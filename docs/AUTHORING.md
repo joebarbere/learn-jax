@@ -53,3 +53,24 @@ Read the `lesson_outputs.py` text yourself: numbers sensible, prose matches what
 - float32 results from `jnp.linalg.*` print float noise via `.tolist()`; format numbers explicitly.
 - `tools/lesson_outputs.py` shows top-level images and text; callouts and plots nested in
   `mo.vstack`/`hstack` may not appear in its text — check those cells in the marimo UI.
+
+## Data, training time, and outputs
+- Datasets: `from learnjax.data import fashion_mnist, tiny_shakespeare, FASHION_CLASSES` (NumPy arrays,
+  cached in the `learn-jax-cache` volume). Don't add downloads elsewhere without updating learnjax/data.py.
+- Training lessons may train for real, but keep each training cell < ~60 s and the lesson < ~4 min.
+  Prefer a few epochs + a note on what more training would give.
+- Files a lesson writes (checkpoints, logs) go under `/course/runs/<module>/` (gitignored).
+
+## PyTorch side-by-side notebooks (`torch_compare.py`)
+- Runs in the PyTorch image (`IMAGE=localhost/learn-jax-torch containers/run.sh ...`), which has **no JAX**.
+  Import only `learnjax.data` (NumPy-only) from the course package — never `learnjax.course`/`timing`/`gpu`.
+- Mirror the JAX lesson's model and data so numbers are comparable; time with `torch.cuda.synchronize()`.
+  `torch.cuda` means "the GPU" on ROCm builds too — say so once.
+- Verify: `IMAGE=localhost/learn-jax-torch containers/run.sh python $M/torch_compare.py` (exit 0) and
+  `IMAGE=localhost/learn-jax-torch containers/run.sh python tools/lesson_outputs.py $M/torch_compare.py`.
+- XLA "excess precision": under `jit`, a float32→bfloat16→float32 round trip may be optimized away
+  (reports zero error). To *demonstrate* bf16 rounding use `jax.lax.reduce_precision(x, 8, 7)`
+  (exponent, mantissa bits) or compute outside jit.
+- `jax.config.update("jax_debug_nans", True)` may not take effect inside marimo; use the scoped
+  `with jax.debug_nans(True):` form.
+- Flax 0.12: read parameters as `module.kernel[...]`, not `.value` (deprecated, prints a warning).

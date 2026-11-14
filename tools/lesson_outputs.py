@@ -43,10 +43,16 @@ def main(path: str, images: str | None = None) -> int:
     errors = 0
     for i, cell in enumerate(nb["cells"]):
         for j, o in enumerate(cell.get("outputs", [])):
-            png = (o.get("data") or {}).get("image/png")
-            if images and png:
-                Path(images).mkdir(parents=True, exist_ok=True)
-                (Path(images) / f"cell{i:02d}_{j}.png").write_bytes(base64.b64decode("".join(png)))
+            data = o.get("data") or {}
+            pngs = ["".join(data["image/png"])] if "image/png" in data else []
+            for mime in ("text/html", "text/markdown"):  # plots nested in mo.vstack/hstack
+                if mime in data:
+                    raw = "".join(data[mime]) if isinstance(data[mime], list) else str(data[mime])
+                    pngs += re.findall(r"data:image/png;base64,([A-Za-z0-9+/=]+)", raw)
+            if images:
+                for k, png in enumerate(pngs):
+                    Path(images).mkdir(parents=True, exist_ok=True)
+                    (Path(images) / f"cell{i:02d}_{j}_{k}.png").write_bytes(base64.b64decode(png))
             t = text_of(o)
             if t:
                 errors += t.startswith("!! ERROR") or "raised an error" in t

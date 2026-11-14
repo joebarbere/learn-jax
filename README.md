@@ -53,14 +53,14 @@ answers, unless you ask for the answer outright.
 | 04 | Probability, softmax, cross-entropy and JAX random keys | ✅ |
 | 05 | Optimization: gradient descent to Adam | ✅ |
 | **Part 2 — JAX core** | | |
-| 06 | jit and XLA: tracing, compilation, timing | |
-| 07 | vmap, pytrees and functional state | |
-| 08 | Control flow, scan, and mixed precision | |
+| 06 | jit and XLA: tracing, compilation, timing | ✅ |
+| 07 | vmap, pytrees and functional state | ✅ |
+| 08 | Control flow, scan, and mixed precision | ✅ |
 | **Part 3 — Neural networks** | | |
-| 09 | Linear and logistic regression from scratch | |
-| 10 | MLPs on Fashion-MNIST, then Flax NNX *(+ PyTorch)* | |
-| 11 | Training craft: init, norms, schedules, checkpoints | |
-| 12 | Convolutional networks | |
+| 09 | Linear and logistic regression from scratch | ✅ |
+| 10 | MLPs on Fashion-MNIST, then Flax NNX *(+ PyTorch)* | ✅ |
+| 11 | Training craft: init, norms, schedules, checkpoints | ✅ |
+| 12 | Convolutional networks | ✅ |
 | **Part 4 — Sequences, attention, transformers** | | |
 | 13 | Tokenization: build BPE yourself | |
 | 14 | Language modeling basics: bigrams to MLP LMs | |
