@@ -97,3 +97,16 @@ Add the module's 2–5 seminal papers to `learnjax/papers.py` (title, authors, y
 matters *for this module*). Prefer arXiv abs links or DOIs. The lesson renders them with a cell just before
 `## Further reading`: `python3 tools/add_papers_cell.py modules/NN-slug/lesson.py` inserts it. Then
 `make papers` checks every link (arXiv titles against the arXiv API) and regenerates docs/PAPERS.md.
+
+## Part 5: real pretrained models (`learnjax.llama`)
+- `params, cfg, tok = llama.load(llama.SMOLLM_360M)` (or `SMOLLM_135M`, a base model with the same
+  tokenizer — a natural draft model). Pure-JAX Llama: stacked layers + `lax.scan`, GQA, rotate-half RoPE,
+  preallocated KV cache (`init_cache`, `forward(params, tokens, cfg, cache, pos)`), `generate`,
+  `chat_prompt` (ChatML; stop on `<|im_end|>`). Verified against HF transformers by
+  `tools/check_llama.py` (logits 3e-4, greedy tokens identical). Baseline (idle GPU, 360M bf16):
+  ~119–135 tok/s decode with `generate`'s Python loop; ~172–175 tok/s with an on-device `fori_loop`
+  (module 18). Time with the *same* cache shape as warmup — a new `n_new` changes the cache shape and
+  recompiles (an early "68 tok/s" figure was that artifact).
+- Weights download once into the HF cache volume. Don't modify learnjax/llama.py from a module — copy
+  and adapt into the module if a lesson needs a variant, and report it.
+- PyTorch image has transformers 5.23 / peft 0.21 / accelerate 1.15 for side-by-side notebooks.

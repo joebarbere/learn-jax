@@ -1,6 +1,8 @@
 # learn-jax — everything runs in the container (containers/run.sh); nothing is installed on the host.
 .DEFAULT_GOAL := help
-RUN  := containers/run.sh
+# Join the llama.cpp network automatically once it exists (make llama-up creates it).
+NETWORK ?= $(shell podman network exists learn-jax-net 2>/dev/null && echo learn-jax-net)
+RUN  := NETWORK=$(NETWORK) containers/run.sh
 PORT ?= 2718
 N    ?= 00
 MOD   = $(shell ls -d modules/$(N)-* 2>/dev/null | head -1)
@@ -50,6 +52,19 @@ check: ## Course self-check: every lesson runs headless and every test passes on
 shell: ## Shell in the container
 	$(RUN) bash
 
+BACKEND ?= vulkan
+llama-download: ## Download the module 19 GGUF models (~12 GB)
+	containers/llamacpp.sh download
+
+llama-up: ## Start the llama.cpp server: make llama-up [BACKEND=vulkan|rocm] [MODEL=...]
+	containers/llamacpp.sh start $(BACKEND) $(MODEL)
+
+llama-down: ## Stop the llama.cpp server
+	containers/llamacpp.sh stop
+
+llama-bench: ## Benchmark models x backends (module 19), writes runs/19-local-serving/bench.json
+	python3 modules/19-local-serving/bench.py
+
 papers: ## Check every paper link and regenerate docs/PAPERS.md
 	$(RUN) python tools/check_papers.py
 	$(RUN) python tools/gen_papers.py
@@ -57,4 +72,4 @@ papers: ## Check every paper link and regenerate docs/PAPERS.md
 lint: ## Ruff
 	$(RUN) ruff check learnjax modules
 
-.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers lint
+.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers lint llama-download llama-up llama-down llama-bench

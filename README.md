@@ -24,6 +24,10 @@ make help           # everything else
 
 `make build-torch` builds the PyTorch image used by the side-by-side notebooks (`make torch-lesson N=10`).
 
+Module 19 runs a local coding model with llama.cpp: `make llama-download` (~12 GB of GGUF models), then
+`make llama-up` serves an OpenAI-compatible API on http://127.0.0.1:8080 (Vulkan by default;
+`BACKEND=rocm` also works). Lessons reach it automatically once it's up.
+
 **On a card other than the RX 7600 / 7600 XT,** check the three settings in `containers/Containerfile`.
 Module 00 explains each one. Your card may not need the gfx override.
 
@@ -71,10 +75,10 @@ answers, unless you ask for the answer outright.
 | 16 | Build and train a GPT on your GPU *(+ PyTorch)* | ✅ |
 | 17 | Modern LLM architecture: RoPE, RMSNorm, SwiGLU, MLA, MoE | ✅ |
 | **Part 5 — LLMs in practice** | | |
-| 18 | Inference: KV cache, sampling, quantization | |
-| 19 | Local serving for coding assistants (llama.cpp on ROCm) | |
-| 20 | Fine-tuning and LoRA *(+ PyTorch/PEFT)* | |
-| 21 | Evaluating language models | |
+| 18 | Inference: KV cache, sampling, quantization | ✅ |
+| 19 | Local serving for coding assistants (llama.cpp on ROCm) | ✅ |
+| 20 | Fine-tuning and LoRA *(+ PyTorch/PEFT)* | ✅ |
+| 21 | Evaluating language models | ✅ |
 | **Part 6 — Performance & ROCm** | | |
 | 22 | Profiling JAX on ROCm | |
 | 23 | Kernels: Pallas, HIP and fusion | |
