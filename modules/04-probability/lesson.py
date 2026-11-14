@@ -431,6 +431,14 @@ def _(mo, quiz):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(4))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * JAX docs, [Pseudorandom numbers](https://docs.jax.dev/en/latest/random-numbers.html) — the key

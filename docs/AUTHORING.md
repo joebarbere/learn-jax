@@ -74,3 +74,26 @@ Read the `lesson_outputs.py` text yourself: numbers sensible, prose matches what
 - `jax.config.update("jax_debug_nans", True)` may not take effect inside marimo; use the scoped
   `with jax.debug_nans(True):` form.
 - Flax 0.12: read parameters as `module.kernel[...]`, not `.value` (deprecated, prints a warning).
+
+## Phase 3+ additions
+- `learnjax.data.detective_corpus()` → the deepseek-v3-jax v1.0 tokens (train ~21.7M / val ~0.30M,
+  uint16) + its 8,192-vocab BPE `tokenizer_path`. GPT-2's tokenizer: `tokenizers.Tokenizer.from_pretrained("gpt2")`.
+- Longer training runs (minutes, not seconds) go in a standalone `modules/NN-slug/train.py` the learner
+  runs with `containers/run.sh python modules/NN-slug/train.py`; it writes `/course/runs/NN-slug/`
+  (metrics.jsonl, checkpoint). The lesson trains a short version live and, if the long run's outputs
+  exist, plots/loads them instead (and says how to produce them if not).
+- PyTorch SDPA on this card: the flash / memory-efficient backends of `F.scaled_dot_product_attention`
+  are off by default ("No available kernel") and need `TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1`, set
+  before torch first runs attention (module 15: ~40× faster, 27× less memory at T=4096). It's
+  experimental, so notebooks opt in explicitly and say so; the image does not set it.
+- JAX has no fused attention on ROCm: `jax.nn.dot_product_attention(implementation="cudnn")` fails;
+  the default falls back to plain XLA.
+- marimo markdown swallows `<|endoftext|>`-style tokens as HTML even in backticks: `html.escape` them.
+- Pass large arrays (token datasets) into jitted functions as arguments, don't close over them —
+  closures bake multi-MB constants into the compiled program.
+
+## Seminal papers (every module)
+Add the module's 2–5 seminal papers to `learnjax/papers.py` (title, authors, year, link, one line on why it
+matters *for this module*). Prefer arXiv abs links or DOIs. The lesson renders them with a cell just before
+`## Further reading`: `python3 tools/add_papers_cell.py modules/NN-slug/lesson.py` inserts it. Then
+`make papers` checks every link (arXiv titles against the arXiv API) and regenerates docs/PAPERS.md.

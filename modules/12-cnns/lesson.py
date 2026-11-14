@@ -546,6 +546,14 @@ def _(mo, quiz):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(12))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * Vincent Dumoulin & Francesco Visin, [A guide to convolution arithmetic for deep learning](https://arxiv.org/abs/1603.07285)

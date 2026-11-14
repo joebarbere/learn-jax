@@ -536,6 +536,14 @@ def _(ex, g, jax, jnp, lj, mo):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(3))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * Andrej Karpathy, [The spelled-out intro to neural networks and backpropagation: building

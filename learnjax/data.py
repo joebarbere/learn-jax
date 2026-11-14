@@ -62,3 +62,21 @@ def fashion_mnist() -> dict[str, np.ndarray]:
 def tiny_shakespeare() -> str:
     """~1.1 MB of Shakespeare as one string (Karpathy's char-rnn dataset)."""
     return _download(SHAKESPEARE_URL, CACHE / "tiny_shakespeare.txt").read_text(encoding="utf-8")
+
+
+DETECTIVE_URL = "https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax/releases/download/v1.0/"
+
+
+def detective_corpus() -> dict:
+    """The deepseek-v3-jax corpus: 207 public-domain detective novels, already BPE-tokenized.
+
+    Returns {"train": uint16 tokens (~21.7M), "val": uint16 tokens (~0.30M), "tokenizer_path": Path}
+    — the exact published v1.0 bytes, so results compare with that project. The tokenizer is a
+    Hugging Face `tokenizers` BPE with an 8,192-token vocabulary (`Tokenizer.from_file(path)`).
+    """
+    d = CACHE / "detective"
+    out = {}
+    for split in ("train", "val"):
+        out[split] = np.fromfile(_download(DETECTIVE_URL + f"{split}.bin", d / f"{split}.bin"), np.uint16)
+    out["tokenizer_path"] = _download(DETECTIVE_URL + "tokenizer.json", d / "tokenizer.json")
+    return out

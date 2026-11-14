@@ -50,7 +50,11 @@ check: ## Course self-check: every lesson runs headless and every test passes on
 shell: ## Shell in the container
 	$(RUN) bash
 
+papers: ## Check every paper link and regenerate docs/PAPERS.md
+	$(RUN) python tools/check_papers.py
+	$(RUN) python tools/gen_papers.py
+
 lint: ## Ruff
 	$(RUN) ruff check learnjax modules
 
-.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell lint
+.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers lint

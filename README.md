@@ -37,6 +37,9 @@ Each module in `modules/NN-slug/` has:
 - `test_exercises.py`: run `make test N=03` to grade your work.
 - `solutions.py`: reference answers. Try first, peek last.
 
+Each lesson ends with its **seminal papers**: the original sources for the ideas it teaches. All of
+them, by module, are in [docs/PAPERS.md](docs/PAPERS.md).
+
 Claude Code in this repo works in **tutor mode** (see `CLAUDE.md`). It gives hints and questions, not
 answers, unless you ask for the answer outright.
 
@@ -62,11 +65,11 @@ answers, unless you ask for the answer outright.
 | 11 | Training craft: init, norms, schedules, checkpoints | ✅ |
 | 12 | Convolutional networks | ✅ |
 | **Part 4 — Sequences, attention, transformers** | | |
-| 13 | Tokenization: build BPE yourself | |
-| 14 | Language modeling basics: bigrams to MLP LMs | |
-| 15 | Attention from scratch *(+ PyTorch)* | |
-| 16 | Build and train a GPT on your GPU *(+ PyTorch)* | |
-| 17 | Modern LLM architecture: RoPE, RMSNorm, SwiGLU, MLA, MoE | |
+| 13 | Tokenization: build BPE yourself | ✅ |
+| 14 | Language modeling basics: bigrams to MLP LMs | ✅ |
+| 15 | Attention from scratch *(+ PyTorch)* | ✅ |
+| 16 | Build and train a GPT on your GPU *(+ PyTorch)* | ✅ |
+| 17 | Modern LLM architecture: RoPE, RMSNorm, SwiGLU, MLA, MoE | ✅ |
 | **Part 5 — LLMs in practice** | | |
 | 18 | Inference: KV cache, sampling, quantization | |
 | 19 | Local serving for coding assistants (llama.cpp on ROCm) | |

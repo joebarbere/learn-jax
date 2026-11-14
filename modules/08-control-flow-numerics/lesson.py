@@ -590,6 +590,14 @@ def _(ex, jax, jnp, lax, lj, mo):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(8))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * JAX docs: [Control flow and logical operators with JIT](https://docs.jax.dev/en/latest/control-flow.html)

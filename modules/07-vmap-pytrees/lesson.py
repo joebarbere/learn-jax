@@ -453,6 +453,14 @@ def _(ex, jax, jnp, lj, mo):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(7))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Takeaways
 

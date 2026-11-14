@@ -656,6 +656,14 @@ def _(mo, quiz):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(11))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * Andrej Karpathy, [A Recipe for Training Neural Networks](https://karpathy.github.io/2019/04/25/recipe/)

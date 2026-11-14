@@ -444,6 +444,14 @@ def _(ex, jax, jnp, lj, mo, np, photo):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(2))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * 3Blue1Brown, [Essence of Linear Algebra](https://www.3blue1brown.com/topics/linear-algebra) — the

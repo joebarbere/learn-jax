@@ -722,6 +722,14 @@ def _(mo, quiz):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(10))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 9 · The PyTorch side
 

@@ -8,6 +8,8 @@ RUN python3 -m pip install --no-cache-dir marimo==0.25.2 matplotlib==3.11.2 pand
 
 # No HSA_OVERRIDE_GFX_VERSION here: PyTorch's ROCm build runs natively on gfx1102 (verified: reports
 # gcnArchName gfx1102). Only the JAX plugin needs the override — a useful contrast in the course.
+# Opt-in (experimental on RDNA3): TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 enables flash/mem-efficient SDPA.
+# Not set here; notebooks that need it set it before importing torch (see modules/15-attention).
 ENV PYTHONPATH=/course HF_HOME=/cache/hf LEARNJAX_CACHE=/cache/learnjax MPLCONFIGDIR=/cache/mpl PYTHONUNBUFFERED=1
 WORKDIR /course
 EXPOSE 2718

@@ -636,6 +636,14 @@ def _(mo, quiz):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(5))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * Gabriel Goh, [Why Momentum Really Works](https://distill.pub/2017/momentum/) — interactive, the

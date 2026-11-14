@@ -481,6 +481,14 @@ def _(ex, jax, jnp, lj, mo):
 
 
 @app.cell
+def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(6))
+    return
+
+
+@app.cell
 def _(fusion_speedup, mo):
     mo.md(f"""
     ## Takeaways

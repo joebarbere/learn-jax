@@ -558,6 +558,14 @@ def _(ex, fm_pred, fm_yte, lj, mo, np):
 
 
 @app.cell
+def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(9))
+    return
+
+
+@app.cell
 def _(fm_test_acc, mo):
     mo.md(f"""
     ## Further reading

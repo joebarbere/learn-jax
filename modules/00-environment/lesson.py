@@ -240,6 +240,14 @@ def _(ex, lj, mo):
 
 @app.cell
 def _(mo):
+    import learnjax.papers as _papers
+
+    mo.md(_papers.papers_md(0))
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## Further reading
     * JAX docs: [Quickstart](https://docs.jax.dev/en/latest/quickstart.html) and
