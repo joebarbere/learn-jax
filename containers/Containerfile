@@ -1,0 +1,24 @@
+# learn-jax course image: JAX on ROCm for the RX 7600 XT (gfx1102), plus marimo and the course libraries.
+FROM docker.io/rocm/jax:rocm10.1.0_ubuntu24.04_py3.12_jax_release_0.11.1
+
+COPY requirements.txt /tmp/requirements.txt
+RUN python3 -c "import jax, jaxlib, numpy; print(f'jax=={jax.__version__}\njaxlib=={jaxlib.__version__}\nnumpy=={numpy.__version__}')" > /tmp/constraints.txt \
+ && python3 -m pip install --no-cache-dir -r /tmp/requirements.txt -c /tmp/constraints.txt \
+ && ln -sf "$(command -v python3)" /usr/local/bin/python
+
+# --- The three settings this GPU needs (see modules/00-environment) ---
+# gfx1102: ROCm 10.1 supports it, but the JAX ROCm plugin rejects it, so present it as gfx1100.
+ENV HSA_OVERRIDE_GFX_VERSION=11.0.0
+# XLA's Triton GEMM fusions exceed Navi 33 dispatch limits on larger models and hang the GPU.
+ENV XLA_FLAGS=--xla_gpu_enable_triton_gemm=false
+# Several notebooks may share the 16 GB card: allocate on demand instead of grabbing 75% up front.
+ENV XLA_PYTHON_CLIENT_PREALLOCATE=false
+
+# Course plumbing
+ENV PYTHONPATH=/course \
+    HF_HOME=/cache/hf \
+    LEARNJAX_CACHE=/cache/learnjax \
+    MPLCONFIGDIR=/cache/mpl \
+    PYTHONUNBUFFERED=1
+WORKDIR /course
+EXPOSE 2718

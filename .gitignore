@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+__marimo__/
+*.html
+runs/
+data/
+checkpoints/
+infra/aws/.terraform/
+infra/aws/*.tfstate*
+infra/aws/terraform.tfvars
+.figs/

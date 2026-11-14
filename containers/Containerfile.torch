@@ -1,0 +1,13 @@
+# learn-jax PyTorch side-by-side image: same ROCm 10.1 stack, PyTorch instead of JAX, plus marimo.
+# Used by modules/*/torch_compare.py (make torch-lesson N=..).
+FROM docker.io/rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.14.0
+
+RUN python3 -m pip install --no-cache-dir marimo==0.25.2 matplotlib==3.11.2 pandas==3.1.1 \
+      tokenizers==0.23.3 datasets==5.2.0 pytest==9.2.0 nbformat==5.11.1 \
+ && ln -sf "$(command -v python3)" /usr/local/bin/python
+
+# No HSA_OVERRIDE_GFX_VERSION here: PyTorch's ROCm build runs natively on gfx1102 (verified: reports
+# gcnArchName gfx1102). Only the JAX plugin needs the override — a useful contrast in the course.
+ENV PYTHONPATH=/course HF_HOME=/cache/hf MPLCONFIGDIR=/cache/mpl PYTHONUNBUFFERED=1
+WORKDIR /course
+EXPOSE 2718

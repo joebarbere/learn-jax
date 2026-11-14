@@ -1,0 +1,15 @@
+# Course dependencies, pinned. JAX itself (0.11.1, ROCm 10.1 plugin) comes from the base image and must
+# not be upgraded by pip — constraints.txt holds it in place.
+marimo==0.25.2
+flax==0.12.12
+optax==0.2.9
+orbax-checkpoint==0.12.10
+tokenizers==0.23.3
+datasets==5.2.0
+matplotlib==3.11.2
+altair==6.3.0
+pandas==3.1.1
+treescope==0.1.11
+pytest==9.2.0
+ruff==0.17.5
+nbformat==5.11.1  # marimo export ipynb (tools/lesson_outputs.py)

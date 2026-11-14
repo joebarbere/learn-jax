@@ -1,0 +1,16 @@
+[project]
+name = "learnjax"
+version = "0.1.0"
+description = "A hands-on course in deep learning, JAX, LLMs and ROCm, run in a container on an AMD GPU."
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -q"
+testpaths = ["modules"]
+python_files = ["test_*.py"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["modules/*/lesson.py", "modules/*/torch_compare.py"]  # marimo-generated cell structure
