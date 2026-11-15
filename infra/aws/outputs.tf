@@ -21,7 +21,13 @@ output "results_bucket" {
 
 output "ssm_sessions" {
   description = "Interactive shells (no SSH, no open ports)."
-  value       = [for i in aws_instance.node : "aws ssm start-session --target ${i.id} --region ${var.region} --profile ${var.aws_profile}"]
+  value = [for i in aws_instance.node :
+  "aws ssm start-session --target ${i.id} --region ${var.region}${var.aws_profile == null ? "" : " --profile ${var.aws_profile}"}"]
+}
+
+output "aws_profile" {
+  description = "The profile this stack was applied with (\"\" = default chain); run_remote.sh reuses it."
+  value       = var.aws_profile == null ? "" : var.aws_profile
 }
 
 output "auto_terminates_after_minutes" {

@@ -130,7 +130,8 @@ aws-howto: ## Print the owner-run commands for a paid AWS session (apply / run /
 bench: ## Single-device benchmark on this machine (module 25 local column), writes runs/25-aws/
 	$(RUN) python modules/25-aws/bench_single.py
 
-AWS_AI_CORPUS ?= $(HOME)/dev/github/joebarbere/aws-ai/local-kb/.state/corpus
+# an aws-ai checkout next to this repo, if any; otherwise rag-data fetches the corpus from arXiv
+AWS_AI_CORPUS ?= $(abspath ../aws-ai/local-kb/.state/corpus)
 rag-data: ## Module 38 corpus: copy aws-ai's radio abstracts into the cache, else fetch them from arXiv (~15 min)
 	@if [ -f "$(AWS_AI_CORPUS)/radio-abstracts.jsonl" ]; then \
 	  echo "copying from $(AWS_AI_CORPUS)"; \

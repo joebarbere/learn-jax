@@ -3,7 +3,16 @@
 A short-lived study stack: **plan → you approve → apply → run → collect → destroy.** Nothing here runs by
 itself, and nothing should be applied without the owner reading the plan first (see `CLAUDE.md`).
 
-It creates, in us-east-1 (the only region the `aws-cloud` seatbelt allows):
+It assumes your account has guardrails the course calls **the seatbelt**: an IAM policy that allowlists
+instance types and denies other regions, NAT gateways and fleets, plus budgets. Point Terraform at your
+profile and that policy in a gitignored `terraform.tfvars`:
+
+```hcl
+aws_profile   = "my-admin"                            # your AWS CLI / IAM Identity Center profile
+seatbelt_path = "../../../my-guardrails/seatbelt.json"  # optional: enables the plan-time allowlist check
+```
+
+It creates, in us-east-1 (the only region the seatbelt allows):
 
 - a VPC with one public subnet and an internet gateway. There's **no NAT gateway** (the seatbelt denies it)
   and **no inbound access from the internet**. You reach instances through SSM Session Manager. The security
@@ -26,8 +35,8 @@ It creates, in us-east-1 (the only region the `aws-cloud` seatbelt allows):
 1. **Hard auto-stop.** Each instance runs `shutdown -h +max_minutes` at boot (default 120). Its shutdown
    behavior is *terminate*, so after that time the instance and its disk are gone, even if you forget to
    destroy. Use `-var max_minutes=60` for a tighter session.
-2. **Plan-time allowlist check.** The plan fails if a profile's instance type isn't in
-   `../../../aws-cloud/terraform/seatbelt.json`, so you find out before anything is created.
+2. **Plan-time allowlist check.** The plan fails if a profile's instance type isn't in the seatbelt policy
+   at `seatbelt_path`, so you find out before anything is created.
 3. **The seatbelt itself.** AWS refuses any instance type outside the allowlist, any other region, NAT,
    fleets, and capacity reservations.
 4. **Budgets.** The `learn-jax-monthly` ($25) and account ($50) budgets email you. They do *not* stop anything.
@@ -48,8 +57,8 @@ boot, installing JAX with uv, first compiles, the benchmarks, then destroy. EBS 
 All five sessions together come to roughly **$12**.
 
 **Needs, as of 2026-11-14:**
-- `gpu4` and `trn` need the pending `aws-cloud` seatbelt change (branch `learn-jax-gpu`) to be applied.
-  Until then the plan fails on the allowlist check.
+- `gpu4` and `trn` need g6.12xlarge and trn1.2xlarge on the seatbelt's allowlist. Until then the plan
+  fails on the allowlist check.
 - `trn` also needs the *Running On-Demand Trn instances* quota (requested: 8 vCPUs).
 - Spot (`-var use_spot=true`) needs the G and Trn spot quotas (requested: 48 and 8). The default is
   on-demand until those are approved.
@@ -58,7 +67,7 @@ All five sessions together come to roughly **$12**.
 
 ```bash
 cd infra/aws
-aws sso login --profile joebarbere-admin           # if the token expired
+aws sso login --profile my-admin                   # your profile; if the token expired
 terraform init                                     # once
 terraform plan -var profile=gpu1 -out=gpu1.tfplan  # read it: instance types, count, tags, no NAT
 terraform apply gpu1.tfplan                        # ← the step that costs money (owner only)
@@ -79,6 +88,6 @@ with your card.
   (trn1 is only in 1c and 1f) or wait.
 - **`VcpuLimitExceeded` / `MaxSpotInstanceCountExceeded`**: a quota is still pending. Check with
   `aws service-quotas list-requested-service-quota-change-history --service-code ec2`.
-- **`UnauthorizedOperation` on RunInstances**: the seatbelt refused the instance type. Apply the
-  `aws-cloud` change first.
+- **`UnauthorizedOperation` on RunInstances**: the seatbelt refused the instance type. Add it to the
+  seatbelt's allowlist first.
 - **Spot interruption**: the instance terminates. Rerun the session; partial results already uploaded are kept.

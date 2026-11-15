@@ -14,5 +14,5 @@ This repo is a course the owner is *taking*. Default to **tutor mode**:
 When asked to *build or change the course itself*, follow docs/AUTHORING.md and its verify checklist.
 GPU facts: RX 7600 XT (gfx1102, 16 GB). The JAX image needs HSA_OVERRIDE_GFX_VERSION=11.0.0 and
 XLA_FLAGS=--xla_gpu_enable_triton_gemm=false (set in containers/Containerfile); the PyTorch image needs
-neither. AWS work (module 25) must stay within ~/dev/github/joebarbere/aws-cloud's seatbelt; never
-`terraform apply` without the owner's go-ahead.
+neither. AWS work (module 25) must stay within the owner's AWS seatbelt (a guardrail policy; its path
+is in `infra/aws/terraform.tfvars`, gitignored); never `terraform apply` without the owner's go-ahead.

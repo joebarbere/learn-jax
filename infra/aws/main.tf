@@ -8,7 +8,7 @@ locals {
   }
   p = local.profiles[var.profile]
 
-  # The seatbelt's EC2 allowlist (empty list if the aws-cloud repo isn't next to this one).
+  # The seatbelt's EC2 allowlist (empty list, so no plan-time check, when seatbelt_path isn't set).
   seatbelt = try(jsondecode(file(var.seatbelt_path)), null)
   allowlist = local.seatbelt == null ? [] : flatten([
     for s in local.seatbelt.Statement : s.Condition.StringNotEquals["ec2:InstanceType"]
@@ -208,7 +208,7 @@ resource "aws_instance" "node" {
   lifecycle {
     precondition {
       condition     = length(local.allowlist) == 0 || contains(local.allowlist, local.p.types[count.index])
-      error_message = "Instance type ${local.p.types[count.index]} is not in the aws-cloud seatbelt allowlist (${var.seatbelt_path}). Apply the seatbelt change in aws-cloud first."
+      error_message = "Instance type ${local.p.types[count.index]} is not in the seatbelt allowlist (${var.seatbelt_path}). Add it to the seatbelt policy and apply that first."
     }
   }
 }

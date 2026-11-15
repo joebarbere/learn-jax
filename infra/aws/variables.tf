@@ -1,13 +1,16 @@
 variable "region" {
-  description = "Must be us-east-1: the aws-cloud seatbelt denies every other region."
+  description = "Must be us-east-1: the seatbelt (your AWS guardrail policy) denies every other region."
   type        = string
   default     = "us-east-1"
 }
 
 variable "aws_profile" {
-  description = "AWS CLI profile (IAM Identity Center)."
+  description = <<-EOT
+    AWS CLI profile (e.g. your IAM Identity Center admin profile). null = the AWS SDK's usual chain
+    (AWS_PROFILE, then default). Set yours in terraform.tfvars, which is gitignored.
+  EOT
   type        = string
-  default     = "joebarbere-admin"
+  default     = null
 }
 
 variable "profile" {
@@ -65,7 +68,7 @@ variable "root_volume_gb" {
 }
 
 variable "seatbelt_path" {
-  description = "aws-cloud's seatbelt policy, read to fail the plan early if an instance type isn't allowlisted."
+  description = "The seatbelt's IAM policy JSON (from your guardrail setup), read to fail the plan early if an instance type isn't allowlisted. Empty = skip the check. Set it in terraform.tfvars."
   type        = string
-  default     = "../../../aws-cloud/terraform/seatbelt.json"
+  default     = ""
 }

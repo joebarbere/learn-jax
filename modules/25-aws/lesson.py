@@ -103,7 +103,7 @@ def _(mo):
 
     1. **Auto-stop.** Each instance runs `shutdown -h +120` at boot, and its shutdown behavior is
        *terminate*. A forgotten session deletes itself after two hours.
-    2. **The seatbelt.** Your `aws-cloud` repo's IAM policy refuses any instance type outside an allowlist,
+    2. **The seatbelt.** A guardrail IAM policy on your account refuses any instance type outside an allowlist,
        any region but us-east-1, NAT gateways and fleets. This stack's plan also checks the allowlist
        before anything is created.
     3. **Quotas.** AWS's own per-family vCPU limits. They're why `trn` waits for an approved increase.

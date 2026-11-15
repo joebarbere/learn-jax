@@ -12,7 +12,7 @@ provider "aws" {
   profile = var.aws_profile
   default_tags {
     tags = {
-      Project   = "learn-jax" # cost-allocation tag → the learn-jax-monthly budget in aws-cloud
+      Project   = "learn-jax" # cost-allocation tag → a learn-jax budget in your guardrail setup
       ManagedBy = "terraform"
       Module    = "25-aws"
     }
