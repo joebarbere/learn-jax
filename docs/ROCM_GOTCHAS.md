@@ -125,6 +125,7 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
   Two separate problems: a power with a broadcast exponent inside a reduction takes a very slow ROCm code
   path, and a large intermediate computed only from closed-over constants is constant-folded on the CPU
   at compile time.
+
 - **Fix:** `exp(k * log(x))` for positive x, and pass arrays as jit arguments. When the alarm appears, find
   the op and fix it; lessons don't rely on a persistent cache to hide it.
 

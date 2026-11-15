@@ -546,7 +546,7 @@ def _(NamedSharding, cpus, jax, mo, n_micro, np, par, plt):
     _fig, _ax = plt.subplots(figsize=(7, 1.6))
     for _s, _m, _t in par.gpipe_schedule(_S, _M):
         _ax.barh(_s, 1, left=_t, color=plt.cm.tab20(_m % 20), edgecolor="k")
-        _ax.text(_t + 0.5, _s, str(_m), ha="center", va="center", fontsize=8)
+        _ax.text(_t + 0.5, _s, str(_m), ha="center", va="center", fontsize=8, color="#1f2430")
     _ax.set_yticks(range(_S), [f"stage {s}" for s in range(_S)])
     _ax.invert_yaxis()
     _ax.set_xlabel("clock tick")

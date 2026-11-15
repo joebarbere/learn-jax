@@ -150,7 +150,9 @@ def _(ex, jnp, lj, mo, plt):
         _ax.set_yticks(range(5), _words, fontsize=8)
         for _i in range(5):
             for _j in range(5):
-                _ax.text(_j, _i, f"{float(_cs.value[_i, _j]):.2f}", ha="center", va="center", fontsize=7)
+                _v = float(_cs.value[_i, _j])
+                _ax.text(_j, _i, f"{_v:.2f}", ha="center", va="center", fontsize=7,
+                         color="white" if abs(_v) > 0.6 else "#1f2430")
         _ax.set_title("cosine similarity (your function)", fontsize=9)
         _fig.colorbar(_im, ax=_ax, shrink=0.8)
         _fig.tight_layout()

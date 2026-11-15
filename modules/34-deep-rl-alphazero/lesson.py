@@ -186,9 +186,9 @@ def _(episode_slider, grid_run, mo, np, plt, rl):
         _fig, (_ax1, _ax2) = plt.subplots(1, 2, figsize=(9, 3.6))
         _im = _ax1.imshow(_V, cmap="RdYlGn", vmin=-1, vmax=1)
         for _p in np.asarray(rl.PITS):
-            _ax1.text(_p % rl.GRID, _p // rl.GRID, "pit", ha="center", va="center", fontsize=8)
-        _ax1.text(4, 4, "goal", ha="center", va="center", fontsize=8)
-        _ax1.text(0, 0, "start", ha="center", va="center", fontsize=8)
+            _ax1.text(_p % rl.GRID, _p // rl.GRID, "pit", ha="center", va="center", fontsize=8, color="#1f2430")
+        _ax1.text(4, 4, "goal", ha="center", va="center", fontsize=8, color="#1f2430")
+        _ax1.text(0, 0, "start", ha="center", va="center", fontsize=8, color="#1f2430")
         if _i == 19:
             _pr = [(s // rl.GRID, s % rl.GRID) for s in grid_run["path"]]
             _ax1.plot([c for _, c in _pr], [r for r, _ in _pr], "b-o", ms=3, lw=1.5)

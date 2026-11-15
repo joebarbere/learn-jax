@@ -65,6 +65,7 @@ def md_to_html(text: str, toc: bool = False) -> str:
 
     pieces = _CODE.split(text)
     text = "".join(p if i % 2 else _MATH.sub(keep, p) for i, p in enumerate(pieces))
+    text = _list_gap(text)
     exts = ["tables", "fenced_code", "codehilite", "sane_lists", "md_in_html"]
     cfg = {"codehilite": {"css_class": "hl", "guess_lang": False}}
     if toc:
@@ -72,6 +73,23 @@ def md_to_html(text: str, toc: bool = False) -> str:
         cfg["toc"] = {"slugify": _gh_slug}
     out = markdown.markdown(text, extensions=exts, extension_configs=cfg)
     return re.sub(r"MATHPH(\d+)ZZ", lambda m: stash[int(m.group(1))], out)
+
+
+_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s")
+
+
+def _list_gap(text: str) -> str:
+    """A list right after a paragraph line needs a blank line for Python-Markdown (GitHub and marimo don't)."""
+    out, fence = [], False
+    for ln in text.split("\n"):
+        if ln.lstrip().startswith(("```", "~~~")):
+            fence = not fence
+        prev = out[-1] if out else ""
+        if (not fence and _ITEM.match(ln) and prev.strip() and not _ITEM.match(prev)
+                and not prev.startswith((" ", "\t", "|", "#", ">"))):
+            out.append("")
+        out.append(ln)
+    return "\n".join(out)
 
 
 def _gh_slug(value: str, separator: str = "-") -> str:
@@ -217,7 +235,11 @@ def module_body(nb_path: Path) -> str:
             if "text/html" in d:
                 parts.append(convert(_text(d["text/html"])))
             elif "text/markdown" in d:
-                parts.append(md_to_html(_text(d["text/markdown"])))
+                md = _text(d["text/markdown"])
+                if md.lstrip().startswith("&lt;marimo-"):  # UI elements arrive as escaped HTML in text/markdown
+                    parts.append(convert(html.unescape(md)))
+                else:
+                    parts.append(md_to_html(md))
             elif "image/png" in d:
                 parts.append(f'<img class="plot" src="data:image/png;base64,{_text(d["image/png"]).strip()}" alt="">')
             elif out.get("output_type") == "error":
