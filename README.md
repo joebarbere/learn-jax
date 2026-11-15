@@ -28,14 +28,34 @@ base image so the base's JAX and ROCm wheels never move. To change a dependency,
 `containers/requirements*.txt`, then `make lock` and `make build`. On the host you only need uv if you want
 `make glossary` or ruff in your editor (`uv sync`). Nothing ML-related is installed there.
 
-`make build-torch` builds the PyTorch image used by the side-by-side notebooks (`make torch-lesson N=10`).
+`make build-torch` builds the PyTorch image used by the side-by-side notebooks (`make torch-lesson N=10`);
+it's optional and large, see *Disk space* below.
 
 Module 27 runs your own exported models in LM Studio, headless in a container: `make lms-build lms-up`, then
 `make export-models`.
 
 Module 19 runs a local coding model with llama.cpp: `make llama-download` (~12 GB of GGUF models), then
 `make llama-up` serves an OpenAI-compatible API on http://127.0.0.1:8080 (Vulkan by default;
-`BACKEND=rocm` also works). Lessons reach it automatically once it's up.
+`BACKEND=rocm` also works; its image is 23 GB and downloads on first use). Lessons reach it automatically once
+it's up.
+
+### Disk space
+
+The course's container images are big, but every one can be removed and restored exactly: images are built
+from the lockfiles or pulled by pinned digest. Your data lives elsewhere (the `learn-jax-cache` volume and
+`runs/`), so removing an image loses nothing.
+
+| image | size | needed for | remove | restore |
+|---|---|---|---|---|
+| `localhost/learn-jax` | ~19 GB | everything | — | `make build` |
+| `localhost/learn-jax-torch` (+ its `rocm/pytorch` base) | ~26 GB | PyTorch side-by-side notebooks, `make export-models`' check | `podman rmi localhost/learn-jax-torch docker.io/rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.14.0` | `make build-torch` |
+| llama.cpp `server-rocm` | 23 GB | `BACKEND=rocm` in Module 19 | `podman rmi ghcr.io/ggml-org/llama.cpp:server-rocm-b12375` | automatic on next `BACKEND=rocm make llama-up` |
+| llama.cpp `server-vulkan`, `full-vulkan` | 0.9 + 2.7 GB | Module 19 (default), Module 27's GGUF conversion | — | automatic on next use |
+| `localhost/learn-jax-book` | ~1.4 GB | `make site`, `make pdf` | `podman rmi localhost/learn-jax-book` | `make book-image` |
+
+If an image is missing, `containers/run.sh` stops and prints the command that restores it, and `make check`
+skips the PyTorch notebooks instead of failing. Don't prune podman volumes: that would delete
+`learn-jax-cache`, which holds the downloaded weights, datasets and GGUF models (about 15 GB to download again).
 
 **On a card other than the RX 7600 / 7600 XT,** check the three settings in `containers/Containerfile`.
 Module 00 explains each one. Your card may not need the gfx override.

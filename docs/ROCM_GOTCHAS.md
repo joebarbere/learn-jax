@@ -212,6 +212,8 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
 | Vulkan (Mesa RADV) | `/dev/dri` only | 0.9 GB | no flash attention (disabled automatically) |
 | ROCm/HIP | `/dev/kfd` + `/dev/dri` | 23 GB | gfx1102 native, no override |
 
+- The ROCm image is 23 GB to Vulkan's 0.9 GB. It's pulled on first use, and can be removed and pulled again
+  exactly (pinned by digest); see the README's *Disk space* section.
 - **Measured** (Module 19): ROCm is 1.2–2× faster at prompt processing; Vulkan is 7–29% faster at generation.
   A 14B Q4_K_M model generates 27–29 tok/s, about 90% of the memory bus. The course defaults to Vulkan.
 

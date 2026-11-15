@@ -65,6 +65,8 @@ Read the `lesson_outputs.py` text yourself: numbers sensible, prose matches what
 
 ## PyTorch side-by-side notebooks (`torch_compare.py`)
 - Runs in the PyTorch image (`IMAGE=localhost/learn-jax-torch containers/run.sh ...`), which has **no JAX**.
+  The image is optional (~26 GB): if it's missing, `make build-torch` first. `make check` skips torch notebooks
+  without it, so build it before verifying one.
   Import only `learnjax.data` (NumPy-only) from the course package — never `learnjax.course`/`timing`/`gpu`.
 - Mirror the JAX lesson's model and data so numbers are comparable; time with `torch.cuda.synchronize()`.
   `torch.cuda` means "the GPU" on ROCm builds too — say so once.

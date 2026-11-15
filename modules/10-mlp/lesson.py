@@ -753,7 +753,8 @@ def _(mo):
 
     `modules/10-mlp/torch_compare.py` trains this exact network in PyTorch on ROCm, with the same
     hyperparameters, and ends with a line-by-line table of JAX vs PyTorch idioms. Open it with
-    `make build-torch` (once) then `make torch-lesson N=10`.
+    `make build-torch` (once; a ~26 GB image you can remove when you're done and rebuild later, see the
+    README's *Disk space* section) then `make torch-lesson N=10`.
 
     ## Further reading
     * Michael Nielsen, [Neural Networks and Deep Learning, ch. 1–2](http://neuralnetworksanddeeplearning.com/)

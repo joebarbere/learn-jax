@@ -76,7 +76,9 @@ progress: ## Show the syllabus with your progress
 check: ## Course self-check: every lesson runs headless and every test passes on the reference solutions
 	LEARNJAX_SOLUTIONS=1 $(RUN) python -m pytest
 	@for f in modules/*/lesson.py; do echo "== $$f"; LEARNJAX_SOLUTIONS=1 $(RUN) python $$f >/dev/null || exit 1; done
-	@for f in $$(ls modules/*/torch_compare.py 2>/dev/null); do echo "== $$f (torch)"; IMAGE=localhost/learn-jax-torch $(RUN) python $$f >/dev/null || exit 1; done
+	@if podman image exists localhost/learn-jax-torch; then \
+	  for f in $$(ls modules/*/torch_compare.py 2>/dev/null); do echo "== $$f (torch)"; IMAGE=localhost/learn-jax-torch $(RUN) python $$f >/dev/null || exit 1; done; \
+	else echo "== skipping the PyTorch side-by-side notebooks: no learn-jax-torch image (make build-torch to include them)"; fi
 	@echo "all lessons ran"
 
 shell: ## Shell in the container

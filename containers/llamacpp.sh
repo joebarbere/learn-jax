@@ -43,6 +43,10 @@ case "$cmd" in
       rocm)   image="$ROCM_IMAGE";   devices=(--device /dev/kfd --device /dev/dri) ;;
       *) echo "backend must be vulkan or rocm" >&2; exit 2 ;;
     esac
+    if ! podman image exists "$image"; then   # first use, or removed to save disk space: pinned, so it re-pulls exactly
+      echo "pulling the $backend image ($([[ $backend == rocm ]] && echo '23 GB' || echo '0.9 GB'), once) ..."
+      podman pull -q "$image" >/dev/null
+    fi
     podman rm -f "$NAME" >/dev/null 2>&1 || true
     podman network exists "$NET" || podman network create "$NET" >/dev/null
     podman run -d --name "$NAME" --network "$NET" --network-alias llama "${devices[@]}" \

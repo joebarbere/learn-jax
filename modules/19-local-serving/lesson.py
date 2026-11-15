@@ -81,7 +81,7 @@ def _(mo):
     ```bash
     containers/llamacpp.sh download                         # ~12 GB of GGUF models, once
     containers/llamacpp.sh start vulkan                     # Qwen2.5-Coder-14B Q4_K_M on Vulkan
-    containers/llamacpp.sh start rocm qwen2.5-coder-1.5b-instruct-q4_k_m.gguf
+    containers/llamacpp.sh start rocm qwen2.5-coder-1.5b-instruct-q4_k_m.gguf   # first use pulls a 23 GB image
     containers/llamacpp.sh stop
     ```
 
