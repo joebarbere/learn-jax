@@ -47,3 +47,28 @@ def test_session_cost(impl):
     assert impl.session_cost("gpu4", 45) == pytest.approx(4.602 * 0.75)
     with pytest.raises(KeyError):
         impl.session_cost("p5", 60)
+
+
+def test_estimate_run(impl):
+    r = impl.estimate_run(1e8, 2e9, peak_tflops=100.0, mfu=0.5, usd_per_hour=2.0)
+    assert set(r) == {"state_gb", "flops", "hours", "usd"}
+    assert r["state_gb"] == pytest.approx(1.6)
+    assert r["flops"] == pytest.approx(1.2e18)
+    assert r["hours"] == pytest.approx(1.2e18 / 5e13 / 3600)
+    assert r["usd"] == pytest.approx(2.0 * r["hours"])
+    four = impl.estimate_run(1e8, 2e9, peak_tflops=100.0, mfu=0.5, n_devices=4, usd_per_hour=2.0)
+    assert four["hours"] == pytest.approx(r["hours"] / 4)           # perfect split
+    assert four["state_gb"] == pytest.approx(r["state_gb"])         # state is not divided
+    assert impl.estimate_run(1e6, 1e6, 1.0, 1.0)["usd"] == 0        # edge: free (your own card's default)
+
+
+def test_dp_comm_ratio(impl):
+    r = impl.dp_comm_ratio(1e8, 4096, 4, peak_tflops=100.0, mfu=0.5, interconnect_gbs=10.0)
+    comm = 2 * 3 / 4 * 4e8 / 10e9
+    compute = 6 * 1e8 * 4096 / 5e13
+    assert r == pytest.approx(comm / compute)
+    # both sides scale with the parameter count, so model size cancels
+    assert impl.dp_comm_ratio(7e9, 4096, 4, 100.0, 0.5, 10.0) == pytest.approx(r, rel=1e-6)
+    # twice the tokens per device: twice the compute, same communication
+    assert impl.dp_comm_ratio(1e8, 8192, 4, 100.0, 0.5, 10.0) == pytest.approx(r / 2)
+    assert impl.dp_comm_ratio(1e8, 4096, 1, 100.0, 0.5, 10.0) == 0.0  # edge: one device

@@ -42,3 +42,19 @@ def spot_savings(on_demand_usd: float, spot_usd: float) -> float:
 
 def session_cost(profile: str, minutes: float) -> float:
     return sum(PRICES[t] for t in PROFILES[profile]) * minutes / 60
+
+
+def estimate_run(n_params: float, n_tokens: float, peak_tflops: float, mfu: float, n_devices: int = 1,
+                 usd_per_hour: float = 0.0) -> dict:
+    flops = 6 * n_params * n_tokens
+    hours = flops / (n_devices * peak_tflops * 1e12 * mfu) / 3600
+    return {"state_gb": 16 * n_params / 1e9, "flops": flops, "hours": hours, "usd": hours * usd_per_hour}
+
+
+def dp_comm_ratio(n_params: float, tokens_per_device: float, n_devices: int, peak_tflops: float, mfu: float,
+                  interconnect_gbs: float) -> float:
+    if n_devices == 1:
+        return 0.0
+    compute_s = 6 * n_params * tokens_per_device / (peak_tflops * 1e12 * mfu)
+    comm_s = allreduce_bytes(int(n_params), n_devices) / (interconnect_gbs * 1e9)
+    return comm_s / compute_s

@@ -63,3 +63,31 @@ def session_cost(profile: str, minutes: float) -> float:
     Raise KeyError for an unknown profile.
     """
     raise NotImplementedError
+
+
+# ---------------------------------------------------------------- back of the envelope (Section 9)
+def estimate_run(n_params: float, n_tokens: float, peak_tflops: float, mfu: float, n_devices: int = 1,
+                 usd_per_hour: float = 0.0) -> dict:
+    """Predict a training run before paying for it. Returns a dict with four keys:
+
+    - "state_gb": training state in GB (10**9 bytes) at 16 bytes per parameter (bf16/f32 mixed precision:
+      f32 master weights 4 + gradients 4 + Adam's two moments 8). Not divided across devices.
+    - "flops":    total training FLOPs, ≈ 6 · n_params · n_tokens (2 forward + 4 backward per parameter
+      per token; Module 16 — attention's extra term is ignored here).
+    - "hours":    flops / (n_devices · peak_tflops·10**12 · mfu), converted to hours. The devices are
+      assumed to split the work perfectly (communication is dp_comm_ratio's job).
+    - "usd":      hours · usd_per_hour (the price of the whole machine, not per device).
+    """
+    raise NotImplementedError
+
+
+def dp_comm_ratio(n_params: float, tokens_per_device: float, n_devices: int, peak_tflops: float, mfu: float,
+                  interconnect_gbs: float) -> float:
+    """Data parallel: time spent all-reducing gradients ÷ time spent computing, per step.
+
+    - compute time per step = 6 · n_params · tokens_per_device / (peak_tflops·10**12 · mfu)
+    - comm time per step    = allreduce_bytes(n_params, n_devices) (ring, f32 gradients) / (interconnect_gbs·10**9)
+    Below 1, compute dominates (and overlap can hide the communication entirely); above 1, the step is
+    communication-bound. One device communicates nothing: return 0.0.
+    """
+    raise NotImplementedError

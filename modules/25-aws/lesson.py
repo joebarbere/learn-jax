@@ -38,7 +38,8 @@ def _(mo):
     **You will:** see how a paid session is planned, run and torn down safely · benchmark your card live with
     the same script the cloud runs · compare tokens/s, utilization and $/million tokens across machines · see
     real collective bandwidth and communication/compute overlap · do the arithmetic that picks an instance
-    and a parallelism strategy · plan your capstone.
+    and a parallelism strategy · estimate a run's time, cost and communication before paying for it ·
+    plan your capstone.
 
     Everything that costs money happens outside this notebook, in `infra/aws/`, and only after you read a
     `terraform plan` and approve it. This lesson reads the results those sessions leave in `runs/25-aws/`
@@ -216,7 +217,7 @@ def _(mo):
     mo.md(r"""
     ## 5 · Your turn: is renting worth it?
 
-    Open `modules/25-aws/exercises.py`. The six functions are the arithmetic you do *before*
+    Open `modules/25-aws/exercises.py`. The first six functions are the arithmetic you do *before*
     `terraform apply`: cost per million tokens, how many bytes an all-reduce sends, bandwidth, which
     parallelism strategy a model needs, what spot saves, and what a session costs.
     """)
@@ -357,6 +358,132 @@ def _(mo, results):
 
 @app.cell
 def _(mo):
+    mo.md(r"""
+    ## 9 · Estimate before you `terraform apply`
+
+    Before anyone spends money on a training run, they predict it on the back of an envelope. The recipe
+    takes five lines, and every input is a number you've already measured:
+
+    | quantity | estimate | from |
+    |---|---|---|
+    | training state | 16 bytes per parameter (f32 weights, gradients, two Adam moments) | Modules 00, 20 |
+    | compute | $6 \cdot N \cdot D$ FLOPs for $N$ parameters and $D$ tokens | Module 16 |
+    | time | FLOPs ÷ (devices × peak × MFU) | Section 3 |
+    | communication | ring all-reduce bytes ÷ interconnect bandwidth, every step | Sections 5–6 |
+    | cost | hours × \$/hour | Section 5 |
+
+    The communication line deserves a closer look. Per step, compute grows with $N$ times the tokens on each
+    device, and the all-reduce grows with $N$. **The model size cancels**, so whether data parallelism is
+    limited by communication depends only on how many tokens each device processes per step, compared
+    with the hardware's ratio of FLOP/s to bytes/s. The same idea runs all through Google DeepMind's
+    [How To Scale Your Model](https://jax-ml.github.io/scaling-book/). Its chapters on
+    [Transformer math](https://jax-ml.github.io/scaling-book/transformers) and
+    [parallelizing training](https://jax-ml.github.io/scaling-book/training) work it out in full.
+
+    **Your turn:** `estimate_run` and `dp_comm_ratio` in `exercises.py`. The problems below use them. Try
+    each one on paper first, then open the answer.
+    """)
+    return
+
+
+@app.cell
+def _(live_gpt, live_peak, mo, results):
+    # Inputs for the estimates: measured where a session has measured them, stated assumptions otherwise.
+    _l4 = next((r["single"] for k, r in results.items() if k.startswith("g6.xlarge") and (r.get("single") or {}).get("peak")), None)
+    _bw_rows = [row for r in results.values() if isinstance(r.get("multi"), dict)
+                for row in ((r["multi"].get("bandwidth") or {}).get("rows") or [])]
+    env = {
+        "card_peak": (live_peak["bf16_tflops"], "measured live, Section 3"),
+        "card_mfu": (live_gpt["mfu_vs_measured_peak"], "measured live, Section 3 (13.9M GPT)"),
+        "l4_peak": ((_l4["peak"]["bf16_tflops"], "measured on gpu1") if _l4 else
+                    (121.0, "**assumed**: NVIDIA's datasheet, dense bf16; `gpu1` replaces it")),
+        "l4_mfu": ((_l4["gpt_train"]["mfu_vs_measured_peak"], "measured on gpu1") if _l4 and _l4.get("gpt_train") else
+                   (live_gpt["mfu_vs_measured_peak"], "**assumed**: same as your card; `gpu1` replaces it")),
+        "pcie_gbs": ((max(r["psum_busbw_gbs"] for r in _bw_rows), "measured on gpu4 (best psum)") if _bw_rows else
+                     (10.0, "**assumed**: what a PCIe GPU box sustains; `gpu4` replaces it")),
+    }
+    _names = {"card_peak": "RX 7600 XT bf16 peak (TFLOP/s)", "card_mfu": "RX 7600 XT MFU",
+              "l4_peak": "L4 bf16 peak (TFLOP/s)", "l4_mfu": "L4 MFU", "pcie_gbs": "all-reduce bandwidth in g6.12xlarge (GB/s)"}
+    _rows = "\n".join(f"| {_names[k]} | {v:.2f} | {src} |" if v < 1 else f"| {_names[k]} | {v:.1f} | {src} |"
+                      for k, (v, src) in env.items())
+    mo.md(f"""
+| input | value | source |
+|---|---|---|
+{_rows}
+
+Each paid session you run replaces an assumption with a measurement, and every answer below updates.
+That's the habit worth keeping: predict first, measure, then find out which assumption was wrong.
+""")
+    return (env,)
+
+
+@app.cell
+def _(env, ex, lj, mo):
+    _cp, _cm = env["card_peak"][0], env["card_mfu"][0]
+    _lp, _lm = env["l4_peak"][0], env["l4_mfu"][0]
+    _bw = env["pcie_gbs"][0]
+    _N, _D = 100e6, 2e9                          # a 100M-parameter capstone, 20 tokens per parameter
+    _card = lj.attempt(ex.estimate_run, _N, _D, _cp, _cm, 1, 0.025)
+    _gpu4 = lj.attempt(ex.estimate_run, _N, _D, _lp, _lm, 4, ex.PRICES["g6.12xlarge"])
+    _ratio = lj.attempt(ex.dp_comm_ratio, _N, 16 * 256, 4, _lp, _lm, _bw)
+    _items = [mo.md("### Your turn: `estimate_run` and `dp_comm_ratio`"),
+              mo.md("`estimate_run` (the capstone on your card):"), _card.view(mo),
+              mo.md("`dp_comm_ratio` (gpu4, 16 × 256 tokens per GPU):"), _ratio.view(mo)]
+    if _card.ok and _gpu4.ok and _ratio.ok:
+        _c, _g, _r = _card.value, _gpu4.value, _ratio.value
+        _big = ex.dp_comm_ratio(7e9, 16 * 256, 4, _lp, _lm, _bw)
+        _crit = 16 * 256 * _r                     # tokens per GPU where comm = compute
+        _N17 = 1.71e9
+        _st17 = 16 * _N17
+        _card17 = ex.choose_strategy(_st17, 16e9, 1)
+        _gpu417 = ex.choose_strategy(_st17, 24e9, 4)
+        _lora17 = 2 * _N17 * 1.005               # frozen bf16 weights + ~0.5% adapters (adapter state is tiny)
+        _problems = {
+            "Problem 1 · Your capstone on your card": f"""
+**Question.** A 100M-parameter model, trained on 2B tokens (Chinchilla's ~20 tokens per parameter), on your
+RX 7600 XT. How long does it take, does the state fit, and what does it cost?
+
+**Answer.** {_c['flops']:.1e} FLOPs at {_cp:.1f} TFLOP/s × {_cm:.0%} MFU is **{_c['hours']:.0f} hours**
+(about {_c['hours'] / 24:.1f} days). The state is {_c['state_gb']:.1f} GB, which fits easily. Electricity
+costs about **\\${_c['usd']:.2f}**. That's slow but cheap. The MFU you measured comes from a 13.9M model,
+and bigger matmuls usually use the card better, so the real run would likely be faster.
+""",
+            "Problem 2 · The same run on gpu4": f"""
+**Question.** The same 100M model and 2B tokens on `gpu4` (4 × L4, \\${ex.PRICES['g6.12xlarge']:.3f}/h).
+
+**Answer.** {_g['hours']:.1f} hours and **\\${_g['usd']:.0f}**, about {_c['hours'] / _g['hours']:.0f}× faster
+than your card for about {_g['usd'] / max(_c['usd'], 1e-9):.0f}× the price. That assumes perfect scaling;
+Problem 3 checks that assumption. The 2-hour auto-stop from Section 2 would also kill a run this long, so
+plan checkpoints and resumes, or raise the limit deliberately.
+""",
+            "Problem 3 · Will data parallelism stall on communication?": f"""
+**Question.** On `gpu4`, each GPU processes 16 sequences of 256 tokens per step. What's the
+communication-to-compute ratio? What if the model were 7B parameters instead of 100M?
+
+**Answer.** **{_r:.2f}** at 100M and **{_big:.2f}** at 7B: the model size cancels, as promised. At
+{_bw:.0f} GB/s, about {_r:.0%} as much time goes to the all-reduce as to compute. Unless the two overlap
+(Section 6 measures how much does), that time adds directly to every step. Communication equals compute
+at about **{_crit:,.0f} tokens per GPU per step**. Larger per-GPU batches (or gradient accumulation) push
+the ratio down. A faster interconnect does the same, which is why training clusters pay for NVLink and
+InfiniBand.
+""",
+            "Problem 4 · Fine-tune SmolLM2-1.7B": f"""
+**Question.** Full fine-tuning of SmolLM2-1.7B (~1.71B parameters). Where does it fit, and what does LoRA
+change?
+
+**Answer.** The full training state is {_st17 / 1e9:.1f} GB. `choose_strategy` gives **{_card17}** on
+your 16 GB card and **{_gpu417}** on `gpu4`'s 4 × 24 GB (about {_st17 / 4e9:.1f} GB per GPU). With LoRA
+(Module 20), the frozen base is about {_lora17 / 1e9:.1f} GB in bf16, and the adapters plus their Adam
+state are a few MB, so it fits on your card. LoRA turns a rental into a local job.
+""",
+        }
+        _items.append(mo.accordion({k: mo.md(v) for k, v in _problems.items()}))
+    mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo):
     quiz = mo.ui.radio(
         options={
             "Data parallel: replicate everything, all-reduce the gradients": "dp",
@@ -388,7 +515,7 @@ def _(mo, quiz):
 @app.cell
 def _(mo):
     mo.md(r"""
-    ## 9 · The capstone: your own small LLM, end to end
+    ## 10 · The capstone: your own small LLM, end to end
 
     You now have every piece. The capstone is to assemble them, on your RX 7600 XT, into a model that's
     yours. Think of it as Andrej Karpathy's [nanochat](https://github.com/karpathy/nanochat) (MIT) in JAX,
@@ -401,7 +528,8 @@ def _(mo):
     2. **Tokenizer.** Train byte-level BPE on it (Module 13). Choose the vocabulary size with the
        embedding-share table in mind.
     3. **Model.** Build a DeepSeek-style MoE with MLA from your Module 17 parts, or the Llama-style one.
-       Size it with Module 00's memory arithmetic and Module 22's MFU.
+       Size it with Module 00's memory arithmetic and Module 22's MFU, then estimate its time and cost with
+       Section 9 before you start.
     4. **Train.** Adapt Module 16's `train.py`: bf16 compute, AdamW with warmup-cosine, deferred metrics,
        donation, a persistent compile cache, `.npz` checkpoints. Watch expert load (Module 17).
     5. **Evaluate.** Bits per byte on held-out text (Module 21). Compare against SmolLM2 and your Module 16
