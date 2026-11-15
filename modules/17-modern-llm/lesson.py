@@ -979,6 +979,33 @@ def _(mo, quiz):
 
 @app.cell
 def _(mo):
+    import learnjax.lineage as _lin
+
+    _m = _lin.by_id()
+    _llama = ("mqa", "pre_norm", "rmsnorm", "rope", "swiglu", "residual", "next_token")
+    _ds = ("mla", "rope", "partial_rope", "moe_topk", "shared_experts", "aux_free", "pre_norm", "rmsnorm", "swiglu",
+           "residual", "next_token")
+    _table = _lin.compare_md(
+        [("**your Llama**", _llama), ("Llama 3", _m["llama3"].uses), ("**your DeepSeek**", _ds),
+         ("DeepSeek-V3", _m["deepseek_v3"].uses), ("SmolLM3", _m["smollm3"].uses)],
+        ["position", "normalization", "sequence mixing", "feed-forward", "objective"])
+    mo.md(f"""
+## You are here
+
+Your two tiny models next to the real ones in the course's family tree (Module 00b, Section 12):
+
+{_table}
+
+Two differences are deliberate. Your Llama has 4 query heads and **one** KV head, which is
+grouped-query attention with a single group, also called multi-query attention. Llama 3 uses 8 KV
+heads. Your DeepSeek skips multi-token prediction (section 9). SmolLM3 is the "hybrid" from section
+2's Beyond RoPE table: Llama's blocks, with no RoPE in every 4th layer.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
     import learnjax.papers as _papers
 
     mo.md(_papers.papers_md(17))

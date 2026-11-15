@@ -51,6 +51,9 @@ pre { white-space: pre-wrap; }
 .ix-entry { break-inside: avoid; }
 a.ixref::after { content: attr(data-page); }
 #app-glossary .app-body { columns: 2; column-gap: 0.35in; }
+/* the family tree's tables run long: let them break across pages, and keep them small */
+#app-lineage table { break-inside: auto; font-size: 7pt; }
+#app-lineage tr { break-inside: avoid; }
 .gl { break-inside: avoid; font-size: 9pt; }
 .gl-letter, .ix-letter { column-span: none; break-after: avoid; }
 

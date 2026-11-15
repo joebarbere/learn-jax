@@ -734,6 +734,33 @@ def _(mo, quiz):
 
 @app.cell
 def _(mo):
+    import learnjax.lineage as _lin
+
+    _m = _lin.by_id()
+    _yours = ("mha", "learned_pos", "pre_norm", "layernorm", "gelu", "residual", "tied_emb", "next_token")
+    _table = _lin.compare_md(
+        [("**your GPT**", _yours), ("GPT-2 (2019)", _m["gpt2"].uses), ("LLaMA (2023)", _m["llama"].uses),
+         ("DeepSeek-V3 (2024)", _m["deepseek_v3"].uses)],
+        ["input", "position", "normalization", "sequence mixing", "feed-forward"])
+    mo.md(f"""
+## You are here
+
+The GPT you built is GPT-2's design at small scale: learned positions, pre-norm LayerNorm, GELU and
+tied embeddings. The table compares it with GPT-2 and two of its descendants in the course's family tree
+(Module 00b, Section 12, and `docs/LINEAGE.md`):
+
+{_table}
+
+Apart from the tokenizer, four things change between your GPT and LLaMA: RoPE replaces learned
+positions, RMSNorm replaces LayerNorm, SwiGLU replaces GELU, and the output head is no longer tied to the
+embeddings. DeepSeek-V3 changes attention and
+the feed-forward block too. Module 17 builds every one of those blocks.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
     import learnjax.papers as _papers
 
     mo.md(_papers.papers_md(16))

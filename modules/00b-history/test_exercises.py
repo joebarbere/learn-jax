@@ -74,3 +74,15 @@ def test_lineage_registry():
     from learnjax import lineage
 
     assert lineage.check() == []
+
+
+def test_lineage_compare_md():
+    """The "you are here" tables in modules 16 and 17 come from this helper."""
+    from learnjax import lineage
+
+    t = lineage.compare_md([("a", ("rope", "rmsnorm")), ("b", ("rope",))], ["position"])
+    rows = t.splitlines()
+    assert rows[0] == "| slot | block | a | b | module |"
+    assert len(rows) == 3 and "| RoPE | ✓ | ✓ | 17 |" in rows[2]      # rmsnorm filtered out by slot
+    with pytest.raises(KeyError):
+        lineage.compare_md([("x", ("no_such_block",))])

@@ -87,6 +87,10 @@ TERMS: list[Term] = [
          "The convolutional network that won the 2012 ImageNet competition by a wide margin, trained on "
          "two GPUs. It is the usual start date of the deep-learning era.",
          "00b", (), "Krizhevsky, Sutskever, Hinton, 2012"),
+    Term("ALiBi", ("attention with linear biases",),
+         "Attention with Linear Biases: no position embeddings; each head subtracts a penalty proportional "
+         "to the query-key distance from its attention scores.",
+         "17", ("00b",), "Press, Smith, Lewis, 2021"),
     Term("all-gather", ("allgather",),
          "Every device contributes its shard and every device ends up with the full array.",
          "24", ("25",), ""),
@@ -163,6 +167,10 @@ TERMS: list[Term] = [
          "One dimension of an array. Reductions such as `sum(axis=0)` collapse an axis; a batch axis holds "
          "independent examples.",
          "01", ("07", "12", "17", "24", "33"), ""),
+    Term("back-of-the-envelope estimate", ("back of the envelope", "estimate_run"),
+         "Predicting a training run's memory, time, communication and cost from a few measured numbers "
+         "before paying for it.",
+         "25", (), ""),
     Term("backpropagation", ("backprop", "back-propagation", "backpropagated"),
          "Reverse-mode autodiff applied to a neural network: run forward, then propagate the loss's "
          "derivative backwards through each layer to get every parameter's gradient in one pass.",
@@ -338,6 +346,11 @@ TERMS: list[Term] = [
          "Recording a sequence of kernel launches once and replaying it, to cut per-launch CPU overhead "
          "(CUDA/HIP graphs).",
          "22", (), ""),
+    Term("communication-to-compute ratio", ("dp_comm_ratio", "comm/compute ratio"),
+         "In data parallelism, time spent all-reducing gradients divided by time spent computing. Model "
+         "size cancels, so it depends on tokens per device per step and on the hardware's "
+         "FLOP/s-to-bandwidth ratio.",
+         "25", ("24",), ""),
     Term("compilation cache", ("persistent compilation cache",),
          "Storing compiled XLA programs on disk so a restarted process skips recompiling them.",
          "16", (), ""),
@@ -617,6 +630,10 @@ TERMS: list[Term] = [
          "A running average where each new value gets weight (1 − β) and the old average β, so recent "
          "values count most. Used by momentum, Adam, BatchNorm and target networks.",
          "08", ("05",), ""),
+    Term("family tree", ("lineage", "LINEAGE.md"),
+         "The course's registry of about fifty models, the models each one builds on, and the building "
+         "blocks each uses, filed by slot (position, normalization, attention, …).",
+         "00b", ("16", "17"), ""),
     Term("fan-in", ("fan_in", "fan-out", "fan_out"),
          "The number of inputs (fan-in) or outputs (fan-out) of a layer, used to scale initial weights and "
          "some optimizer updates.",
@@ -734,6 +751,10 @@ TERMS: list[Term] = [
          "The vector of all partial derivatives of a scalar loss with respect to the parameters. It points "
          "in the direction of steepest increase, so training steps the other way.",
          "03", ("05", "07", "11", "20", "31"), ""),
+    Term("gradient accumulation", (),
+         "Summing gradients over several micro-batches before one optimizer step: a larger effective batch "
+         "without more memory, and fewer all-reduces per token.",
+         "25", (), ""),
     Term("gradient clipping",
          ("clipping by global norm", "clip_by_global_norm", "global gradient norm", "gradient norm"),
          "If the gradient's overall norm exceeds a threshold, scale it down to the threshold. Prevents one "
@@ -1017,6 +1038,10 @@ TERMS: list[Term] = [
     Term("learning-rate schedule", ("LR schedule", "learning rate schedule"),
          "A rule that changes the learning rate over training, typically a warmup followed by a decay.",
          "05", (), ""),
+    Term("length extrapolation", ("extrapolate", "extrapolation"),
+         "Running a model on sequences longer than any it trained on. Position schemes differ in how "
+         "gracefully they degrade.",
+         "17", (), ""),
     Term("length normalization", ("length-normalized", "per-token average"),
          "Dividing an answer's log-likelihood by its length (in tokens or bytes) so longer options aren't "
          "unfairly penalized.",
@@ -1290,6 +1315,10 @@ TERMS: list[Term] = [
          "The practical GAN generator loss, maximizing log D(fake) instead of minimizing log(1 − D(fake)), "
          "so it gets strong gradients early on.",
          "33", (), "Goodfellow et al., 2014"),
+    Term("NoPE", ("no positional encoding",),
+         "No positional encoding at all. The causal mask still leaks order (a token at position p averages "
+         "over p + 1 values), so decoders can learn positions without being given them.",
+         "17", ("00b", "36"), "Haviv et al., 2022"),
     Term("norm", ("L2 norm", "Frobenius norm", "vector norm"),
          "A measure of a vector's or matrix's size, most often the L2 (Euclidean) length. Used for "
          "regularization, clipping and diagnosing training.",
@@ -1381,6 +1410,10 @@ TERMS: list[Term] = [
     Term("partial derivative", ("partial derivatives",),
          "The derivative with respect to one input while holding the others fixed.",
          "03", (), ""),
+    Term("partial RoPE", ("partial rotary", "rope_partial", "partial_rotary_factor"),
+         "RoPE applied to only some of each head's features; the rest stay unrotated and match on content "
+         "regardless of distance.",
+         "17", ("00b",), "Black et al., 2022 (GPT-NeoX-20B)"),
     Term("PartitionSpec", ("PartitionSpecs",),
          "A tuple naming which mesh axis, if any, each array dimension is split over, e.g. P('data', "
          "None).",
@@ -1540,6 +1573,10 @@ TERMS: list[Term] = [
     Term("Q-value", ("action-value", "Q-values", "Q function"),
          "The expected return of taking a given action in a given state, then acting well.",
          "34", (), ""),
+    Term("QK-Norm", ("qk norm", "query-key normalization"),
+         "Normalizing queries and keys before their dot product, which keeps attention logits from blowing "
+         "up and stabilizes training.",
+         "00b", (), "Henry et al., 2020"),
     Term("quadratic cost", ("O(L²)", "quadratic"),
          "Attention compares every pair of positions, so compute and the score matrix grow with the square "
          "of the sequence length.",
@@ -1614,6 +1651,10 @@ TERMS: list[Term] = [
          "Learning to act by trial and error: an agent observes the state of an environment, takes "
          "actions, and adjusts its policy to maximize total reward.",
          "34", ("25", "26", "35", "39"), ""),
+    Term("relative position bias", ("T5 bias",),
+         "A learned number per attention head and distance bucket, added to the attention scores: T5's "
+         "position scheme.",
+         "17", ("32", "00b"), "Raffel et al., 2019"),
     Term("ReLU", ("rectified linear unit",),
          "max(0, x): the simplest common nonlinearity. Networks of ReLUs compute piecewise-linear "
          "functions.",
@@ -1801,6 +1842,10 @@ TERMS: list[Term] = [
     Term("skip-gram", ("skipgram", "skip_gram"),
          "word2vec's objective: from a centre word, predict the words within a small window around it.",
          "30", (), "Mikolov et al., 2013"),
+    Term("sliding-window attention", ("sliding window",),
+         "Each token attends only to the previous W tokens, so compute and the KV cache grow with W "
+         "instead of the context length.",
+         "00b", (), "Beltagy, Peters, Cohan, 2020 (Longformer)"),
     Term("SmolLM2", ("SmolLM2-135M", "SmolLM2-360M", "SmolLM"),
          "Hugging Face's small open LLMs (135M–1.7B); the real pretrained weights the course loads for "
          "inference, LoRA, evaluation, RAG and agents.",

@@ -437,3 +437,22 @@ def check() -> list[str]:
                 if early:
                     errs.append(f"{b.id}: used by {early} before its first model {fm.id} ({fm.year})")
     return errs
+
+
+def compare_md(columns: list[tuple[str, tuple[str, ...]]], slots: list[str] | None = None) -> str:
+    """A markdown table: one row per block that any column uses (in BLOCKS order, limited to `slots`),
+    one ✓ column per (header, uses) pair, plus the module that builds the block. Lessons use it for
+    "you are here" comparisons between the model you built and the registry's models."""
+    blocks = blocks_by_id()
+    for _h, uses in columns:
+        unknown = [u for u in uses if u not in blocks]
+        if unknown:
+            raise KeyError(f"unknown blocks {unknown}")
+    rows = [b for b in BLOCKS if (slots is None or b.slot in slots) and any(b.id in u for _h, u in columns)]
+    head = "| slot | block | " + " | ".join(h for h, _u in columns) + " | module |"
+    sep = "|---|---|" + "---|" * len(columns) + "---|"
+    lines = [head, sep]
+    for b in rows:
+        cells = " | ".join("✓" if b.id in u else "" for _h, u in columns)
+        lines.append(f"| {b.slot} | {b.name} | {cells} | {b.module or '—'} |")
+    return "\n".join(lines)

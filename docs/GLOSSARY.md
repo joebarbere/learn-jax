@@ -1,6 +1,6 @@
 # Glossary
 
-542 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+553 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -30,6 +30,7 @@
 - **agent loop** — The core of an agent: send the conversation to the model, execute any tool call it makes, append the result, repeat until it answers (or a turn limit hits). *(Module 39.)*
 - **AI winter** — A period when funding and interest in AI collapsed after over-promising: roughly the mid-1970s and again the late 1980s to early 1990s. *(Module 00b; also 29.)*
 - **AlexNet** — The convolutional network that won the 2012 ImageNet competition by a wide margin, trained on two GPUs. It is the usual start date of the deep-learning era. *(Module 00b.)* Origin: Krizhevsky, Sutskever, Hinton, 2012.
+- **ALiBi** — Attention with Linear Biases: no position embeddings; each head subtracts a penalty proportional to the query-key distance from its attention scores. *(Module 17; also 00b.)* Origin: Press, Smith, Lewis, 2021.
 - **all-gather** — Every device contributes its shard and every device ends up with the full array. *(Module 24; also 25.)*
 - **all-reduce** — Every device contributes a value and every device gets the sum. Data parallelism uses it to average gradients. *(Module 24; also 25.)*
 - **all-to-all** — Every device sends a different piece to every other device; used to route tokens to experts in expert parallelism. *(Module 24.)*
@@ -54,6 +55,7 @@
 
 ## B
 
+- **back-of-the-envelope estimate** — Predicting a training run's memory, time, communication and cost from a few measured numbers before paying for it. *(Module 25.)*
 - **backpropagation** — Reverse-mode autodiff applied to a neural network: run forward, then propagate the loss's derivative backwards through each layer to get every parameter's gradient in one pass. *(Module 03; also 00b, 10, 11, 29, 31.)* Origin: Rumelhart, Hinton, Williams, 1986.
 - **backpropagation through time** — Backpropagation on an RNN unrolled over the sequence; gradients pass back through every step, so they can vanish or explode. *(Module 31.)* Origin: Werbos, 1990.
 - **base model** — A model trained only on next-token prediction over raw text. It continues text but doesn't follow instructions until fine-tuned. *(Module 20; also 18, 21, 25, 26, 35.)*
@@ -104,6 +106,7 @@
 - **ColBERT** — A retriever keeping one vector per token and scoring by summed max-similarity: between a bi-encoder and a cross-encoder in cost and accuracy. *(Module 38.)* Origin: Khattab & Zaharia, 2020.
 - **collective** — A communication operation involving all devices along an axis, such as all-reduce or all-gather. *(Module 24; also 25.)*
 - **command buffer** — Recording a sequence of kernel launches once and replaying it, to cut per-launch CPU overhead (CUDA/HIP graphs). *(Module 22.)*
+- **communication-to-compute ratio** — In data parallelism, time spent all-reducing gradients divided by time spent computing. Model size cancels, so it depends on tokens per device per step and on the hardware's FLOP/s-to-bandwidth ratio. *(Module 25; also 24.)*
 - **compilation cache** — Storing compiled XLA programs on disk so a restarted process skips recompiling them. *(Module 16.)*
 - **compile time** — The one-off cost of tracing and compiling a jitted function, separate from the per-call run time. Unrolled Python loops make it grow with the loop length. *(Module 06.)*
 - **computation graph** — A record of a computation as nodes (operations) and edges (values). Autodiff walks it backwards to compute gradients; JAX's jaxpr is such a graph. *(Module 03.)*
@@ -191,6 +194,7 @@
 
 ## F
 
+- **family tree** — The course's registry of about fifty models, the models each one builds on, and the building blocks each uses, filed by slot (position, normalization, attention, …). *(Module 00b; also 16, 17.)*
 - **fan-in** — The number of inputs (fan-in) or outputs (fan-out) of a layer, used to scale initial weights and some optimizer updates. *(Module 11; also 05.)*
 - **Fashion-MNIST** — 70,000 28×28 grayscale images of clothing in 10 classes: the course's image benchmark for regression, MLPs and CNNs. *(Module 09; also 07, 10, 11, 12, 33.)* Origin: Xiao, Rasul, Vollgraf, 2017.
 - **feature** — One input variable to a model. In interpretability, a direction in activation space that represents a concept. *(Module 09; also 11, 12, 15, 17, 37.)*
@@ -226,6 +230,7 @@
 - **Goodhart's law** — "When a measure becomes a target, it ceases to be a good measure." Optimizing a proxy reward too hard makes the true quality fall while the proxy keeps climbing. *(Module 35.)* Origin: Goodhart, 1975.
 - **GPT** — A decoder-only transformer trained on next-token prediction. GPT-2 (2019) is the template the course's model follows. *(Module 16; also 13, 21, 25, 27, 32.)* Origin: Radford et al., 2018, 2019.
 - **gradient** — The vector of all partial derivatives of a scalar loss with respect to the parameters. It points in the direction of steepest increase, so training steps the other way. *(Module 03; also 05, 07, 11, 20, 31.)*
+- **gradient accumulation** — Summing gradients over several micro-batches before one optimizer step: a larger effective batch without more memory, and fewer all-reduces per token. *(Module 25.)*
 - **gradient clipping** — If the gradient's overall norm exceeds a threshold, scale it down to the threshold. Prevents one bad batch from wrecking the weights. *(Module 05; also 02, 07, 11, 16.)*
 - **gradient descent** — Repeatedly step the parameters a small amount against the gradient: θ ← θ − η·∇L. *(Module 05; also 09, 14.)* Origin: Cauchy, 1847.
 - **greedy decoding** — Always picking the most probable next token. Deterministic and often repetitive. *(Module 18; also 20, 26, 27, 35.)*
@@ -324,6 +329,7 @@
 - **leaf** — An array (or other non-container value) at the bottom of a pytree. *(Module 07; also 08.)*
 - **learning rate** — The multiplier η on each gradient step. Too small is slow, too large oscillates or diverges; it is the most important hyperparameter. *(Module 05; also 09, 11, 16, 20, 26.)*
 - **learning-rate schedule** — A rule that changes the learning rate over training, typically a warmup followed by a decay. *(Module 05.)*
+- **length extrapolation** — Running a model on sequences longer than any it trained on. Position schemes differ in how gracefully they degrade. *(Module 17.)*
 - **length normalization** — Dividing an answer's log-likelihood by its length (in tokens or bytes) so longer options aren't unfairly penalized. *(Module 21.)*
 - **linear probe** — A linear classifier trained on a model's frozen activations to test whether some property (like a board square's state) is linearly readable from them. *(Module 37.)* Origin: Alain & Bengio, 2016.
 - **linear regression** — Fitting a straight line (or hyperplane) y ≈ Xw + b by minimizing squared error. Solvable in closed form or by gradient descent. *(Module 09.)*
@@ -403,6 +409,7 @@
 - **next-token prediction** — The training task of language models: predict token t+1 from tokens up to t. Inputs and targets are the same sequence shifted by one. *(Module 14; also 04, 18, 32, 35, 37.)*
 - **NHWC** — Axis-order conventions for images (batch, height, width, channels) and conv kernels (height, width, in, out) used by JAX's convolution API. *(Module 12.)*
 - **non-saturating loss** — The practical GAN generator loss, maximizing log D(fake) instead of minimizing log(1 − D(fake)), so it gets strong gradients early on. *(Module 33.)* Origin: Goodfellow et al., 2014.
+- **NoPE** — No positional encoding at all. The causal mask still leaks order (a token at position p averages over p + 1 values), so decoders can learn positions without being given them. *(Module 17; also 00b, 36.)* Origin: Haviv et al., 2022.
 - **norm** — A measure of a vector's or matrix's size, most often the L2 (Euclidean) length. Used for regularization, clipping and diagnosing training. *(Module 02; also 05, 07, 08, 11, 12.)*
 - **normal equations** — The direct least-squares solution w = (XᵀX)⁻¹Xᵀy, found by setting the gradient to zero instead of iterating. *(Module 09; also 16.)*
 - **normalization layer** — A layer that re-centres and re-scales activations to a stable range, so deep networks train reliably. *(Module 11; also 33.)*
@@ -436,6 +443,7 @@
 - **parameter-efficient fine-tuning** — Fine-tuning methods that train only a small number of extra or selected parameters, like LoRA. *(Module 20.)*
 - **parameters** — The learned numbers of a model (weights and biases). Training is the search for good parameter values. *(Module 10; also 03, 05, 12, 16, 20.)*
 - **partial derivative** — The derivative with respect to one input while holding the others fixed. *(Module 03.)*
+- **partial RoPE** — RoPE applied to only some of each head's features; the rest stay unrotated and match on content regardless of distance. *(Module 17; also 00b.)* Origin: Black et al., 2022 (GPT-NeoX-20B).
 - **PartitionSpec** — A tuple naming which mesh axis, if any, each array dimension is split over, e.g. P('data', None). *(Module 24.)*
 - **pass@k** — The probability that at least one of k sampled answers is correct; an upper bound for what voting or verification can reach. *(Module 26.)* Origin: Chen et al., 2021 (Codex).
 - **per-example gradients** — A separate gradient for every example in a batch, obtained as `vmap(grad(loss))`. Used in differential privacy and data diagnostics. *(Module 07.)*
@@ -480,6 +488,7 @@
 
 - **Q-learning** — Learn Q-values by nudging each estimate toward reward + discounted best next Q, from experience, without a model of the environment. *(Module 34.)* Origin: Watkins, 1989.
 - **Q-value** — The expected return of taking a given action in a given state, then acting well. *(Module 34.)*
+- **QK-Norm** — Normalizing queries and keys before their dot product, which keeps attention logits from blowing up and stabilizes training. *(Module 00b.)* Origin: Henry et al., 2020.
 - **quadratic cost** — Attention compares every pair of positions, so compute and the score matrix grow with the square of the sequence length. *(Module 15.)*
 - **quantization** — Storing weights in fewer bits (int8, int4) with a scale per group or channel. Smaller models load faster and decoding speeds up, at a small accuracy cost. *(Module 18; also 01, 19, 27.)*
 - **query likelihood** — Ranking documents by the probability a language model would generate the query from them. *(Module 38.)* Origin: Ponte & Croft, 1998.
@@ -504,6 +513,7 @@
 - **reduction** — An operation that collapses an axis into one value per remaining position: sum, mean, max, argmax. *(Module 01; also 08, 24.)*
 - **regularization** — Anything that discourages fitting noise and so improves generalization: weight decay, dropout, data augmentation, early stopping. *(Module 11; also 05, 09.)*
 - **reinforcement learning** — Learning to act by trial and error: an agent observes the state of an environment, takes actions, and adjusts its policy to maximize total reward. *(Module 34; also 25, 26, 35, 39.)*
+- **relative position bias** — A learned number per attention head and distance bucket, added to the attention scores: T5's position scheme. *(Module 17; also 32, 00b.)* Origin: Raffel et al., 2019.
 - **ReLU** — max(0, x): the simplest common nonlinearity. Networks of ReLUs compute piecewise-linear functions. *(Module 10; also 11, 12, 17, 33, 37.)* Origin: Nair & Hinton, 2010.
 - **reparameterization trick** — Write a sample as μ + σ·ε with ε random noise, so gradients can flow through the sampling step to μ and σ. *(Module 33.)* Origin: Kingma & Welling, 2013.
 - **repetition penalty** — Lowering the logits of tokens already generated to discourage loops. *(Module 18.)* Origin: Keskar et al., 2019.
@@ -556,6 +566,7 @@
 - **sigmoid** — σ(x) = 1/(1 + e⁻ˣ): squashes any number into (0, 1). The two-class special case of softmax. *(Module 09; also 10, 33.)*
 - **SIMD** — Single instruction, multiple data: a hardware unit applying one instruction to a whole wavefront at once. *(Module 23.)*
 - **skip-gram** — word2vec's objective: from a centre word, predict the words within a small window around it. *(Module 30.)* Origin: Mikolov et al., 2013.
+- **sliding-window attention** — Each token attends only to the previous W tokens, so compute and the KV cache grow with W instead of the context length. *(Module 00b.)* Origin: Beltagy, Peters, Cohan, 2020 (Longformer).
 - **SmolLM2** — Hugging Face's small open LLMs (135M–1.7B); the real pretrained weights the course loads for inference, LoRA, evaluation, RAG and agents. *(Module 18; also 20, 21, 27, 35, 38.)* Origin: Allal et al., 2025.
 - **smoothing** — Adding a small count to every possibility so unseen pairs don't get probability zero (and infinite loss). *(Module 14.)*
 - **softmax** — Exponentiate a vector of logits and divide by the total, turning arbitrary scores into a probability distribution. Large logits dominate. *(Module 04; also 08, 15, 18, 22, 23.)*
