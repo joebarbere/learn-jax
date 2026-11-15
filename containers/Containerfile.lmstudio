@@ -1,0 +1,32 @@
+# LM Studio's headless daemon (llmster) + `lms` CLI, for Module 27. LM Studio is free for personal and
+# internal-business use (https://lmstudio.ai/app-terms); its binaries are downloaded at build time,
+# never committed. Models keep their own licenses.
+#
+# lmstudio-install.sh is LM Studio's official installer (MIT/Apache-2.0, from https://lmstudio.ai/install.sh),
+# vendored so the llmster version is pinned (APP_VERSION inside it). Re-vendor to upgrade.
+# GPU: llama.cpp's Vulkan engine via /dev/dri (Mesa RADV) — needs no ROCm. ROCm engine is optional.
+FROM docker.io/library/ubuntu:24.04
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      ca-certificates curl tar gzip libgomp1 libatomic1 libvulkan1 mesa-vulkan-drivers vulkan-tools \
+      python3 python3-requests \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV HOME=/root
+COPY lmstudio-install.sh /tmp/lmstudio-install.sh
+RUN sh /tmp/lmstudio-install.sh --no-modify-path && rm /tmp/lmstudio-install.sh
+ENV PATH=/root/.lmstudio/bin:$PATH
+
+# Pin the llama.cpp engines (LM Studio "runtimes") at one version for both backends, so Vulkan vs ROCm is a
+# fair comparison and nothing auto-updates under you. Engines only change via `lms runtime update`.
+# (--allow-incompatible: there is no GPU during the build, so every GPU engine looks incompatible.)
+ENV LMS_RUNTIME_VERSION=2.73.0
+RUN lms daemon up \
+ && lms runtime get "llama.cpp-linux-x86_64-vulkan-avx2@${LMS_RUNTIME_VERSION}" -y --allow-incompatible \
+ && lms runtime get "llama.cpp-linux-x86_64-amd-rocm-avx2@${LMS_RUNTIME_VERSION}" -y --allow-incompatible \
+ && lms runtime select "llama.cpp-linux-x86_64-vulkan-avx2@${LMS_RUNTIME_VERSION}" \
+ && lms runtime ls \
+ && lms daemon down
+COPY lmstudio-entry.sh /usr/local/bin/lmstudio-entry
+EXPOSE 1234
+CMD ["lmstudio-entry"]

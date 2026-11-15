@@ -1,0 +1,14 @@
+#!/bin/bash
+# learn-jax node bootstrap. Runs once at first boot (as root).
+set -u
+# Hard auto-stop, part 2: power off after ${max_minutes} minutes. Because the instance's shutdown behavior is
+# "terminate", this deletes the instance and its root volume — the session cannot run (or bill) forever.
+shutdown -h +${max_minutes} "learn-jax: max_minutes reached" || true
+mkdir -p /opt/learn-jax
+cat > /opt/learn-jax/node.env <<ENV
+LEARNJAX_RANK=${rank}
+LEARNJAX_NODES=${n_nodes}
+LEARNJAX_BUCKET=${bucket}
+LEARNJAX_STACK=${stack}
+ENV
+echo "learn-jax node ${rank}/${n_nodes} ready (stack=${stack}, auto-stop in ${max_minutes} min)" > /opt/learn-jax/READY

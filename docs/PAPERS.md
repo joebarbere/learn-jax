@@ -51,6 +51,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Decoupled Weight Decay Regularization](https://arxiv.org/abs/1711.05101)** — Loshchilov, Hutter, 2017. AdamW: why weight decay is not L2 regularization under Adam.
 - **[SGDR: Stochastic Gradient Descent with Warm Restarts](https://arxiv.org/abs/1608.03983)** — Loshchilov, Hutter, 2016. Cosine learning-rate schedules.
 - **[On the difficulty of training Recurrent Neural Networks](https://arxiv.org/abs/1211.5063)** — Pascanu, Mikolov, Bengio, 2012. Exploding gradients and gradient-norm clipping.
+- **[Muon is Scalable for LLM Training](https://arxiv.org/abs/2502.16982)** — Liu, Su et al. (Moonshot AI), 2025. Muon (orthogonalized momentum) at LLM scale: weight decay and update-RMS matching make it work.
 - *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Gradient descent, how neural networks learn (Deep learning ch. 2)](https://www.youtube.com/watch?v=IHZwWFHWa-w). Cost functions and walking downhill.
 
 ## Part 2 — JAX core
@@ -112,6 +113,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[SentencePiece: A simple and language independent subword tokenizer](https://arxiv.org/abs/1808.06226)** — Kudo, Richardson, 2018. Tokenization from raw text, no pre-splitting.
 - **[Language Models are Unsupervised Multitask Learners](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf)** — Radford et al., 2019. GPT-2: byte-level BPE and a scaled-up decoder-only Transformer.
 - *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Let's build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE). Byte-level BPE from scratch, and the LLM quirks tokenization causes.
+- *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 1: Tokenization at scale](https://jaxformer.com/tokenization/). Tokenizing FineWeb-EDU with multiprocessing and Ray.
 
 ### 14 · Language modeling basics: bigrams to MLP LMs
 
@@ -139,6 +141,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Let's build GPT: from scratch, in code, spelled out.](https://www.youtube.com/watch?v=kCc8FmEb1nY). A character-level GPT on Shakespeare, built up from a bigram model.
 - *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Transformers, the tech behind LLMs (Deep learning ch. 5)](https://www.youtube.com/watch?v=wjZofJX0v4M). The whole GPT pipeline, visually.
 - *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Large Language Models explained briefly](https://www.youtube.com/watch?v=LPZh9BOjkQs). The big picture in eight minutes.
+- *Companion ([Andrej Karpathy, *nanochat*](https://github.com/karpathy/nanochat)):* [nanochat](https://github.com/karpathy/nanochat). nanoGPT's successor: the same GPT, plus tokenizer, SFT, RL, eval and a chat engine.
 
 ### 17 · Modern LLM architecture: RoPE, RMSNorm, SwiGLU, MLA, MoE
 
@@ -156,6 +159,8 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Better & Faster Large Language Models via Multi-token Prediction](https://arxiv.org/abs/2404.19737)** — Gloeckle et al., 2024. Predict several future tokens per position.
 - **[DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)** — DeepSeek-AI, 2024. MLA + DeepSeekMoE + aux-loss-free balancing + MTP: the model you replicated in miniature.
 - *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [How might LLMs store facts (Deep learning ch. 7)](https://www.youtube.com/watch?v=9-Jl0dxWQs8). What the MLP / feed-forward blocks (SwiGLU, experts) may be doing.
+- *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 2: How to write the base model](https://jaxformer.com/base_model/). RMSNorm, RoPE and multi-latent attention in JAX.
+- *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 6: Implementing mixture-of-experts layers](https://jaxformer.com/moe/). Sigmoid top-k routing, shared experts, load balancing.
 
 ## Part 5 — LLMs in practice
 
@@ -165,6 +170,8 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Fast Inference from Transformers via Speculative Decoding](https://arxiv.org/abs/2211.17192)** — Leviathan, Kalman, Matias, 2022. A small draft model proposes, the big model verifies.
 - **[LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale](https://arxiv.org/abs/2208.07339)** — Dettmers et al., 2022. Int8 inference and outlier features.
 - **[GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers](https://arxiv.org/abs/2210.17323)** — Frantar et al., 2022. 4-bit weights with little loss, the basis of many local-model formats.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [All about Transformer inference](https://jax-ml.github.io/scaling-book/inference). Prefill vs decode, KV-cache costs, batching, latency.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [Serving LLaMA 3-70B](https://jax-ml.github.io/scaling-book/applied-inference). The inference math applied to a real model.
 
 ### 19 · Local serving for coding assistants
 
@@ -184,6 +191,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Measuring Massive Multitask Language Understanding](https://arxiv.org/abs/2009.03300)** — Hendrycks et al., 2020. MMLU, the multiple-choice benchmark everyone reports.
 - **[Holistic Evaluation of Language Models](https://arxiv.org/abs/2211.09110)** — Liang et al., 2022. HELM: evaluate many metrics across many scenarios.
 - **[Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://arxiv.org/abs/2306.05685)** — Zheng et al., 2023. Using a strong model to grade answers, and its biases.
+- *Companion ([Andrej Karpathy, *nanochat*](https://github.com/karpathy/nanochat)):* [nanochat's evaluation (base_eval, chat_eval)](https://github.com/karpathy/nanochat). CORE score, bits per byte, ARC, GSM8K, MMLU in one harness.
 
 ## Part 6 — Performance & ROCm
 
@@ -193,12 +201,15 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Data Movement Is All You Need: A Case Study on Optimizing Transformers](https://arxiv.org/abs/2007.00072)** — Ivanov et al., 2020. Transformers are often memory-bound; measure data movement, not FLOPs.
 - **[Operator Fusion in XLA: Analysis and Evaluation](https://arxiv.org/abs/2301.13062)** — Snider, Liang, 2023. How XLA's fusion decisions show up in a profile.
 - *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Let's reproduce GPT-2 (124M)](https://www.youtube.com/watch?v=l8pRSuU81PU). Make GPT training fast step by step: precision, compilation, flash attention, nice numbers.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [All about rooflines](https://jax-ml.github.io/scaling-book/roofline). Compute vs memory vs communication bounds, worked out.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [How to profile TPU programs](https://jax-ml.github.io/scaling-book/profiling). Reading JAX profiler traces (TPU-focused, same ideas on GPU).
 
 ### 23 · Kernels: Pallas, HIP and fusion
 
 - **[Triton: an intermediate language and compiler for tiled neural network computations](https://doi.org/10.1145/3315508.3329973)** — Tillet, Kung, Cox, 2019. The tile-based kernel language behind Pallas's GPU backend and XLA's GEMM fusions.
 - **[FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness](https://arxiv.org/abs/2205.14135)** — Dao et al., 2022. Attention reorganized around memory traffic, not FLOPs.
 - **[FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning](https://arxiv.org/abs/2307.08691)** — Dao, 2023. Better work partitioning across the GPU.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [How to think about GPUs](https://jax-ml.github.io/scaling-book/gpus). SMs, memory hierarchy and collectives from the scaling-book view.
 
 ## Part 7 — Scale & cloud
 
@@ -208,12 +219,22 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054)** — Rajbhandari et al., 2019. Shard optimizer state, gradients and params: the idea behind FSDP.
 - **[GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding](https://arxiv.org/abs/2006.16668)** — Lepikhin et al., 2020. Sharding annotations + MoE expert parallelism.
 - **[GSPMD: General and Scalable Parallelization for ML Computation Graphs](https://arxiv.org/abs/2105.04663)** — Xu et al., 2021. The XLA partitioner that turns JAX's sharding specs into collectives.
+- *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 3: Inside the sharded model](https://jaxformer.com/sharded/). Mesh, shard_map, FSDP, GPipe pipelines and tensor parallelism.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [Sharded matrices and how to multiply them](https://jax-ml.github.io/scaling-book/sharding). Which collective each sharded matmul needs.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [Programming TPUs in JAX](https://jax-ml.github.io/scaling-book/jax-stuff). Explicit sharding and shard_map from the JAX side.
+- *Companion ([Hugging Face nanotron team, *The Ultra-Scale Playbook*](https://huggingface.co/spaces/nanotron/ultrascale-playbook)):* [The Ultra-Scale Playbook](https://huggingface.co/spaces/nanotron/ultrascale-playbook). DP, ZeRO/FSDP, TP, PP, context and expert parallelism, measured on GPU clusters.
 
 ### 25 · JAX on AWS, and the capstone
 
 - **[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556)** — Hoffmann et al., 2022. Scale tokens with parameters (~20 tokens/param) for a fixed compute budget.
 - **[Efficiently Scaling Transformer Inference](https://arxiv.org/abs/2211.05102)** — Pope et al., 2022. Cost per token for serving, the number to compare across hardware.
 - **[DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)** — DeepSeek-AI, 2024. MLA + DeepSeekMoE + aux-loss-free balancing + MTP: the model you replicated in miniature.
+- *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 4: Dataset class and config files](https://jaxformer.com/dataset/). Sharded data placement.
+- *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 5: Distributed training](https://jaxformer.com/distributed_training/). jax.distributed, Orbax checkpoints, the train loop.
+- *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 7: Final run and training results](https://jaxformer.com/training/). A 949M-param MoE on 32 TPU-v4 chips, multi-host.
+- *Companion ([Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model*](https://jax-ml.github.io/scaling-book/)):* [Training LLaMA 3 on TPUs](https://jax-ml.github.io/scaling-book/applied-training). Choosing a parallelism layout for a real run.
+- *Companion ([Andrej Karpathy, *nanochat*](https://github.com/karpathy/nanochat)):* [nanochat](https://github.com/karpathy/nanochat). The capstone's blueprint: every stage of a small chat model, end to end.
+- *Companion ([Andrej Karpathy, *nanochat*](https://github.com/karpathy/nanochat)):* [Beating GPT-2 for <<$100: the nanochat journey](https://github.com/karpathy/nanochat/discussions/481). Karpathy's write-up of what made it fast.
 
 ## Part 8 — Reasoning
 
@@ -227,9 +248,18 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300)** — Shao et al., 2024. Introduces GRPO: group-relative advantages, no value network.
 - **[DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning](https://arxiv.org/abs/2501.12948)** — DeepSeek-AI, 2025. RL with verifiable rewards produces long reasoning; R1-Zero, distillation.
 - **[s1: Simple test-time scaling](https://arxiv.org/abs/2501.19393)** — Muennighoff et al., 2025. Budget forcing: controlling how long a model thinks at inference time.
-- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 3: The Verifier for Evaluation and RL with Verifiable Rewards](https://www.youtube.com/watch?v=JQJ_8_jSAoY). The checker that is also the reward.
-- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 4: Inference Scaling 1 (Temperature, Top-p, Self-Consistency)](https://www.youtube.com/watch?v=t5y-kS9nNxU). Sampling and majority voting.
-- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 5: Inference Scaling 2 (Logprob Scoring, Self-Refinement)](https://www.youtube.com/watch?v=TVMyOJ_3Gxo). Scoring and critique-then-revise.
-- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 6: Reinforcement Learning 1 (Implementing GRPO for RLVR)](https://www.youtube.com/watch?v=237Hf7Q3lgg). GRPO from scratch.
-- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 7: Reinforcement Learning 2 (Tracking, KL Terms, And More)](https://www.youtube.com/watch?v=VxfUrUrrczs). Clipping, KL, format rewards, reward hacking.
-- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 8: Distillation](https://www.youtube.com/watch?v=msp69FR5NZs). Teaching a small model from a reasoning model's answers.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model (From Scratch)*](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 3: The Verifier for Evaluation and RL with Verifiable Rewards](https://www.youtube.com/watch?v=JQJ_8_jSAoY). The checker that is also the reward.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model (From Scratch)*](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 4: Inference Scaling 1 (Temperature, Top-p, Self-Consistency)](https://www.youtube.com/watch?v=t5y-kS9nNxU). Sampling and majority voting.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model (From Scratch)*](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 5: Inference Scaling 2 (Logprob Scoring, Self-Refinement)](https://www.youtube.com/watch?v=TVMyOJ_3Gxo). Scoring and critique-then-revise.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model (From Scratch)*](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 6: Reinforcement Learning 1 (Implementing GRPO for RLVR)](https://www.youtube.com/watch?v=237Hf7Q3lgg). GRPO from scratch.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model (From Scratch)*](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 7: Reinforcement Learning 2 (Tracking, KL Terms, And More)](https://www.youtube.com/watch?v=VxfUrUrrczs). Clipping, KL, format rewards, reward hacking.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model (From Scratch)*](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 8: Distillation](https://www.youtube.com/watch?v=msp69FR5NZs). Teaching a small model from a reasoning model's answers.
+- *Companion ([Andrej Karpathy, *nanochat*](https://github.com/karpathy/nanochat)):* [nanochat's chat_rl stage](https://github.com/karpathy/nanochat). RL on GSM8K after SFT, the same idea as this module at larger scale.
+
+## Part 9 — Using your models
+
+### 27 · Your models in LM Studio: export, convert, serve
+
+- **[LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)** — Hu et al., 2021. Fine-tune by learning a low-rank update instead of all weights.
+- **[Fast Inference from Transformers via Speculative Decoding](https://arxiv.org/abs/2211.17192)** — Leviathan, Kalman, Matias, 2022. The draft-and-verify scheme behind LM Studio's speculative decoding.
+- **[GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers](https://arxiv.org/abs/2210.17323)** — Frantar et al., 2022. Why 4-bit weights lose so little: the idea behind GGUF's k-quants.

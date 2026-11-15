@@ -9,7 +9,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from difflib import SequenceMatcher
 
-from learnjax.papers import COMPANIONS, PAPERS
+from learnjax.papers import PAPERS, all_companions
 
 UA = {"User-Agent": "learn-jax-course link checker"}
 
@@ -49,8 +49,16 @@ def main() -> int:
             ok = code in (403, 418)  # publisher bot-blocking: the DOI resolved to a real page
             bad += not ok
             print(f"{'ok?' if ok else 'BAD'} {code or type(ex).__name__} {url[:70]}  ({p.title[:40]})")
-    videos = {v.url: v for series in COMPANIONS.values() for lectures in series.values() for v in lectures}
+    videos = {v.url: v for n in range(40) for lectures in all_companions(n).values() for v in lectures}
     for url, v in videos.items():
+        if "youtube.com" not in url:                         # written chapters / repos: must resolve
+            try:
+                code = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).status
+                print(f"ok  page  {code} {url[:70]}")
+            except Exception as ex:  # noqa: BLE001
+                bad += 1
+                print(f"BAD page  {getattr(ex, 'code', type(ex).__name__)} {url[:70]}")
+            continue
         try:
             o = "https://www.youtube.com/oembed?format=json&url=" + url
             title = json.loads(urllib.request.urlopen(urllib.request.Request(o, headers=UA), timeout=30).read())["title"]
@@ -59,7 +67,7 @@ def main() -> int:
             bad += 1
             print(f"BAD video {url[-11:]}  {type(ex).__name__}  ({v.title[:50]})")
     n = len(papers) + len(videos)
-    print(f"\n{len(papers)} paper links + {len(videos)} videos = {n}, {bad} problems")
+    print(f"\n{len(papers)} paper links + {len(videos)} companion lectures/readings = {n}, {bad} problems")
     return 1 if bad else 0
 
 

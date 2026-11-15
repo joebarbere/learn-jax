@@ -49,3 +49,33 @@ def fit(loss_fn, params, data, steps: int, lr: float):
     for _ in range(steps):
         params = step(params)
     return params
+
+
+NS_COEFFS = (3.4445, -4.775, 2.0315)
+
+
+def newton_schulz(G, steps: int = 5, coeffs=NS_COEFFS, eps: float = 1e-7):
+    a, b, c = coeffs
+    X = G / (jnp.linalg.norm(G) + eps)
+    transposed = G.shape[0] > G.shape[1]
+    if transposed:
+        X = X.T
+    for _ in range(steps):
+        A = X @ X.T
+        X = a * X + (b * A + c * (A @ A)) @ X
+    return X.T if transposed else X
+
+
+def muon_step(param, grad, momentum, lr: float, beta: float = 0.95, nesterov: bool = True,
+              eps: float = 1e-8):
+    mu, t = momentum
+    mu = beta * mu + (1 - beta) * grad
+    t = t + 1
+    if nesterov:
+        m_hat = beta * mu / (1 - beta ** (t + 1)) + (1 - beta) * grad / (1 - beta**t)
+    else:
+        m_hat = mu / (1 - beta**t)
+    update = newton_schulz(m_hat, eps=eps)
+    fan_in, fan_out = param.shape
+    scale = math.sqrt(max(1.0, fan_out / fan_in))
+    return param - lr * scale * update, (mu, t)

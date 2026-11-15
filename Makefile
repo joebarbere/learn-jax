@@ -65,6 +65,39 @@ llama-down: ## Stop the llama.cpp server
 llama-bench: ## Benchmark models x backends (module 19), writes runs/19-local-serving/bench.json
 	python3 modules/19-local-serving/bench.py
 
+lms-build: ## Build the LM Studio (llmster) headless image (module 27)
+	containers/lmstudio.sh build
+
+lms-up: ## Start LM Studio headless on http://127.0.0.1:1234 [BACKEND=vulkan|rocm]
+	containers/lmstudio.sh start $(BACKEND)
+
+lms-down: ## Stop LM Studio
+	containers/lmstudio.sh stop
+
+export-models: ## Export your models (16, 20, 26) + SmolLM2 to HF and GGUF, verify, import into LM Studio
+	LEARNJAX_SOLUTIONS=1 $(RUN) python modules/27-lmstudio/export.py
+	IMAGE=localhost/learn-jax-torch $(RUN) python modules/27-lmstudio/verify_hf.py
+	modules/27-lmstudio/build_gguf.sh
+	modules/27-lmstudio/import_models.sh
+
+lms-bench: ## Same model four ways: JAX vs llama.cpp vs LM Studio Vulkan/ROCm (module 27)
+	modules/27-lmstudio/bench.sh
+
+PROFILE ?= gpu1
+aws-plan: ## Plan an AWS session (no cost): make aws-plan PROFILE=gpu1|gpu1-l40s|multihost|gpu4|trn
+	terraform -chdir=infra/aws init -input=false >/dev/null
+	terraform -chdir=infra/aws plan -input=false -var profile=$(PROFILE) -out=$(PROFILE).tfplan
+
+aws-howto: ## Print the owner-run commands for a paid AWS session (apply / run / destroy)
+	@echo "Review the plan from 'make aws-plan PROFILE=$(PROFILE)', then (this costs money):"
+	@echo "  terraform -chdir=infra/aws apply $(PROFILE).tfplan"
+	@echo "  infra/aws/run_remote.sh"
+	@echo "  terraform -chdir=infra/aws destroy -var profile=$(PROFILE)"
+	@echo "Instances also terminate themselves after max_minutes (default 120). See infra/aws/README.md."
+
+bench: ## Single-device benchmark on this machine (module 25 local column), writes runs/25-aws/
+	$(RUN) python modules/25-aws/bench_single.py
+
 papers: ## Check every paper link and regenerate docs/PAPERS.md
 	$(RUN) python tools/check_papers.py
 	$(RUN) python tools/gen_papers.py
@@ -76,4 +109,4 @@ links: ## Link the first JAX API mentions to the docs, then check every external
 lint: ## Ruff
 	$(RUN) ruff check learnjax modules
 
-.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers links lint llama-download llama-up llama-down llama-bench
+.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench

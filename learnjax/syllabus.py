@@ -10,6 +10,7 @@ PARTS = {
     6: "Performance & ROCm",
     7: "Scale & cloud",
     8: "Reasoning",
+    9: "Using your models",
 }
 
 MODULES = [
@@ -40,6 +41,7 @@ MODULES = [
     (24, "24-parallelism", "Parallelism and sharding", 7),
     (25, "25-aws", "JAX on AWS, and the capstone", 7),
     (26, "26-reasoning", "Reasoning models: inference scaling and RLVR with GRPO", 8),
+    (27, "27-lmstudio", "Your models in LM Studio: export, convert, serve", 9),
 ]
 
 

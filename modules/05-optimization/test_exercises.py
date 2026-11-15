@@ -94,3 +94,53 @@ def test_fit_recovers_line(impl):
     out = impl.fit(loss, {"w": jnp.array(0.0), "b": jnp.array(0.0)}, data, steps=300, lr=0.3)
     assert float(out["w"]) == pytest.approx(2.0, abs=1e-2)
     assert float(out["b"]) == pytest.approx(-1.0, abs=1e-2)
+
+
+def _polar(G):
+    u, _, vt = np.linalg.svd(np.asarray(G, np.float64), full_matrices=False)
+    return u @ vt
+
+
+@pytest.mark.parametrize("shape", [(64, 32), (32, 96), (48, 48)])
+def test_newton_schulz_orthogonalizes(impl, shape):
+    key = jax.random.key(sum(shape))
+    # a gradient-like matrix: a few dominant directions plus noise
+    k1, k2, k3 = jax.random.split(key, 3)
+    low = jax.random.normal(k1, (shape[0], 4)) @ jax.random.normal(k2, (4, shape[1]))
+    G = 5 * low + 0.3 * jax.random.normal(k3, shape)
+    X = np.asarray(impl.newton_schulz(G), np.float64)
+    assert X.shape == shape
+    # In G's own singular basis, X ≈ U·f(S)·Vᵀ: read off f(s_i) and check it lands near 1 for every
+    # direction that wasn't negligible to begin with (5 steps can't lift a ~0 singular value).
+    u, sg, vt = np.linalg.svd(np.asarray(G, np.float64), full_matrices=False)
+    f = np.diag(u.T @ X @ vt.T)
+    keep = sg / sg.max() > 1e-2
+    assert f[keep].min() > 0.6 and f[keep].max() < 1.25, f
+    assert np.linalg.svd(X, compute_uv=False).max() < 1.25
+    ref = _polar(G)
+    cos = (X * ref).sum() / (np.linalg.norm(X) * np.linalg.norm(ref))
+    assert cos > 0.9
+
+
+def test_newton_schulz_shrinks_spread(impl):
+    G = jnp.diag(jnp.array([100.0, 10.0, 1.0, 0.1])) @ jnp.eye(4, 6)
+    s_before = np.linalg.svd(np.asarray(G), compute_uv=False)
+    s_after = np.linalg.svd(np.asarray(impl.newton_schulz(G)), compute_uv=False)
+    assert s_before.max() / s_before.min() == pytest.approx(1000.0)
+    assert s_after.max() / s_after.min() < 10  # a 1000× spread collapsed
+
+
+@pytest.mark.parametrize("shape,nesterov", [((24, 40), True), ((40, 24), True), ((32, 32), False)])
+def test_muon_step_matches_optax(impl, shape, nesterov):
+    lr, beta = 0.02, 0.95
+    W = jax.random.normal(jax.random.key(1), shape) * 0.1
+    opt = optax.contrib.muon(learning_rate=lr, beta=beta, nesterov=nesterov)
+    p_ref, s_ref = {"w": W}, opt.init({"w": W})
+    p, mom = W, (jnp.zeros_like(W), 0)
+    for i in range(5):
+        g = jax.random.normal(jax.random.key(10 + i), shape)
+        u, s_ref = opt.update({"w": g}, s_ref, p_ref)
+        p_ref = optax.apply_updates(p_ref, u)
+        p, mom = impl.muon_step(p, g, mom, lr, beta, nesterov=nesterov)
+    np.testing.assert_allclose(np.asarray(p), np.asarray(p_ref["w"]), atol=2e-5)
+    assert int(mom[1]) == 5

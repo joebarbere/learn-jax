@@ -24,6 +24,9 @@ make help           # everything else
 
 `make build-torch` builds the PyTorch image used by the side-by-side notebooks (`make torch-lesson N=10`).
 
+Module 27 runs your own exported models in LM Studio, headless in a container: `make lms-build lms-up`, then
+`make export-models`.
+
 Module 19 runs a local coding model with llama.cpp: `make llama-download` (~12 GB of GGUF models), then
 `make llama-up` serves an OpenAI-compatible API on http://127.0.0.1:8080 (Vulkan by default;
 `BACKEND=rocm` also works). Lessons reach it automatically once it's up.
@@ -83,10 +86,12 @@ answers, unless you ask for the answer outright.
 | 22 | Profiling JAX on ROCm | ✅ |
 | 23 | Kernels: Pallas, HIP and fusion | ✅ |
 | **Part 7 — Scale & cloud** | | |
-| 24 | Parallelism and sharding (on simulated devices) | |
-| 25 | JAX on AWS, and the capstone: your own small LLM end to end | |
+| 24 | Parallelism and sharding (on simulated devices) | ✅ |
+| 25 | JAX on AWS, and the capstone: your own small LLM end to end | ✅ |
 | **Part 8 — Reasoning** | | |
-| 26 | Reasoning models: inference scaling and RLVR with GRPO | |
+| 26 | Reasoning models: inference scaling and RLVR with GRPO | ✅ |
+| **Part 9 — Using your models** | | |
+| 27 | Your models in LM Studio: export what you built and trained, convert to GGUF, serve and use | ✅ |
 
 ✅ = written and verified. The rest are being built in phases.
 
@@ -104,11 +109,21 @@ creators for videos, posts and docs. Most of all:
   **Grant Sanderson**, [3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks), and
   **Sebastian Raschka**, [Build a Reasoning Model (From Scratch)](https://magazine.sebastianraschka.com/p/building-reasoning-models).
   These are companion lectures, listed in each lesson and in [docs/PAPERS.md](docs/PAPERS.md).
+- **Further companion reading:** [Jaxformer](https://jaxformer.com/) by **Aditya Makkar, Divya Makkar and Chinmay
+  Jindal**; [How To Scale Your Model](https://jax-ml.github.io/scaling-book/) by **Jacob Austin, Sholto Douglas, Roy
+  Frostig, Anselm Levskaya et al.** (Google DeepMind); Hugging Face's
+  [Ultra-Scale Playbook](https://huggingface.co/spaces/nanotron/ultrascale-playbook); and **Andrej Karpathy**'s
+  [nanochat](https://github.com/karpathy/nanochat) (MIT), the blueprint for Module 25's capstone. Module 05's Muon
+  sidebar follows **Keller Jordan**'s [post](https://kellerjordan.github.io/posts/muon/).
 - **Saurabh Alone**, ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax).
   Its RoPE explanation and two real KV-cache bugs became Module 17's exercises.
 - **Models:** [SmolLM2](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) by Hugging Face (Apache-2.0)
   and [Qwen2.5-Coder](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF) by the Qwen Team (Apache-2.0),
-  served with [llama.cpp](https://github.com/ggml-org/llama.cpp) by ggml-org (MIT).
+  served with [llama.cpp](https://github.com/ggml-org/llama.cpp) by ggml-org (MIT);
+  [Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) by the Qwen Team (Apache-2.0) for
+  Module 27's tool-calling demo.
+- **[LM Studio](https://lmstudio.ai/)** by Element Labs (Module 27), free for personal and internal business use
+  under its [app terms](https://lmstudio.ai/app-terms). The course fetches it only inside a container build.
 - **Data:** [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) by Zalando Research (MIT);
   [tiny Shakespeare](https://github.com/karpathy/char-rnn) from Andrej Karpathy's char-rnn; public-domain
   detective novels from Standard Ebooks and Project Gutenberg, via deepseek-v3-jax;

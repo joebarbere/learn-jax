@@ -30,7 +30,8 @@ def _(mo):
     **You will:** see a loss as a landscape · watch gradient descent converge, oscillate and diverge as you
     move one slider · learn why long narrow valleys are slow · derive momentum, RMSProp and Adam and race
     them · see why minibatch gradients are noisy · plot the exact learning-rate schedule from
-    deepseek-v3-jax · clip gradients · understand AdamW's weight decay · map all of it onto `optax`.
+    deepseek-v3-jax · clip gradients · understand AdamW's weight decay · map all of it onto `optax` · and, in an
+    advanced sidebar, build Muon — the matrix-aware optimizer behind nanochat.
 
     Module 03 gave you gradients. This module is about what to *do* with them.
     """)
@@ -601,6 +602,237 @@ def _(ex, jax, jnp, lj, mo, np, optax, plt):
     _ax.set(title="cubic fit after 300 steps")
     _fig.tight_layout()
     mo.vstack([_fig, *_items])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## 11 · Advanced sidebar: Muon
+
+    Everything so far treats parameters as **bags of numbers**: Adam gives each element its own step
+    size. But a weight matrix $W$ is not a bag of numbers — it's a *linear map* (Module 02). **Muon**
+    (Keller Jordan, 2024, [Muon: An optimizer for hidden layers in neural networks](https://kellerjordan.github.io/posts/muon/))
+    takes that seriously, and it has since been scaled to LLM training (Liu, Su et al., Moonshot AI,
+    [Muon is Scalable for LLM Training](https://arxiv.org/abs/2502.16982), 2025). Andrej Karpathy's
+    [nanochat](https://github.com/karpathy/nanochat) trains its GPT with an "AdamW + Muon" optimizer.
+
+    **The idea.** A gradient matrix $G$ is usually dominated by a few directions: its singular values
+    $G = U S V^\top$ might span 1000×. An update along $G$ (or Adam's elementwise version of it) moves the
+    weights mostly along those few directions. Muon replaces the momentum-averaged gradient by its
+    **polar factor** $U V^\top$ — the same singular directions, but with *every singular value set to
+    1*. Every direction the gradient points to gets an equal-sized step; rare directions aren't drowned
+    out by the dominant ones.
+
+    **The trick.** An SVD per step would be slow. Instead, normalize $X = G/\lVert G\rVert_F$ (so all
+    singular values are in $[0, 1]$) and apply 5 steps of a quintic **Newton–Schulz** iteration,
+    $X \leftarrow aX + (bA + cA^2)X$ with $A = XX^\top$ and $(a, b, c) = (3.4445, -4.775, 2.0315)$.
+    Each step maps every singular value $s \mapsto as + bs^3 + cs^5$, which pushes small values up toward
+    1 fast. The coefficients are tuned to be *aggressive*: most values end in a band around 1 (≈0.7–1.2),
+    not exactly at 1, and the very smallest are lifted a long way but not all the way. That's fine for an
+    optimizer. It's **just matmuls**, so it's GPU-friendly and works
+    in bf16.
+
+    Implement `newton_schulz` in `exercises.py`; the plot below shows what it does to a realistic
+    gradient (a few strong directions plus noise).
+    """)
+    return
+
+
+@app.cell
+def _(ex, jax, jnp, lj, mo, np, plt):
+    _k1, _k2, _k3 = jax.random.split(jax.random.key(7), 3)
+    _G = (6 * jax.random.normal(_k1, (256, 8)) @ jax.random.normal(_k2, (8, 128))
+          + 0.5 * jax.random.normal(_k3, (256, 128)))
+    _s_before = np.linalg.svd(np.asarray(_G), compute_uv=False)
+    _ns = lj.attempt(ex.newton_schulz, _G)
+    _fig, _ax = plt.subplots(figsize=(7, 3.4))
+    _ax.semilogy(_s_before / _s_before.max(), label="gradient G (normalized)")
+    _ax.axhline(1.0, color="k", lw=0.8, ls=":", label="exact polar factor UVᵀ (all 1)")
+    _items = []
+    if _ns.ok:
+        _s_after = np.linalg.svd(np.asarray(_ns.value), compute_uv=False)
+        _ax.semilogy(_s_after, label="your newton_schulz(G), 5 steps")
+        _u, _, _vt = np.linalg.svd(np.asarray(_G, np.float64), full_matrices=False)
+        _X = np.asarray(_ns.value, np.float64)
+        _cos = float((_X * (_u @ _vt)).sum() / (np.linalg.norm(_X) * np.linalg.norm(_u @ _vt)))
+        # cost: 5 Newton–Schulz steps (matmuls) vs a full SVD, same 1024×1024 matrix on the GPU
+        _big = jax.random.normal(jax.random.key(1), (1024, 1024))
+        _t_ns = lj.timeit(jax.jit(ex.newton_schulz), _big)["median"]
+        _t_svd = lj.timeit(jax.jit(lambda g: jnp.linalg.svd(g, full_matrices=False)), _big, iters=3)["median"]
+        _items.append(mo.md(
+            f"Singular-value spread: **{_s_before.max() / _s_before.min():.0f}×** before → "
+            f"**{_s_after.max() / _s_after.min():.1f}×** after. Cosine similarity with the exact UVᵀ: "
+            f"**{_cos:.3f}**. On a 1024×1024 matrix: Newton–Schulz **{_t_ns * 1e3:.2f} ms** vs a full SVD "
+            f"**{_t_svd * 1e3:.1f} ms** (~{_t_svd / _t_ns:.0f}× slower) — and the SVD gives far more than "
+            f"Muon needs."))
+    else:
+        _items.append(_ns.view(mo))
+    _ax.set(xlabel="singular value index (largest first)", ylabel="singular value",
+            title="what Muon does to a gradient's spectrum")
+    _ax.legend(fontsize=8)
+    _fig.tight_layout()
+    mo.vstack([_fig, *_items])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ### The Muon update, and where to use it
+
+    For a 2-D weight $W$ of shape (fan_in, fan_out) — the `x @ W` layout used in this course:
+
+    1. momentum: $\mu \leftarrow \beta\mu + (1-\beta)g$ ($\beta = 0.95$), bias-corrected and with a
+       Nesterov look-ahead, exactly as in Section 4;
+    2. orthogonalize: $O = \text{newton\_schulz}(\hat\mu)$;
+    3. scale and step: $W \leftarrow W - \eta \cdot \sqrt{\max(1, \text{fan\_out}/\text{fan\_in})} \cdot O$.
+
+    **Scaling convention.** Because $O$'s singular values are all ≈1, the update's size depends only on
+    the matrix shape. We implement **optax's default "width transfer" scaling**,
+    $\sqrt{\max(1, \text{fan\_out}/\text{fan\_in})}$ — the same rule as Keller Jordan's
+    $\max(1, \text{rows}/\text{cols})^{0.5}$ for PyTorch's (out, in) layout. Moonshot AI's paper instead
+    uses $0.2\sqrt{\max(\text{fan\_in}, \text{fan\_out})}$ to match AdamW's update RMS, so AdamW
+    learning rates transfer (optax: `consistent_rms=0.2`).
+
+    **Only hidden 2-D weights.** Muon is defined for matrices. Biases and norm gains are vectors, and
+    the embedding table and output head behave differently (their rows are looked up, not mixed), so
+    those keep **AdamW** — exactly the split nanochat uses. `optax.contrib.muon` applies Muon to every
+    2-D parameter by default; `muon_weight_dimension_numbers` picks which ones.
+
+    Implement `muon_step` (state = `(mu, t)`, like your `adam_step`). It should match
+    `optax.contrib.muon` to float precision.
+    """)
+    return
+
+
+@app.cell
+def _(ex, jax, jnp, lj, mo, np, optax):
+    def _compare():
+        _W = jax.random.normal(jax.random.key(1), (48, 96)) * 0.1
+        _opt = optax.contrib.muon(learning_rate=0.02)
+        _pr, _sr = {"w": _W}, _opt.init({"w": _W})
+        _p, _m = _W, (jnp.zeros_like(_W), 0)
+        for _i in range(5):
+            _g = jax.random.normal(jax.random.key(20 + _i), _W.shape)
+            _u, _sr = _opt.update({"w": _g}, _sr, _pr)
+            _pr = optax.apply_updates(_pr, _u)
+            _p, _m = ex.muon_step(_p, _g, _m, 0.02)
+        return float(np.abs(np.asarray(_p) - np.asarray(_pr["w"])).max())
+
+    _cmp = lj.attempt(_compare)
+    (mo.md(f"Your `muon_step` vs `optax.contrib.muon` after 5 steps on a 48×96 matrix: max |Δ| = "
+           f"**{_cmp.value:.1e}**") if _cmp.ok else _cmp.view(mo))
+    return
+
+
+@app.cell
+def _(ex, jax, jnp, lj, mo, np, optax, plt):
+    from learnjax.data import fashion_mnist as _fm
+    from optax.contrib import MuonDimensionNumbers as _MDN
+
+    _d = _fm()
+    _xtr = jnp.asarray(_d["train_images"].reshape(-1, 784), jnp.float32) / 255.0
+    _ytr = jnp.asarray(_d["train_labels"])
+    _xte = jnp.asarray(_d["test_images"].reshape(-1, 784), jnp.float32) / 255.0
+    _yte = jnp.asarray(_d["test_labels"])
+    _sizes = [784, 256, 256, 256, 10]
+    _hidden = ("w1", "w2")            # the hidden-to-hidden matrices get Muon; everything else AdamW
+    _steps, _bs = 400, 256
+    _idx = jax.random.randint(jax.random.key(3), (_steps, _bs), 0, _xtr.shape[0])
+
+    def _init():
+        _ks = jax.random.split(jax.random.key(0), 4)
+        _p = {}
+        for _i, (_a, _b) in enumerate(zip(_sizes[:-1], _sizes[1:])):
+            _p[f"w{_i}"] = jax.random.normal(_ks[_i], (_a, _b)) * jnp.sqrt(2.0 / _a)
+            _p[f"b{_i}"] = jnp.zeros(_b)
+        return _p
+
+    def _logits(p, x):
+        for _i in range(3):
+            x = jax.nn.relu(x @ p[f"w{_i}"] + p[f"b{_i}"])
+        return x @ p["w3"] + p["b3"]
+
+    def _loss(p, x, y):
+        return -jnp.mean(jnp.take_along_axis(jax.nn.log_softmax(_logits(p, x)), y[:, None], 1))
+
+    def _run(make_step, state0):
+        @jax.jit
+        def _train(p, s, idx, xtr, ytr):
+            def _body(c, i):
+                _l, _g = jax.value_and_grad(_loss)(c[0], xtr[i], ytr[i])
+                return make_step(c[0], _g, c[1]), _l
+            (p, s), _ls = jax.lax.scan(_body, (p, s), idx)
+            return p, _ls
+        _p, _ls = _train(_init(), state0, _idx, _xtr, _ytr)
+        _acc = float(jnp.mean(jnp.argmax(_logits(_p, _xte), -1) == _yte))
+        return np.asarray(_ls), _acc
+
+    def _adamw(lr):
+        _o = optax.adamw(lr)
+        def _step(p, g, s):
+            _u, s = _o.update(g, s, p)
+            return optax.apply_updates(p, _u), s
+        return _run(_step, _o.init(_init()))
+
+    def _optax_muon(lr, adam_lr=1e-3):
+        _dims = {k: (_MDN() if k in _hidden else None) for k in _init()}
+        _o = optax.contrib.muon(learning_rate=lr, adam_learning_rate=adam_lr, muon_weight_dimension_numbers=_dims)
+        def _step(p, g, s):
+            _u, s = _o.update(g, s, p)
+            return optax.apply_updates(p, _u), s
+        return _run(_step, _o.init(_init()))
+
+    def _your_muon(lr, adam_lr=1e-3):
+        _p0 = _init()
+        _rest = {k: v for k, v in _p0.items() if k not in _hidden}
+        _o = optax.adamw(adam_lr, weight_decay=0.0, nesterov=True)   # the AdamW settings optax's muon uses
+        _s0 = (_o.init(_rest), {k: (jnp.zeros_like(_p0[k]), jnp.int32(0)) for k in _hidden})
+        def _step(p, g, s):
+            _ra, _ms = s
+            _u, _ra = _o.update({k: g[k] for k in _rest}, _ra, {k: p[k] for k in _rest})
+            _new = optax.apply_updates({k: p[k] for k in _rest}, _u)
+            _ms2 = {}
+            for k in _hidden:
+                _new[k], _ms2[k] = ex.muon_step(p[k], g[k], _ms[k], lr)
+            return _new, (_ra, _ms2)
+        return _run(_step, _s0)
+
+    def _best(fn, lrs):
+        _res = {lr: fn(lr) for lr in lrs}
+        _lr = min(_res, key=lambda k: _res[k][0][-50:].mean())
+        return _lr, _res[_lr]
+
+    _runs = {"AdamW": _best(_adamw, [1e-3, 3e-3]),
+             "optax.contrib.muon": _best(_optax_muon, [0.02, 0.05])}
+    _mine = lj.attempt(_best, _your_muon, [0.02, 0.05])
+    if _mine.ok:
+        _runs["your Muon"] = _mine.value
+
+    _fig, _ax = plt.subplots(figsize=(7, 3.4))
+    _rows = ["| optimizer | best LR (of 2) | train loss, last 50 steps | test accuracy |", "|---|---|---|---|"]
+    for _name, (_lr, (_ls, _acc)) in _runs.items():
+        _smooth = np.convolve(_ls, np.ones(20) / 20, mode="valid")
+        _ax.plot(_smooth, label=f"{_name} (lr {_lr:g})", ls="--" if _name == "your Muon" else "-")
+        _rows.append(f"| {_name} | {_lr:g} | {_ls[-50:].mean():.3f} | {100 * _acc:.1f}% |")
+    _ax.set(xlabel="step (batch 256)", ylabel="train loss (20-step mean)",
+            title="4-layer MLP on Fashion-MNIST, 400 steps", ylim=(0.2, 1.2))
+    _ax.legend(fontsize=8)
+    _fig.tight_layout()
+    _gap = _runs["optax.contrib.muon"][1][0][-50:].mean() - _runs["AdamW"][1][0][-50:].mean()
+    _verdict = ("Muon finished **ahead** of AdamW here" if _gap < -0.01 else
+                "Muon finished **behind** AdamW here" if _gap > 0.01 else
+                "Muon and AdamW finished **about even** here")
+    _items = [_fig, mo.md("\n".join(_rows)),
+              mo.md(f"{_verdict} (train-loss gap {_gap:+.3f}). Only two of this model's four matrices "
+                    "are hidden-to-hidden, it's a tiny model, and each optimizer got just a two-point "
+                    "learning-rate sweep — so read this as *it works and it's competitive*, not as a "
+                    "ranking. Muon's reported wins are on transformers with many large hidden matrices, "
+                    "at scale.")]
+    if not _mine.ok:
+        _items.append(_mine.view(mo))
+    mo.vstack(_items)
     return
 
 

@@ -74,3 +74,41 @@ def fit(loss_fn, params, data, steps: int, lr: float):
     and return the final params. `loss_fn(params, data)` returns a scalar.
     Tip: jax.jit the step so the loop is fast."""
     raise NotImplementedError
+
+
+# --- Advanced sidebar: Muon (Section 11) -------------------------------------------------------------
+
+NS_COEFFS = (3.4445, -4.775, 2.0315)  # Keller Jordan's quintic Newton–Schulz coefficients (a, b, c)
+
+
+def newton_schulz(G, steps: int = 5, coeffs=NS_COEFFS, eps: float = 1e-7):
+    """Approximate the polar factor U·Vᵀ of a 2-D matrix G (from its SVD G = U·S·Vᵀ) using only matmuls.
+
+    1. X = G / (‖G‖_F + eps)   — Frobenius normalization puts every singular value in [0, 1].
+    2. If G has more rows than columns, work on X.T (so X·Xᵀ is the *small* Gram matrix) and transpose
+       the result back at the end.
+    3. Repeat `steps` times, with (a, b, c) = coeffs and A = X·Xᵀ:
+           X ← a·X + (b·A + c·A·A)·X
+    The result has the same shape as G and singular values pushed into a band around 1 (≈0.7–1.2 with
+    these coefficients — deliberately not exactly 1; that's what makes 5 steps enough).
+    """
+    raise NotImplementedError
+
+
+def muon_step(param, grad, momentum, lr: float, beta: float = 0.95, nesterov: bool = True,
+              eps: float = 1e-8):
+    """One Muon update of a single 2-D weight `param` of shape (fan_in, fan_out) — the x @ W layout used
+    throughout this course. Matches `optax.contrib.muon` (its default 'frobenius' preconditioning and
+    width scaling) exactly.
+
+    `momentum` is the state tuple (mu, t): the momentum buffer (zeros like `param` at the start) and the
+    number of steps taken so far (0 at the start). Return (new_param, (new_mu, new_t)).
+
+        mu ← beta·mu + (1 − beta)·grad;  t ← t + 1
+        nesterov:  m̂ = beta·mu/(1 − beta^(t+1)) + (1 − beta)·grad/(1 − beta^t)
+        otherwise: m̂ = mu/(1 − beta^t)                      (bias-corrected, like Adam's m)
+        O = newton_schulz(m̂, eps=eps)
+        scale = sqrt(max(1, fan_out / fan_in))              (optax's "width transfer" scaling)
+        param ← param − lr · scale · O
+    """
+    raise NotImplementedError

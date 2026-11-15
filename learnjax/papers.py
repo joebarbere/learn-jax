@@ -70,7 +70,9 @@ PAPERS: dict[int, list[Paper]] = {
         Paper("SGDR: Stochastic Gradient Descent with Warm Restarts", "Loshchilov, Hutter", 2016, arxiv("1608.03983"),
               "Cosine learning-rate schedules."),
         Paper("On the difficulty of training Recurrent Neural Networks", "Pascanu, Mikolov, Bengio", 2012,
-              arxiv("1211.5063"), "Exploding gradients and gradient-norm clipping.")],
+              arxiv("1211.5063"), "Exploding gradients and gradient-norm clipping."),
+        Paper("Muon is Scalable for LLM Training", "Liu, Su et al. (Moonshot AI)", 2025, arxiv("2502.16982"),
+              "Muon (orthogonalized momentum) at LLM scale: weight decay and update-RMS matching make it work.")],
     6: [JAX_PAPER,
         Paper("Operator Fusion in XLA: Analysis and Evaluation", "Snider, Liang", 2023, arxiv("2301.13062"),
               "What XLA fuses, and why fusion is most of the speedup you measured.")],
@@ -224,6 +226,11 @@ PAPERS: dict[int, list[Paper]] = {
                arxiv("2501.12948"), "RL with verifiable rewards produces long reasoning; R1-Zero, distillation."),
          Paper("s1: Simple test-time scaling", "Muennighoff et al.", 2025, arxiv("2501.19393"),
                "Budget forcing: controlling how long a model thinks at inference time.")],
+    27: [LORA,
+         Paper("Fast Inference from Transformers via Speculative Decoding", "Leviathan, Kalman, Matias", 2022,
+               arxiv("2211.17192"), "The draft-and-verify scheme behind LM Studio's speculative decoding."),
+         Paper("GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers", "Frantar et al.",
+               2022, arxiv("2210.17323"), "Why 4-bit weights lose so little: the idea behind GGUF's k-quants.")],
     25: [CHINCHILLA,
          Paper("Efficiently Scaling Transformer Inference", "Pope et al.", 2022, arxiv("2211.05102"),
                "Cost per token for serving, the number to compare across hardware."),
@@ -246,9 +253,50 @@ def _yt(v: str) -> str:
 ZTH = "Andrej Karpathy, *Neural Networks: Zero to Hero* (PyTorch, code-along)"
 B3 = "Grant Sanderson, 3Blue1Brown (visual intuition, no code)"
 RASCHKA = "Sebastian Raschka, *Build a Reasoning Model (From Scratch)* (PyTorch, code-along)"
+JAXFORMER = "Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer* (written guide, JAX on TPU)"
+SCALING = "Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model* (written guide, JAX)"
+ULTRA = "Hugging Face nanotron team, *The Ultra-Scale Playbook* (written guide, PyTorch)"
+NANOCHAT = "Andrej Karpathy, *nanochat* (MIT-licensed repo, a full ChatGPT-style pipeline in PyTorch)"
 SERIES = {ZTH: "https://karpathy.ai/zero-to-hero.html",
+          JAXFORMER: "https://jaxformer.com/",
+          SCALING: "https://jax-ml.github.io/scaling-book/",
+          ULTRA: "https://huggingface.co/spaces/nanotron/ultrascale-playbook",
+          NANOCHAT: "https://github.com/karpathy/nanochat",
           B3: "https://www.3blue1brown.com/?topic=neural-networks",
           RASCHKA: "https://magazine.sebastianraschka.com/p/building-reasoning-models"}
+
+
+def _r(url: str, title: str, why: str) -> Lecture:
+    """A written chapter or repo page (not a video)."""
+    return Lecture(title, url, "", why)
+
+
+JF, SB = "https://jaxformer.com/", "https://jax-ml.github.io/scaling-book/"
+NC = "https://github.com/karpathy/nanochat"
+EXTRA: dict[int, dict[str, list[Lecture]]] = {
+    13: {JAXFORMER: [_r(JF + "tokenization/", "Part 1: Tokenization at scale", "Tokenizing FineWeb-EDU with multiprocessing and Ray.")]},
+    16: {NANOCHAT: [_r(NC, "nanochat", "nanoGPT's successor: the same GPT, plus tokenizer, SFT, RL, eval and a chat engine.")]},
+    17: {JAXFORMER: [_r(JF + "base_model/", "Part 2: How to write the base model", "RMSNorm, RoPE and multi-latent attention in JAX."),
+                     _r(JF + "moe/", "Part 6: Implementing mixture-of-experts layers", "Sigmoid top-k routing, shared experts, load balancing.")]},
+    18: {SCALING: [_r(SB + "inference", "All about Transformer inference", "Prefill vs decode, KV-cache costs, batching, latency."),
+                   _r(SB + "applied-inference", "Serving LLaMA 3-70B", "The inference math applied to a real model.")]},
+    21: {NANOCHAT: [_r(NC, "nanochat's evaluation (base_eval, chat_eval)", "CORE score, bits per byte, ARC, GSM8K, MMLU in one harness.")]},
+    22: {SCALING: [_r(SB + "roofline", "All about rooflines", "Compute vs memory vs communication bounds, worked out."),
+                   _r(SB + "profiling", "How to profile TPU programs", "Reading JAX profiler traces (TPU-focused, same ideas on GPU).")]},
+    23: {SCALING: [_r(SB + "gpus", "How to think about GPUs", "SMs, memory hierarchy and collectives from the scaling-book view.")]},
+    24: {JAXFORMER: [_r(JF + "sharded/", "Part 3: Inside the sharded model", "Mesh, shard_map, FSDP, GPipe pipelines and tensor parallelism.")],
+         SCALING: [_r(SB + "sharding", "Sharded matrices and how to multiply them", "Which collective each sharded matmul needs."),
+                   _r(SB + "jax-stuff", "Programming TPUs in JAX", "Explicit sharding and shard_map from the JAX side.")],
+         ULTRA: [_r("https://huggingface.co/spaces/nanotron/ultrascale-playbook", "The Ultra-Scale Playbook",
+                    "DP, ZeRO/FSDP, TP, PP, context and expert parallelism, measured on GPU clusters.")]},
+    25: {JAXFORMER: [_r(JF + "dataset/", "Part 4: Dataset class and config files", "Sharded data placement."),
+                     _r(JF + "distributed_training/", "Part 5: Distributed training", "jax.distributed, Orbax checkpoints, the train loop."),
+                     _r(JF + "training/", "Part 7: Final run and training results", "A 949M-param MoE on 32 TPU-v4 chips, multi-host.")],
+         SCALING: [_r(SB + "applied-training", "Training LLaMA 3 on TPUs", "Choosing a parallelism layout for a real run.")],
+         NANOCHAT: [_r(NC, "nanochat", "The capstone's blueprint: every stage of a small chat model, end to end."),
+                    _r(NC + "/discussions/481", "Beating GPT-2 for <<$100: the nanochat journey", "Karpathy's write-up of what made it fast.")]},
+    26: {NANOCHAT: [_r(NC, "nanochat's chat_rl stage", "RL on GSM8K after SFT, the same idea as this module at larger scale.")]},
+}
 
 
 def _b3(v: str, title: str, why: str) -> Lecture:
@@ -309,10 +357,18 @@ COMPANIONS: dict[int, dict[str, list[Lecture]]] = {
 }
 
 
+def all_companions(module: int) -> dict[str, list[Lecture]]:
+    out = {k: list(v) for k, v in COMPANIONS.get(module, {}).items()}
+    for k, v in EXTRA.get(module, {}).items():
+        out.setdefault(k, []).extend(v)
+    return out
+
+
 def companions_md(module: int) -> list[str]:
     lines = []
-    for series, lectures in COMPANIONS.get(module, {}).items():
-        lines += ["", f"**Companion lectures** — [{series.split(' (')[0]}]({SERIES[series]}) ({series.split(' (')[1]}", ""]
+    for series, lectures in all_companions(module).items():
+        kind = "Companion reading" if series in (JAXFORMER, SCALING, ULTRA, NANOCHAT) else "Companion lectures"
+        lines += ["", f"**{kind}** — [{series.rsplit(' (', 1)[0]}]({SERIES[series]}) ({series.rsplit(' (', 1)[1]}", ""]
         lines += [f"* [{v.title}]({v.url}){f' ({v.length})' if v.length else ''}. {v.why}" for v in lectures]
     return lines
 
