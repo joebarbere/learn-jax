@@ -35,7 +35,7 @@ It creates, in us-east-1 (the only region the `aws-cloud` seatbelt allows):
 ## Profiles and cost per session
 
 On-demand us-east-1 prices from instances.vantage.sh, 2026-11-14. A session is roughly 45–75 minutes:
-boot, pip install, first compiles, the benchmarks, then destroy. EBS adds about $0.02/h.
+boot, installing JAX with uv, first compiles, the benchmarks, then destroy. EBS adds about $0.02/h.
 
 | `profile` | Instances | Teaches | $/hour | Typical session |
 |---|---|---|---|---|

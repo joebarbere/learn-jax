@@ -44,8 +44,8 @@ GLOSSARY = _load("glossary", ROOT / "learnjax" / "glossary.py").TERMS if (ROOT /
 
 # ---------------------------------------------------------------------------------------------- markdown + math
 
-_CODE = re.compile(r"(```.*?```|`[^`\n]+`)", re.S)
-_MATH = re.compile(r"(\$\$.+?\$\$|(?<![\\$\w])\$(?=[^\s$])(?:[^$\n]|\n(?!\n))+?(?<=[^\s\\])\$(?![\w$]))", re.S)
+_CODE = re.compile(r"(```.*?```|`[^`\n]+`)", re.DOTALL)
+_MATH = re.compile(r"(\$\$.+?\$\$|(?<![\\$\w])\$(?=[^\s$])(?:[^$\n]|\n(?!\n))+?(?<=[^\s\\])\$(?![\w$]))", re.DOTALL)
 
 
 def _math_html(src: str) -> str:
@@ -266,7 +266,7 @@ def term_patterns():
         names = sorted({t.term, *t.aliases}, key=len, reverse=True)
         alt = "|".join(re.escape(n).replace(r"\ ", r"[\s-]+").replace(r"\-", r"[\s-]?") for n in names if len(n) > 2)
         if alt:
-            pats.append((i, re.compile(rf"(?<![\w-])(?:{alt})(?![\w-])", re.I)))
+            pats.append((i, re.compile(rf"(?<![\w-])(?:{alt})(?![\w-])", re.IGNORECASE)))
     return pats
 
 
@@ -366,7 +366,7 @@ def build_theme(theme: str):
 
 
 def _drop_h1(h: str) -> str:
-    return re.sub(r"<h1[^>]*>.*?</h1>", "", h, count=1, flags=re.S)
+    return re.sub(r"<h1[^>]*>.*?</h1>", "", h, count=1, flags=re.DOTALL)
 
 
 def glossary_html() -> str:
@@ -387,7 +387,7 @@ def glossary_html() -> str:
 
 def md_inline(s: str) -> str:
     h = md_to_html(s)
-    return re.sub(r"^<p>(.*)</p>$", r"\1", h.strip(), flags=re.S)
+    return re.sub(r"^<p>(.*)</p>$", r"\1", h.strip(), flags=re.DOTALL)
 
 
 def index_html(hits) -> str:

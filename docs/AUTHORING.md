@@ -77,6 +77,14 @@ Read the `lesson_outputs.py` text yourself: numbers sensible, prose matches what
   `with jax.debug_nans(True):` form.
 - Flax 0.12: read parameters as `module.kernel[...]`, not `.value` (deprecated, prints a warning).
 
+## Dependencies
+- Add a package to `containers/requirements.txt` (or `-torch.txt` / `-book.txt`) with an exact pin, run
+  `make lock`, then rebuild (`make build`). Commit both the `.txt` and the regenerated `.lock`.
+- `containers/lock.sh` resolves with uv *inside the base image*, holding every preinstalled package at its
+  version (only packages the `.txt` names may move, and the lock says so). Images install the lock with
+  `uv pip install --no-deps` and fail the build on `uv pip check` errors.
+- For a reproducible re-lock, pass a date: `UV_EXCLUDE_NEWER=2026-11-15T00:00:00Z make lock`.
+
 ## Phase 3+ additions
 - `learnjax.data.detective_corpus()` → the deepseek-v3-jax v1.0 tokens (train ~21.7M / val ~0.30M,
   uint16) + its 8,192-vocab BPE `tokenizer_path`. GPT-2's tokenizer: `tokenizers.Tokenizer.from_pretrained("gpt2")`.

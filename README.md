@@ -22,6 +22,12 @@ make progress       # the syllabus, with ✓ for modules whose exercises pass
 make help           # everything else
 ```
 
+Python packages are installed with [uv](https://docs.astral.sh/uv/) from lockfiles
+(`containers/requirements*.lock`). Every package each image adds is pinned there, resolved inside the ROCm
+base image so the base's JAX and ROCm wheels never move. To change a dependency, edit
+`containers/requirements*.txt`, then `make lock` and `make build`. On the host you only need uv if you want
+`make glossary` or ruff in your editor (`uv sync`). Nothing ML-related is installed there.
+
 `make build-torch` builds the PyTorch image used by the side-by-side notebooks (`make torch-lesson N=10`).
 
 Module 27 runs your own exported models in LM Studio, headless in a container: `make lms-build lms-up`, then

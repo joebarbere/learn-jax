@@ -3,6 +3,14 @@ name = "learnjax"
 version = "0.1.0"
 description = "A hands-on course in deep learning, JAX, LLMs and ROCm, run in a container on an AMD GPU."
 requires-python = ">=3.12"
+# No runtime dependencies on the host: JAX, ROCm and everything ML run in the containers
+# (containers/requirements*.txt, locked by `make lock`). The dev group is for host-side editing only:
+#   uv sync            # .venv with ruff, for your editor
+#   uv run ruff check learnjax modules tools    # what `make lint` runs in the container
+dependencies = []
+
+[dependency-groups]
+dev = ["ruff==0.17.5"]   # same version as the course image
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib -q"
@@ -14,3 +22,6 @@ filterwarnings = ["ignore::DeprecationWarning"]
 line-length = 110
 target-version = "py312"
 extend-exclude = ["modules/*/lesson.py", "modules/*/torch_compare.py"]  # marimo-generated cell structure
+
+[tool.ruff.lint.isort]
+known-third-party = ["markdown"]  # the PyPI package, not the gitignored markdown/ output folder

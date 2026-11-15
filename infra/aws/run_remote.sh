@@ -11,8 +11,10 @@
 # downloads the JSON into runs/25-aws/ for the Module 25 lesson to compare with your RX 7600 XT.
 #
 # JAX on each stack (sources):
-#   NVIDIA: pip install "jax[cuda13]" — JAX installation docs, https://docs.jax.dev/en/latest/installation.html
-#           (CUDA 13 wheels bundle the CUDA libraries; the DLAMI provides the NVIDIA driver)
+#   NVIDIA: "jax[cuda13]" — JAX installation docs, https://docs.jax.dev/en/latest/installation.html
+#           (CUDA 13 wheels bundle the CUDA libraries; the DLAMI provides the NVIDIA driver), installed into
+#           a venv with uv (https://docs.astral.sh/uv/): a pinned release from GitHub, checked against its
+#           published SHA-256. Much faster than pip, which matters at $/hour.
 #   Neuron: the Neuron JAX DLAMI's venv, `source /opt/aws_neuronx_venv_jax/bin/activate` — AWS Neuron docs,
 #           https://awsdocs-neuron.readthedocs-hosted.com/en/latest/setup/jax/dlami.html (JAX NeuronX is beta)
 set -euo pipefail
@@ -20,6 +22,7 @@ here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
 export AWS_PROFILE="${AWS_PROFILE:-joebarbere-admin}" AWS_REGION="${AWS_REGION:-us-east-1}" AWS_PAGER=""
 JAX_VERSION="${JAX_VERSION:-0.11.1}"   # match the course container
+UV_VERSION="${UV_VERSION:-0.13.6}"     # match containers/lock.sh
 TIMEOUT_S="${TIMEOUT_S:-3000}"
 
 tf() { terraform -chdir="$here" output -raw "$1"; }
@@ -51,10 +54,16 @@ if [ "\$LEARNJAX_STACK" = neuron ]; then
   source /opt/aws_neuronx_venv_jax/bin/activate
   pip install -q optax safetensors tokenizers huggingface_hub
 else
-  [ -d /opt/learn-jax/venv ] || python3 -m venv /opt/learn-jax/venv
+  if [ ! -x /opt/learn-jax/bin/uv ]; then
+    rel=https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-x86_64-unknown-linux-gnu.tar.gz
+    curl -fsSL -o /tmp/uv.tgz "\$rel" && curl -fsSL -o /tmp/uv.tgz.sha256 "\$rel.sha256"
+    echo "\$(cut -d' ' -f1 /tmp/uv.tgz.sha256)  /tmp/uv.tgz" | sha256sum -c --quiet
+    mkdir -p /opt/learn-jax/bin && tar -xzf /tmp/uv.tgz -C /opt/learn-jax/bin --strip-components=1
+  fi
+  export UV_CACHE_DIR=/opt/learn-jax/uv-cache
+  [ -d /opt/learn-jax/venv ] || /opt/learn-jax/bin/uv venv --quiet --python python3 /opt/learn-jax/venv
   source /opt/learn-jax/venv/bin/activate
-  pip install -q -U pip
-  pip install -q "jax[cuda13]==$JAX_VERSION" optax==0.2.9 safetensors tokenizers huggingface_hub
+  /opt/learn-jax/bin/uv pip install --quiet "jax[cuda13]==$JAX_VERSION" optax==0.2.9 safetensors tokenizers huggingface_hub
 fi
 python -c "import jax; print('JAX', jax.__version__, jax.devices())"
 cd modules/25-aws && $bench

@@ -10,7 +10,6 @@ import ast
 import re
 import sys
 
-
 _JOIN = re.compile(r"""(["'])\\n\1\s*\.join|chr\(10\)\s*\.join""")
 
 
@@ -21,14 +20,15 @@ def multiline(src, fn, value) -> bool:
     if fn is None or not isinstance(value, ast.Name):
         return False
     for n in ast.walk(fn):
-        if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == value.id for t in n.targets):
-            if _JOIN.search(ast.get_source_segment(src, n.value) or ""):
-                return True
+        if (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == value.id for t in n.targets)
+                and _JOIN.search(ast.get_source_segment(src, n.value) or "")):
+            return True
     return False
 
 
 def candidates(path: str):
-    src = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as f:
+        src = f.read()
     tree = ast.parse(src)
     cell_of = {}
     for fn in ast.walk(tree):

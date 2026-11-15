@@ -1,9 +1,13 @@
 # learn-jax course image: JAX on ROCm for the RX 7600 XT (gfx1102), plus marimo and the course libraries.
 FROM docker.io/rocm/jax:rocm10.1.0_ubuntu24.04_py3.12_jax_release_0.11.1
 
-COPY requirements.txt /tmp/requirements.txt
-RUN python3 -c "import jax, jaxlib, numpy; print(f'jax=={jax.__version__}\njaxlib=={jaxlib.__version__}\nnumpy=={numpy.__version__}')" > /tmp/constraints.txt \
- && python3 -m pip install --no-cache-dir -r /tmp/requirements.txt -c /tmp/constraints.txt \
+# uv, pinned (keep in step with UV_VERSION in lock.sh)
+COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /usr/local/bin/uv
+# requirements.lock = every package this image adds, pinned (containers/lock.sh). --no-deps: nothing unlisted
+# is resolved, and the base image's JAX, ROCm plugin and rocm-sdk wheels can't move.
+COPY requirements.lock /tmp/requirements.lock
+RUN uv pip install --system --no-cache --no-deps -r /tmp/requirements.lock \
+ && uv pip check --system \
  && ln -sf "$(command -v python3)" /usr/local/bin/python
 
 # --- The three settings this GPU needs (see modules/00-environment) ---

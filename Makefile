@@ -13,6 +13,9 @@ help: ## Show this help
 build: ## Build the course image (JAX + ROCm + marimo)
 	podman build -t learn-jax -f containers/Containerfile containers
 
+lock: ## Re-resolve the images' pinned dependencies (containers/requirements*.lock) with uv, inside the base images
+	containers/lock.sh
+
 build-torch: ## Build the PyTorch side-by-side image
 	podman build -t learn-jax-torch -f containers/Containerfile.torch containers
 
@@ -56,8 +59,8 @@ site: ## Static HTML of every lesson (light + dark) into site/ (after make rende
 pdf: ## The book, "Arrays to Agents": site/arrays-to-agents.pdf and -dark.pdf (after make render)
 	$(BOOK) python tools/book/build.py --pdf
 
-glossary: ## Regenerate docs/GLOSSARY.md from learnjax/glossary.py
-	python3 tools/gen_glossary.py
+glossary: ## Regenerate docs/GLOSSARY.md from learnjax/glossary.py (on the host, with uv)
+	uv run --no-dev python tools/gen_glossary.py
 
 md: ## Export every lesson to Markdown (prose + code, no outputs) into markdown/
 	@mkdir -p markdown
@@ -148,6 +151,6 @@ links: ## Link the first JAX API mentions to the docs, then check every external
 	$(RUN) python tools/check_links.py
 
 lint: ## Ruff
-	$(RUN) ruff check learnjax modules
+	$(RUN) ruff check learnjax modules tools
 
-.PHONY: help build build-torch up url down lesson torch-lesson read md test progress check shell papers lineage links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary
+.PHONY: help build lock build-torch up url down lesson torch-lesson read md test progress check shell papers lineage links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary

@@ -13,3 +13,4 @@ infra/aws/terraform.tfvars
 .figs/
 markdown/
 site/
+.venv/

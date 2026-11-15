@@ -477,8 +477,8 @@ def _(BASE, ex, lj, lmclient, mo):
 @app.cell
 def _(mo):
     mo.md(r"""
-    LM Studio's own Python SDK, [`lmstudio`](https://lmstudio.ai/docs/python) (`pip install lmstudio`), wraps
-    the same server. It isn't installed in the course image (the lesson sticks to plain HTTP), but this is
+    LM Studio's own Python SDK, [`lmstudio`](https://lmstudio.ai/docs/python), wraps the same server. In your
+    own projects, add it with [uv](https://docs.astral.sh/uv/) (`uv add lmstudio`) or pip (`pip install lmstudio`). It isn't installed in the course image (the lesson sticks to plain HTTP), but this is
     what the call above looks like with it:
 
     ```python
