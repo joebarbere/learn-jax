@@ -23,14 +23,14 @@ def _(mo):
     mo.md(r"""
     # 03 · Derivatives and autodiff, built from scratch
 
-    **Goal:** understand what `jax.grad` actually computes and how, well enough that you could write it.
+    **Goal:** understand what [`jax.grad`](https://docs.jax.dev/en/latest/_autosummary/jax.grad.html#jax.grad) actually computes and how, well enough that you could write it.
     Training a neural network is "nudge every parameter in the direction that lowers the loss"; the
     gradient *is* that direction, and autodiff is how we get it for millions of parameters at once.
 
     **You will:** see a derivative as a slope · measure why finite differences are a poor substitute ·
     see a gradient as the direction of steepest ascent · walk the chain rule through a computational graph
     · build reverse-mode autodiff yourself (a `Value` class, micrograd-style) · learn why deep learning
-    uses *reverse* mode · tour `jax.grad`, `value_and_grad`, `jvp`, `vjp`, `jacobian` and `hessian`.
+    uses *reverse* mode · tour `jax.grad`, [`value_and_grad`](https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html#jax.value_and_grad), [`jvp`](https://docs.jax.dev/en/latest/_autosummary/jax.jvp.html#jax.jvp), [`vjp`](https://docs.jax.dev/en/latest/_autosummary/jax.vjp.html#jax.vjp), [`jacobian`](https://docs.jax.dev/en/latest/_autosummary/jax.jacobian.html#jax.jacobian) and [`hessian`](https://docs.jax.dev/en/latest/_autosummary/jax.hessian.html#jax.hessian).
     """)
     return
 
@@ -149,7 +149,7 @@ def _(mo):
 
     The arrows below are $\nabla f$ at each grid point for
     $f(x, y) = 0.5x^2 + 2y^2 + 0.5xy + \sin(2x)$. They are short where the surface is flat and long
-    where it is steep. (`jax.vmap` evaluates the gradient at all grid points at once; Module 07 covers it.)
+    where it is steep. ([`jax.vmap`](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html#jax.vmap) evaluates the gradient at all grid points at once; Module 07 covers it.)
     """)
     return
 
@@ -359,7 +359,7 @@ def _(mo):
     price: it must store intermediate values from the forward pass (activation memory, Module 11).
 
     Measured below on the GPU for $f(x) = \sum \tanh(Wx)$ with $x \in \mathbb{R}^n$: `jax.grad` (reverse)
-    vs `jax.jacfwd` (forward, n JVPs batched together).
+    vs [`jax.jacfwd`](https://docs.jax.dev/en/latest/_autosummary/jax.jacfwd.html#jax.jacfwd) (forward, n JVPs batched together).
     """)
     return
 
@@ -434,7 +434,7 @@ def _(mo):
 
     `jax.grad` is a *function transformation*: it takes a Python function and returns a new function that
     computes the gradient. Because it transforms functions rather than recording a tape at runtime, it
-    composes with everything else in JAX (`jit`, `vmap`, even `grad` of `grad`).
+    composes with everything else in JAX ([`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit), `vmap`, even `grad` of `grad`).
     """)
     return
 
@@ -463,7 +463,7 @@ def _(jax, jnp, mo):
     | gradient of a **dict** of params (a *pytree*) | same structure back: `w` grad `{[[round(v, 4) for v in r] for r in _grads['w'].tolist()]}`, `b` grad `{[round(v, 4) for v in _grads['b'].tolist()]}` |
     | `jax.grad(loss, argnums=1)` — w.r.t. the input `x` | `{[round(v, 4) for v in _gx.tolist()]}` |
     | `has_aux=True` — return extras alongside the loss | predictions `{[round(v, 4) for v in _pred.tolist()]}` |
-    | `jax.grad(jax.grad(jnp.sin))(1.0)` — second derivative | {float(_d2):.4f} (= −sin 1) |
+    | [`jax.grad(jax.grad(jnp.sin))(1.0)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.sin.html#jax.numpy.sin) — second derivative | {float(_d2):.4f} (= −sin 1) |
 
     The dict case matters most: a model's parameters are a nested structure of arrays, and `jax.grad`
     returns gradients with the *same* structure, ready to subtract (Module 07 generalizes this).

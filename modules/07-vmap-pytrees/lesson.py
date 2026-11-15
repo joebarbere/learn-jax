@@ -24,11 +24,11 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""
-    # 07 · `vmap`, pytrees and functional state
+    # 07 · [`vmap`](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html#jax.vmap), pytrees and functional state
 
     **Goal:** two habits that make JAX code short and fast. Write every function for **one example**
     and let `jax.vmap` add the batch dimension. Keep every piece of state — parameters, optimizer
-    moments, random keys — in **pytrees** you pass in and return, so `jit`, `grad` and `vmap` all compose.
+    moments, random keys — in **pytrees** you pass in and return, so [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit), [`grad`](https://docs.jax.dev/en/latest/_autosummary/jax.grad.html#jax.grad) and `vmap` all compose.
 
     **You will:** batch a function without touching it · build an all-pairs distance matrix from a
     two-vector function · race a Python loop against `vmap` · get per-example gradients (and spot an
@@ -221,9 +221,9 @@ def _(mo):
     `jax.grad(loss)(params)` hands back gradients *shaped exactly like* `params`, and how optax
     updated a whole model in Module 05.
 
-    The core tools: `jax.tree.leaves` (the arrays, in a fixed order), `jax.tree.structure` (the
-    shape of the nesting), `jax.tree.flatten`/`unflatten` (take apart, put back), and
-    `jax.tree.map(f, *trees)` (apply `f` leaf by leaf).
+    The core tools: [`jax.tree.leaves`](https://docs.jax.dev/en/latest/_autosummary/jax.tree.leaves.html#jax.tree.leaves) (the arrays, in a fixed order), [`jax.tree.structure`](https://docs.jax.dev/en/latest/_autosummary/jax.tree.structure.html#jax.tree.structure) (the
+    shape of the nesting), [`jax.tree.flatten`](https://docs.jax.dev/en/latest/_autosummary/jax.tree.flatten.html#jax.tree.flatten)/`unflatten` (take apart, put back), and
+    [`jax.tree.map(f, *trees)`](https://docs.jax.dev/en/latest/_autosummary/jax.tree.map.html#jax.tree.map) (apply `f` leaf by leaf).
     """)
     return
 
@@ -472,12 +472,12 @@ def _(mo):
 
     ## Further reading
     * JAX docs: [Automatic vectorization](https://docs.jax.dev/en/latest/automatic-vectorization.html)
-    * JAX docs: [Working with pytrees](https://docs.jax.dev/en/latest/working-with-pytrees.html)
+    * JAX docs: [Pytrees](https://docs.jax.dev/en/latest/pytrees.html)
     * JAX docs: [Stateful computations](https://docs.jax.dev/en/latest/stateful-computations.html)
     * Abadi et al., [Deep Learning with Differential Privacy](https://arxiv.org/abs/1607.00133) —
       where per-example gradient clipping comes from.
 
-    **Next:** Module 08 — control flow (`lax.scan`, `cond`, loops) and the numerics of mixed precision.
+    **Next:** Module 08 — control flow ([`lax.scan`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html#jax.lax.scan), `cond`, loops) and the numerics of mixed precision.
     """)
     return
 

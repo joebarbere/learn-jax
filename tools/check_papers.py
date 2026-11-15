@@ -2,13 +2,14 @@
 
     containers/run.sh python tools/check_papers.py
 """
+import json
 import re
 import sys
 import urllib.request
 import xml.etree.ElementTree as ET
 from difflib import SequenceMatcher
 
-from learnjax.papers import PAPERS
+from learnjax.papers import COMPANIONS, PAPERS
 
 UA = {"User-Agent": "learn-jax-course link checker"}
 
@@ -48,8 +49,17 @@ def main() -> int:
             ok = code in (403, 418)  # publisher bot-blocking: the DOI resolved to a real page
             bad += not ok
             print(f"{'ok?' if ok else 'BAD'} {code or type(ex).__name__} {url[:70]}  ({p.title[:40]})")
-    n = len(papers)
-    print(f"\n{n} unique links, {bad} problems")
+    videos = {v.url: v for series in COMPANIONS.values() for lectures in series.values() for v in lectures}
+    for url, v in videos.items():
+        try:
+            o = "https://www.youtube.com/oembed?format=json&url=" + url
+            title = json.loads(urllib.request.urlopen(urllib.request.Request(o, headers=UA), timeout=30).read())["title"]
+            print(f"ok  video {url[-11:]}  {title[:70]}")
+        except Exception as ex:  # noqa: BLE001
+            bad += 1
+            print(f"BAD video {url[-11:]}  {type(ex).__name__}  ({v.title[:50]})")
+    n = len(papers) + len(videos)
+    print(f"\n{len(papers)} paper links + {len(videos)} videos = {n}, {bad} problems")
     return 1 if bad else 0
 
 

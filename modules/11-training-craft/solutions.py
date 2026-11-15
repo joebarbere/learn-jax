@@ -50,3 +50,36 @@ def save_and_restore(state, path):
     ckpt.save(path, state)
     ckpt.wait_until_finished()
     return ckpt.restore(path)
+
+
+def batch_norm(x, gamma, beta, running_mean, running_var, momentum: float = 0.1, train: bool = True,
+               eps: float = 1e-5):
+    if not train:
+        y = (x - running_mean) / jnp.sqrt(running_var + eps) * gamma + beta
+        return y, running_mean, running_var
+    mean = x.mean(0)
+    var = ((x - mean) ** 2).mean(0)
+    y = (x - mean) / jnp.sqrt(var + eps) * gamma + beta
+    return (y, (1 - momentum) * running_mean + momentum * mean,
+            (1 - momentum) * running_var + momentum * var)
+
+
+def forward_with_cache(params: dict, x, y):
+    h_pre = x @ params["w1"] + params["b1"]
+    h = jnp.tanh(h_pre)
+    logits = h @ params["w2"] + params["b2"]
+    probs = jax.nn.softmax(logits, axis=-1)
+    loss = -jnp.mean(jnp.log(probs[jnp.arange(x.shape[0]), y]))
+    return loss, {"x": x, "h_pre": h_pre, "h": h, "logits": logits, "probs": probs}
+
+
+def manual_backward(params: dict, cache: dict, y) -> dict:
+    n = cache["x"].shape[0]
+    dlogits = (cache["probs"] - jax.nn.one_hot(y, cache["probs"].shape[-1])) / n
+    dw2 = cache["h"].T @ dlogits
+    db2 = dlogits.sum(0)
+    dh = dlogits @ params["w2"].T
+    dh_pre = dh * (1 - cache["h"] ** 2)
+    dw1 = cache["x"].T @ dh_pre
+    db1 = dh_pre.sum(0)
+    return {"w1": dw1, "b1": db1, "w2": dw2, "b2": db2}

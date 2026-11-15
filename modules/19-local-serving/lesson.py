@@ -622,13 +622,13 @@ def _(mo):
 def _(mo):
     mo.md(r"""
     ## Further reading
-    * [llama.cpp server README](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) — every
+    * ggml-org, [llama.cpp server README](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) — every
       flag and endpoint (`/completion`, `/v1/chat/completions`, `/tokenize`, `/metrics`).
-    * [GGUF format specification](https://github.com/ggml-org/ggml/blob/master/docs/gguf.md)
-    * [k-quants pull request](https://github.com/ggml-org/llama.cpp/pull/1684) — how Q4_K and friends are
+    * ggml-org, [GGUF format specification](https://github.com/ggml-org/ggml/blob/master/docs/gguf.md)
+    * Iwan Kawrakow, [k-quants pull request](https://github.com/ggml-org/llama.cpp/pull/1684) — how Q4_K and friends are
       laid out, with perplexity/size trade-offs.
-    * [Qwen2.5-Coder technical report](https://arxiv.org/abs/2409.12186) — the models used here.
-    * [OpenAI Chat Completions API](https://platform.openai.com/docs/api-reference/chat) — the protocol
+    * Hui et al. (Qwen Team), [Qwen2.5-Coder technical report](https://arxiv.org/abs/2409.12186) — the models used here.
+    * OpenAI, [Chat Completions API reference](https://platform.openai.com/docs/api-reference/chat) — the protocol
       llama-server implements.
 
     **Next:** Module 20 — fine-tuning with LoRA: teach a model new behaviour by training a few small

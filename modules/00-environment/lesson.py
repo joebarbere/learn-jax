@@ -42,11 +42,11 @@ def _(mo):
     mo.md(r"""
     ## 1 · The stack
 
-    When you write `jnp.dot(a, b)`, it passes through these layers:
+    When you write [`jnp.dot(a, b)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.dot.html#jax.numpy.dot), it passes through these layers:
 
     | Layer | What it is | Where it lives |
     |---|---|---|
-    | Your code | `jax.numpy`, `jax.grad`, `jax.jit` … | this notebook |
+    | Your code | [`jax.numpy`](https://docs.jax.dev/en/latest/jax.numpy.html#module-jax.numpy), [`jax.grad`](https://docs.jax.dev/en/latest/_autosummary/jax.grad.html#jax.grad), [`jax.jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit) … | this notebook |
     | **JAX** | traces Python into a graph of array operations | pip package, from the base image |
     | **XLA** | compiler: fuses operations and generates GPU kernels | inside `jaxlib` |
     | **PJRT ROCm plugin** | JAX's bridge to AMD GPUs | `jax-rocm10-plugin` |
@@ -192,7 +192,7 @@ def _(jax, jnp, lj, mo):
     ### CPU vs GPU, same code
 
     A {_n}×{_n} float32 matmul: **CPU {_t_cpu * 1e3:.2f} ms**, **GPU {_t_gpu * 1e3:.3f} ms**
-    (~{_t_cpu / _t_gpu:.0f}× faster). The code is identical; only `jax.device_put` moved the data.
+    (~{_t_cpu / _t_gpu:.0f}× faster). The code is identical; only [`jax.device_put`](https://docs.jax.dev/en/latest/_autosummary/jax.device_put.html#jax.device_put) moved the data.
     JAX decides where to run from *where the data lives* — check any array's `.devices()`.
     """)
     return

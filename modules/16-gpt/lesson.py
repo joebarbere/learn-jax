@@ -49,7 +49,7 @@ def _(mo):
 
     Everything in this module is code you have already met: LayerNorm and residuals (Module 11),
     attention (Module 15), mixed precision (Module 08), AdamW + warmup-cosine + clipping (Module 05),
-    the `lax.scan` training loop (Module 10), random windows with `vmap` + `dynamic_slice` (Module 14).
+    the [`lax.scan`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html#jax.lax.scan) training loop (Module 10), random windows with [`vmap`](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html#jax.vmap) + `dynamic_slice` (Module 14).
     """)
     return
 
@@ -241,7 +241,7 @@ def _(mo):
     window shifted by one).
 
     There are no epochs: each step draws fresh random windows. **Your turn:** `get_batch(key, data, B, T)`
-    with `jax.random.randint` for start positions and `jax.vmap(jax.lax.dynamic_slice)` to cut windows.
+    with [`jax.random.randint`](https://docs.jax.dev/en/latest/_autosummary/jax.random.randint.html#jax.random.randint) for start positions and [`jax.vmap(jax.lax.dynamic_slice)`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.dynamic_slice.html#jax.lax.dynamic_slice) to cut windows.
     Because it uses no Python indexing on traced values, it runs *inside* the jitted training loop, so
     the data never leaves the GPU.
     """)
@@ -468,7 +468,7 @@ def _(mo):
        jitted step returns immediately with arrays the GPU is still computing. `float(loss)` or `print`
        forces Python to wait for the GPU, and while Python then prepares the next step the GPU sits idle
        — a **step bubble**. Instead, dispatch step *n + 1* first and only then read step *n*'s loss.
-    2. **Compute host-side scalars on the host.** Calling a `jnp`/optax function outside `jit` to log
+    2. **Compute host-side scalars on the host.** Calling a `jnp`/optax function outside [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit) to log
        the learning rate launches a tiny GPU computation and waits for it, every step. Plain Python math
        (or letting the jitted step compute it) avoids the round trip.
     3. **Donate buffers you won't reuse.** `jax.jit(step, donate_argnums=(0, 1))` hands the old params and

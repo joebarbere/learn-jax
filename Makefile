@@ -69,7 +69,11 @@ papers: ## Check every paper link and regenerate docs/PAPERS.md
 	$(RUN) python tools/check_papers.py
 	$(RUN) python tools/gen_papers.py
 
+links: ## Link the first JAX API mentions to the docs, then check every external link
+	$(RUN) python tools/link_jax_docs.py modules/*/lesson.py
+	$(RUN) python tools/check_links.py
+
 lint: ## Ruff
 	$(RUN) ruff check learnjax modules
 
-.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers lint llama-download llama-up llama-down llama-bench
+.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers links lint llama-download llama-up llama-down llama-bench

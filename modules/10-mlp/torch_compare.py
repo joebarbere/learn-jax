@@ -304,7 +304,7 @@ def _(mo):
     ## Further reading
     * PyTorch: [Learn the Basics](https://pytorch.org/tutorials/beginner/basics/intro.html) and
       [Introduction to torch.compile](https://pytorch.org/tutorials/intermediate/torch_compile_tutorial.html).
-    * [torch.func](https://pytorch.org/docs/stable/func.html) — JAX-like function transforms in PyTorch.
+    * PyTorch docs: [torch.func](https://pytorch.org/docs/stable/func.html) — JAX-like function transforms in PyTorch.
     * JAX docs, [JAX for PyTorch users / "Thinking in JAX"](https://docs.jax.dev/en/latest/notebooks/thinking_in_jax.html).
     """)
     return

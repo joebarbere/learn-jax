@@ -84,14 +84,14 @@ def _(mo):
 
     NumPy and PyTorch keep a hidden global random state that every call advances. JAX doesn't: you pass
     a **key** explicitly, and the same key always produces the same numbers. That makes results
-    reproducible and lets `jit` and `vmap` transform random code safely (a hidden state is a side effect,
+    reproducible and lets [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit) and [`vmap`](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html#jax.vmap) transform random code safely (a hidden state is a side effect,
     and JAX functions must be pure — Module 07).
 
     The price: **you** must never use a key twice for things that should be independent. To get new
     randomness, derive new keys:
 
-    * `k1, k2 = jax.random.split(key)` — two independent keys from one.
-    * `jax.random.fold_in(key, step)` — a distinct key per step number, handy in training loops.
+    * [`k1, k2 = jax.random.split(key)`](https://docs.jax.dev/en/latest/_autosummary/jax.random.split.html#jax.random.split) — two independent keys from one.
+    * [`jax.random.fold_in(key, step)`](https://docs.jax.dev/en/latest/_autosummary/jax.random.fold_in.html#jax.random.fold_in) — a distinct key per step number, handy in training loops.
     """)
     return
 
@@ -371,7 +371,7 @@ def _(mo):
     To *generate* text, draw the next token from $\text{softmax}(z)$. A neat way that needs no cumulative
     sums: add independent **Gumbel** noise $g_i = -\log(-\log u_i)$, $u_i \sim \text{Uniform}(0,1)$, to
     each logit and take the argmax. The winner is distributed exactly as $\text{softmax}(z)$ — and it
-    vectorizes perfectly on a GPU. `jax.random.categorical` does exactly this.
+    vectorizes perfectly on a GPU. [`jax.random.categorical`](https://docs.jax.dev/en/latest/_autosummary/jax.random.categorical.html#jax.random.categorical) does exactly this.
 
     Your `sample_categorical` below draws 20,000 next words from the logits in section 4 (at $T = 1$); the
     bars should match the true probabilities.
@@ -448,7 +448,7 @@ def _(mo):
     * Andrej Karpathy, [The spelled-out intro to language modeling: building
       makemore](https://www.youtube.com/watch?v=PaCmpygFfXo) — cross-entropy and sampling on a real
       character model (Module 14 builds on it).
-    * Gregory Gundersen, [The Gumbel-Max Trick](https://gregorygundersen.com/blog/2019/12/10/gumbel-max-trick/)
+    * Tim Vieira, [Gumbel-max trick](https://timvieira.github.io/blog/gumbel-max-trick/) (Graduate Descent blog)
       — why adding noise and taking the argmax samples from softmax.
 
     **Next:** Module 05 — optimization: using gradients (Module 03) to minimize losses like these.

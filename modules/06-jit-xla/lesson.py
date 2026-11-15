@@ -23,7 +23,7 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""
-    # 06 · `jit` and XLA: tracing, compilation, timing
+    # 06 · [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit) and XLA: tracing, compilation, timing
 
     **Goal:** understand what `jax.jit` actually does to your function, so that you can predict when it
     will be fast, when it will compile again, and when it will refuse your code outright.
@@ -83,7 +83,7 @@ def _(mo):
     mo.md(r"""
     ## 2 · The recording: jaxprs
 
-    `jax.make_jaxpr(f)(args)` shows what tracing recorded — JAX's own small intermediate language.
+    [`jax.make_jaxpr(f)(args)`](https://docs.jax.dev/en/latest/_autosummary/jax.make_jaxpr.html#jax.make_jaxpr) shows what tracing recorded — JAX's own small intermediate language.
     Each line is one *primitive* (`sin`, `mul`, `dot_general`, …) on typed values like `f32[3]`.
     Python is gone: loops are unrolled, `if`s on static values already decided.
     """)
@@ -96,7 +96,7 @@ def _(jax, jnp, mo):
         return 0.5 * x * (1.0 + jnp.tanh(0.79788456 * (x + 0.044715 * x**3)))
 
     gelu_jaxpr = jax.make_jaxpr(gelu_ish)(jnp.ones(4))
-    mo.md(f"`jax.make_jaxpr(gelu_ish)(jnp.ones(4))` — the tanh approximation of GELU:\n\n```\n{gelu_jaxpr}\n```")
+    mo.md(f"[`jax.make_jaxpr(gelu_ish)(jnp.ones(4))`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.ones.html#jax.numpy.ones) — the tanh approximation of GELU:\n\n```\n{gelu_jaxpr}\n```")
     return (gelu_ish,)
 
 
@@ -212,7 +212,7 @@ def _(jax, mo):
     **Still using 0.1** — the value was captured as a constant when the function was traced. No error,
     just a silently wrong result. The fix is always the same: pass it in as an argument.
     `print` inside a jitted function has the same trap (it prints tracers, once); use
-    `jax.debug.print` to print runtime values.
+    [`jax.debug.print`](https://docs.jax.dev/en/latest/_autosummary/jax.debug.print.html#jax.debug.print) to print runtime values.
     """)
     return
 
@@ -254,11 +254,11 @@ def _(jax, jnp, mo):
 
     | Fix | When | Here |
     |---|---|---|
-    | `jnp.where(cond, a, b)` | the condition depends on *data* (per element) | `{float(abs_with_where(jnp.float32(-2.0)))}` |
+    | [`jnp.where(cond, a, b)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.where.html#jax.numpy.where) | the condition depends on *data* (per element) | `{float(abs_with_where(jnp.float32(-2.0)))}` |
     | `static_argnames=` | the value is a *setting* (sizes, flags, modes) | `{abs_static(x=-2.0)}` |
 
     A static argument must be hashable (an int, a string, a tuple — not an array), and **every new
-    value compiles a new version**. `lax.cond`/`lax.switch` (Module 08) are the third option when you
+    value compiles a new version**. [`lax.cond`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.cond.html#jax.lax.cond)/[`lax.switch`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.switch.html#jax.lax.switch) (Module 08) are the third option when you
     really need only one branch to run.
     """)
     return
@@ -338,7 +338,7 @@ def _(jax, jnp, mo, time):
     | method | ms per call | implied TFLOP/s |
     |---|---|---|
     | naive `perf_counter()` around the call | {_naive * 1e3:.3f} | {2 * 4096**3 / _naive / 1e12:,.0f} (impossible) |
-    | with `jax.block_until_ready` | {_real * 1e3:.3f} | {2 * 4096**3 / _real / 1e12:.1f} |
+    | with [`jax.block_until_ready`](https://docs.jax.dev/en/latest/_autosummary/jax.block_until_ready.html#jax.block_until_ready) | {_real * 1e3:.3f} | {2 * 4096**3 / _real / 1e12:.1f} |
 
     The naive number is a fantasy (the card peaks around 28 TFLOP/s). Always block before stopping
     the clock — `learnjax.timeit` does, and so will your `time_jitted`. (Printing or converting a
@@ -509,7 +509,7 @@ def _(fusion_speedup, mo):
     * Horace He, [Making Deep Learning Go Brrrr](https://horace.io/brrr_intro.html) — why fusion wins
       for memory-bound ops.
 
-    **Next:** Module 07 — `vmap`, pytrees and functional state: batching for free and models as data.
+    **Next:** Module 07 — [`vmap`](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html#jax.vmap), pytrees and functional state: batching for free and models as data.
     """)
     return
 

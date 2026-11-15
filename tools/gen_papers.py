@@ -4,7 +4,7 @@
 """
 from pathlib import Path
 
-from learnjax.papers import PAPERS
+from learnjax.papers import COMPANIONS, PAPERS, SERIES
 from learnjax.syllabus import MODULES, PARTS
 
 out = ["# Seminal papers, by module", "",
@@ -17,6 +17,9 @@ for n, _slug, title, p in MODULES:
         out += [f"## Part {p} — {PARTS[p]}", ""]
     out += [f"### {n:02d} · {title}", ""]
     out += [f"- **[{x.title}]({x.url})** — {x.authors}, {x.year}. {x.why}" for x in PAPERS.get(n, [])]
+    for series, lectures in COMPANIONS.get(n, {}).items():
+        name = series.split(" (")[0]
+        out += [f"- *Companion ([{name}]({SERIES[series]})):* [{v.title}]({v.url}). {v.why}" for v in lectures]
     out.append("")
 Path("docs/PAPERS.md").write_text("\n".join(out))
 print(f"wrote docs/PAPERS.md ({sum(map(len, PAPERS.values()))} entries)")

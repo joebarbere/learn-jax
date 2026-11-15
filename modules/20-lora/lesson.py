@@ -326,12 +326,12 @@ def _(mo):
     ## 8 · Two ways to freeze the base model
 
     **Way 1 — differentiate only what trains** (what section 6 did). The loss takes `(adapters, params)`
-    and `jax.value_and_grad` differentiates argument 0 only. JAX never even builds gradients for the 362M
+    and [`jax.value_and_grad`](https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html#jax.value_and_grad) differentiates argument 0 only. JAX never even builds gradients for the 362M
     frozen weights; the optimizer state covers only the adapters.
 
     **Way 2 — one pytree, per-path optimizer rules** (the JAX *Training Cookbook*'s approach). Put
     everything in one tree `{"base": params, "lora": adapters}`, label each leaf by its *path* with
-    `jax.tree_util.tree_map_with_path`, and give optax a rule per label: AdamW for `"train"`,
+    [`jax.tree_util.tree_map_with_path`](https://docs.jax.dev/en/latest/_autosummary/jax.tree_util.tree_map_with_path.html#jax.tree_util.tree_map_with_path), and give optax a rule per label: AdamW for `"train"`,
     `optax.set_to_zero()` for `"freeze"`. This is how you'd freeze "the embeddings and the first 10
     layers" or give the head its own learning rate — any per-parameter policy, decided by name.
 

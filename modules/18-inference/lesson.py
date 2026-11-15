@@ -38,7 +38,7 @@ def _(mo):
     tricks every inference engine (llama.cpp, vLLM, Ollama) is built from — measured on a real pretrained
     model on your RX 7600 XT.
 
-    **The model:** [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct)
+    **The model:** [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) by Hugging Face's SmolLM team
     (Apache-2.0), loaded into `learnjax/llama.py` — a pure-JAX Llama made of exactly the parts you built
     in Module 17 (RMSNorm, RoPE, grouped-query attention, SwiGLU) and checked against Hugging Face
     `transformers` (identical greedy tokens). Its little sibling SmolLM2-135M shares the tokenizer, which
@@ -174,7 +174,7 @@ def _(mo):
     (Module 06's async dispatch), then Python launches the next step — so the GPU idles between tokens,
     and each step pays launch overhead for dozens of small kernels.
 
-    The fix: put the whole loop inside one compiled program with `lax.fori_loop`. The cache has a fixed
+    The fix: put the whole loop inside one compiled program with [`lax.fori_loop`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.fori_loop.html#jax.lax.fori_loop). The cache has a fixed
     size (prompt + new tokens), so the loop body has static shapes and compiles once:
 
     ```python
@@ -680,7 +680,7 @@ def _(mo):
     * Lilian Weng, [Large Transformer Model Inference Optimization](https://lilianweng.github.io/posts/2023-01-10-inference-optimization/) — a map of the whole field.
     * Horace He, [Making Deep Learning Go Brrrr](https://horace.io/brrr_intro.html) — the overhead / bandwidth / compute framing used in §1–§3.
     * Maarten Grootendorst, [A Visual Guide to Quantization](https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-quantization) — int8, int4, GPTQ and GGUF, with pictures.
-    * The [llama.cpp quantization README](https://github.com/ggml-org/llama.cpp/blob/master/tools/quantize/README.md) — what `Q8_0`, `Q4_K_M` and friends actually are.
+    * ggml-org, the [llama.cpp quantization README](https://github.com/ggml-org/llama.cpp/blob/master/tools/quantize/README.md) — what `Q8_0`, `Q4_K_M` and friends actually are.
 
     **Next:** Module 19 — local serving: run a real 7B-class coding model with llama.cpp on your GPU,
     using everything here (a KV cache, batching, 4-bit grouped weights, speculative decoding) behind an

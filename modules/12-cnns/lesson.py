@@ -33,10 +33,10 @@ def _(mo):
     bigger generic model.
 
     **You will:** slide a kernel along a 1-D signal, then over a Fashion-MNIST image with hand-made edge
-    detectors · learn `jax.lax.conv_general_dilated`, its NHWC/HWIO layouts, padding, stride and the output-size
+    detectors · learn [`jax.lax.conv_general_dilated`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.conv_general_dilated.html#jax.lax.conv_general_dilated), its NHWC/HWIO layouts, padding, stride and the output-size
     formula · pool · count parameters and see weight sharing pay off · *prove* translation equivariance by
     shifting an image · train a CNN that beats Module 10's MLP with fewer parameters · look inside at its
-    learned filters · show that convolution is secretly a matrix multiply.
+    learned filters · show that convolution is secretly a matrix multiply · turn convolutions into a causal, dilated sequence model (WaveNet) that predicts text.
 
     Module 10's MLP flattened each image into 784 unrelated numbers. Shift a shirt two pixels left and, to the
     MLP, it's a completely different input. This module fixes that.
@@ -236,7 +236,7 @@ def _(mo):
 
     After detecting features we often don't need their *exact* position — "there's an edge around here" is
     enough. **Max pooling** keeps the largest value in each 2×2 block, halving height and width: 4× less data
-    for the next layer, and a little tolerance to small shifts. In JAX it's a `jax.lax.reduce_window`.
+    for the next layer, and a little tolerance to small shifts. In JAX it's a [`jax.lax.reduce_window`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.reduce_window.html#jax.lax.reduce_window).
     """)
     return
 
@@ -501,7 +501,235 @@ def _(ex, hand_bank, jax, jnp, lj, mo, sample):
 @app.cell
 def _(mo):
     mo.md(r"""
-    ## 9 · Architecture encodes assumptions
+    ## 9 · Dilated causal convolutions: CNNs for sequences (WaveNet)
+
+    Convolutions work on sequences too — text, audio — with two changes:
+
+    * **Causal:** to *predict* the next character, position $t$ may only see positions $\le t$. Pad the
+      sequence on the **left** only, so the kernel never reaches into the future.
+    * **Dilated:** a kernel of size 2 with *dilation* $d$ looks at steps $t$ and $t-d$. Stack layers with
+      dilations 1, 2, 4, 8, … and the **receptive field doubles with every layer**: 4 layers see 16 steps,
+      10 layers see 1,024. Undilated, 4 layers see only 5. This is DeepMind's **WaveNet** (2016), which
+      generated raw audio sample by sample.
+
+    There's a second, quieter win. Module 14's MLP language model made **one** prediction per window. A
+    causal conv stack predicts the next character at **every** position of a 128-character window in one
+    pass, each from its own past — 128 training signals for the price of one forward pass. Transformers do
+    the same thing with causal attention (Module 15).
+
+    Move the sliders: each dot is a time step at one layer; the colored ones feed the **last output**.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    rf_layers = mo.ui.slider(1, 6, value=4, label="layers", show_value=True)
+    rf_mode = mo.ui.radio(options=["dilated (1, 2, 4, …)", "undilated (1, 1, 1, …)"],
+                          value="dilated (1, 2, 4, …)", label="dilations")
+    mo.hstack([rf_layers, rf_mode], justify="start", gap=2)
+    return rf_layers, rf_mode
+
+
+@app.cell
+def _(plt, rf_layers, rf_mode):
+    _L = rf_layers.value
+    _dil = [2**_i for _i in range(_L)] if rf_mode.value.startswith("dilated") else [1] * _L
+    _span = 1 + sum(_dil)
+    _width = max(_span, 8) + 2
+    _last = _width - 1
+    # which nodes feed the last output? walk backwards: layer l node t uses t and t - d_l from layer l-1
+    _live = [set() for _ in range(_L + 1)]
+    _live[_L] = {_last}
+    for _l in range(_L, 0, -1):
+        for _t in _live[_l]:
+            _live[_l - 1] |= {_t, _t - _dil[_l - 1]}
+    _fig, _ax = plt.subplots(figsize=(min(11, 2 + 0.28 * _width), 0.55 * (_L + 1) + 1.2))
+    for _l in range(_L + 1):
+        _ax.scatter(range(_width), [_l] * _width, s=14, color="lightgray", zorder=1)
+        _ax.scatter(sorted(_live[_l]), [_l] * len(_live[_l]), s=28, color="tab:red" if _l == _L else "tab:blue",
+                    zorder=3)
+        if _l:
+            for _t in _live[_l]:
+                for _src in (_t, _t - _dil[_l - 1]):
+                    _ax.plot([_src, _t], [_l - 1, _l], color="tab:blue", alpha=0.5, lw=1, zorder=2)
+    _ax.set_yticks(range(_L + 1), labels=["input"] + [f"layer {_i + 1} (d={_d})" for _i, _d in enumerate(_dil)])
+    _ax.set_xticks([])
+    _ax.set_xlabel("time →  (the red dot is the newest output; nothing to its right exists yet)")
+    _ax.set_title(f"kernel 2, dilations {_dil}: receptive field = {_span} steps")
+    _fig.tight_layout()
+    _fig
+    return
+
+
+@app.cell
+def _(ex, jax, jnp, lj, mo):
+    _x = jax.random.normal(jax.random.key(3), (1, 32, 4))
+    _w = jax.random.normal(jax.random.key(4), (2, 4, 4))
+    _a = lj.attempt(ex.causal_conv1d, _x, _w, 4)
+    _rf = lj.attempt(ex.receptive_field, 2, [1, 2, 4, 8])
+    _items = [mo.md("### Your turn: `causal_conv1d` and `receptive_field`")]
+    if _a.ok:
+        _ref = jax.lax.conv_general_dilated(_x, _w, (1,), [(4, 0)], rhs_dilation=(4,),
+                                            dimension_numbers=("NWC", "WIO", "NWC"))
+        _future = ex.causal_conv1d(_x.at[:, 16:].set(1e3), _w, 4)
+        _leak = float(jnp.abs(_future[:, :16] - _a.value[:, :16]).max())
+        _items.append(mo.md(f"Matches `lax.conv_general_dilated` to **{float(jnp.abs(_a.value - _ref).max()):.1e}** · "
+                            f"setting every input from step 16 on to 1000 changes outputs 0–15 by "
+                            f"**{_leak}** (it must be exactly 0: no peeking at the future)."))
+        # speed: forward + backward through 4 dilated layers, the shape the model below trains with
+        _xs = jax.random.normal(jax.random.key(5), (64, 128, 128))
+        _ws = jax.random.normal(jax.random.key(6), (2, 128, 128)) / 16
+
+        def _lax_cc(x, w, d):
+            return jax.lax.conv_general_dilated(x, w, (1,), [(d, 0)], rhs_dilation=(d,),
+                                                dimension_numbers=("NWC", "WIO", "NWC"))
+
+        def _stack_grad(conv):
+            return jax.jit(jax.grad(lambda w, x: sum(
+                jnp.tanh(conv(x, w, _d)).sum() for _d in (1, 2, 4, 8))))
+
+        _t_yours = lj.timeit(_stack_grad(ex.causal_conv1d), _ws, _xs, iters=5)["median"]
+        _t_lax = lj.timeit(_stack_grad(_lax_cc), _ws, _xs, iters=5)["median"]
+        _items.append(mo.md(
+            f"**Speed** (forward + backward, batch 64 × 128 steps × 128 channels, dilations 1-2-4-8): your "
+            f"`causal_conv1d` **{_t_yours * 1e3:.1f} ms** vs `lax.conv_general_dilated` **{_t_lax * 1e3:.1f} ms**. "
+            f"On this card the library's dilated 1-D convolution (ROCm's convolution backend) is the slow path; "
+            f"two shifted matmuls hit the fast GEMM path — another reminder to *measure*, as Module 22 will do "
+            f"systematically. (If you used `lax.conv_general_dilated` yourself, the two numbers will match — and "
+            f"the training cell below will take minutes instead of seconds.)"))
+    else:
+        _items.append(_a.view(mo))
+    if _rf.ok:
+        _rows = ["| layers | dilated (1, 2, 4, …) | undilated |", "|---|---|---|"]
+        for _n in (1, 2, 4, 6, 8, 10):
+            _rows.append(f"| {_n} | {ex.receptive_field(2, [2**_i for _i in range(_n)]):,} | "
+                         f"{ex.receptive_field(2, [1] * _n)} |")
+        _items.append(mo.md("Receptive field with kernel size 2:\n\n" + "\n".join(_rows)))
+    else:
+        _items.append(_rf.view(mo))
+    mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(ex, jax, jnp, lj, mo, np, optax, plt, time):
+    from learnjax.data import tiny_shakespeare as _tiny
+
+    _text = _tiny()
+    _chars = sorted(set(_text))
+    _stoi = {_c: _i for _i, _c in enumerate(_chars)}
+    _data = np.array([_stoi[_c] for _c in _text], np.int32)
+    _n = int(0.9 * len(_data))  # same split as Module 14: first 90% train, last 10% validation
+    _train, _val = jnp.asarray(_data[:_n]), jnp.asarray(_data[_n:])
+    _V, _E, _C, _T, _B = len(_chars), 24, 128, 128, 64
+    _DIL = (1, 2, 4, 8)  # kernel 2 → receptive field 16, matching Module 14's longest context
+    _ok = lj.attempt(ex.causal_conv1d, jnp.zeros((1, 4, 2)), jnp.zeros((2, 2, 2)), 1).ok
+
+    def _init(key):
+        _ks = jax.random.split(key, len(_DIL) + 3)
+        return {"emb": jax.random.normal(_ks[0], (_V, _E)) * 0.3, "inp": jax.random.normal(_ks[1], (_E, _C)) / _E**0.5,
+                "convs": [jax.random.normal(_k, (2, _C, _C)) / (2 * _C) ** 0.5 for _k in _ks[2:-1]],
+                "out": jax.random.normal(_ks[-1], (_C, _V)) / _C**0.5 * 0.1, "b": jnp.zeros(_V)}
+
+    def _apply(p, ids):
+        _h = p["emb"][ids] @ p["inp"]
+        for _w, _d in zip(p["convs"], _DIL, strict=True):
+            _h = _h + jnp.tanh(ex.causal_conv1d(_h, _w, _d))  # residual WaveNet-style block, your conv
+        return _h @ p["out"] + p["b"]
+
+    def _loss(p, x, y, start=0):
+        _lp = jax.nn.log_softmax(_apply(p, x))
+        return -jnp.take_along_axis(_lp, y[..., None], -1)[..., 0][:, start:].mean()
+
+    def _batch(key, d):
+        _s = jax.random.randint(key, (_B,), 0, d.shape[0] - _T - 1)
+        _c = jax.vmap(lambda i: jax.lax.dynamic_slice(d, (i,), (_T + 1,)))(_s)
+        return _c[:, :-1], _c[:, 1:]
+
+    _opt = optax.adamw(3e-3, weight_decay=1e-4)
+
+    @jax.jit
+    def _train_run(p, data, keys):
+        def _step(carry, k):
+            _p, _st = carry
+            _l, _g = jax.value_and_grad(_loss)(_p, *_batch(k, data))
+            _u, _st = _opt.update(_g, _st, _p)
+            return (optax.apply_updates(_p, _u), _st), _l
+        (_p, _), _ls = jax.lax.scan(_step, (p, _opt.init(p)), keys)
+        return _p, _ls
+
+    if not _ok:
+        _out = mo.callout(mo.md("Implement `causal_conv1d` above and this cell trains a WaveNet-style "
+                                "character model with it."), kind="info")
+    else:
+        _p0 = _init(jax.random.key(0))
+        _nparams = sum(_x.size for _x in jax.tree.leaves(_p0))
+        _t0 = time.perf_counter()
+        _p, _ls = _train_run(_p0, _train, jax.random.split(jax.random.key(1), 3000))
+        _ls = np.asarray(_ls)
+        _secs = time.perf_counter() - _t0
+        _vkeys = jax.random.split(jax.random.key(9), 20)
+        _val_full = float(np.mean([float(_loss(_p, *_batch(_k, _val), start=15)) for _k in _vkeys]))
+        _val_all = float(np.mean([float(_loss(_p, *_batch(_k, _val))) for _k in _vkeys]))
+
+        # sample 300 characters, re-running the causal stack on the last 128 characters each step
+        @jax.jit
+        def _next_logits(p, window):
+            return _apply(p, window[None])[0, -1]
+
+        _ctx = list(_data[_n : _n + 32])
+        _key = jax.random.key(5)
+        for _ in range(300):
+            _key, _sub = jax.random.split(_key)
+            _win = jnp.asarray(np.array(([0] * _T + _ctx)[-_T:], np.int32))
+            _ctx.append(int(jax.random.categorical(_sub, _next_logits(_p, _win) / 0.8)))
+        _sample = "".join(_chars[_i] for _i in _ctx[32:])
+
+        _fig, _ax = plt.subplots(figsize=(7, 3))
+        _ax.plot(np.convolve(_ls, np.ones(50) / 50, mode="valid"))
+        _ax.axhline(1.82, color="gray", ls=":", label="Module 14 MLP LM, context 8 (val 1.82)")
+        _ax.axhline(_val_full, color="tab:red", ls="--", label=f"this model's val loss ({_val_full:.2f})")
+        _ax.set(xlabel="step", ylabel="loss", title="WaveNet-style char model: train loss (smoothed) vs val",
+                ylim=(1.2, 3.2))
+        _ax.legend(fontsize=8)
+        _fig.tight_layout()
+        if _val_full < 1.82:
+            _verdict = (f"That beats both MLPs by {1.82 - _val_full:.2f} nats. Module 14's MLP got *worse* going from "
+                        "8 to 16 characters of context; the dilated stack uses all 16 — one small kernel per layer, "
+                        "shared across positions, instead of a weight block per context slot, and a training "
+                        "signal from every position of every window.")
+        else:
+            _verdict = (f"That's {_val_full - 1.82:+.2f} nats against the best MLP — not a win at this training "
+                        "budget. The dilated stack's advantages (shared kernels, a training signal at every "
+                        "position) show up with longer training and deeper stacks.")
+        _out = mo.vstack([_fig, mo.md(f"""
+| model | context | parameters | val loss |
+|---|---|---|---|
+| Module 14 MLP LM (measured when written) | 8 chars | 50,769 | 1.82 |
+| Module 14 MLP LM (measured when written) | 16 chars | 83,537 | 1.86 |
+| **WaveNet-style, dilations 1-2-4-8 (yours)** | **16 chars** | **{_nparams:,}** | **{_val_full:.3f}** |
+
+{3000:,} steps × {_B}×{_T} positions, trained in **{_secs:.0f} s** (including compilation). Validation loss
+is measured on positions that have their full 16-character context ({_val_all:.3f} over all positions,
+including the first 15 of each window that see less). {_verdict}
+Attention (next part) goes one step further: a receptive field as long as the whole sequence, and weights
+that depend on the content.
+
+**Sample** (temperature 0.8):
+
+```
+{_sample}
+```
+""")])
+    _out
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## 10 · Architecture encodes assumptions
 
     A CNN assumes **locality** (nearby pixels matter together) and **translation equivariance** (a pattern
     means the same thing anywhere). For images both are true, so the CNN needs less data and fewer
@@ -560,7 +788,7 @@ def _(mo):
       — the padding/stride/dilation pictures everyone links to.
     * Chris Olah, [Conv Nets: A Modular Perspective](https://colah.github.io/posts/2014-07-Conv-Nets-Modular/).
     * Stanford CS231n, [Convolutional Neural Networks](https://cs231n.github.io/convolutional-networks/) notes.
-    * Distill, [Feature Visualization](https://distill.pub/2017/feature-visualization/) — what deeper layers learn.
+    * Olah, Mordvintsev & Schubert (Distill), [Feature Visualization](https://distill.pub/2017/feature-visualization/) — what deeper layers learn.
     * JAX docs: [`jax.lax.conv_general_dilated`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.conv_general_dilated.html).
 
     **Next:** Module 13 — tokenization: turning text into the integers a language model reads.

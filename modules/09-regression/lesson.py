@@ -48,7 +48,7 @@ def _(mo):
 
     Model: $\hat y = w x + b$. Loss: mean squared error $\frac1n\sum_i (\hat y_i - y_i)^2$. Stack a column of
     ones next to $x$ and it becomes $\hat{\mathbf y} = X\mathbf w$ — a matrix problem with an exact answer,
-    *least squares* (`jnp.linalg.lstsq`). It's also an optimization problem gradient descent can solve.
+    *least squares* ([`jnp.linalg.lstsq`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.linalg.lstsq.html#jax.numpy.linalg.lstsq)). It's also an optimization problem gradient descent can solve.
     For this tiny problem both work; the exact answer stops existing once models become nonlinear, and
     gradient descent is what's left. So it's worth seeing them agree once.
     """)
@@ -374,7 +374,7 @@ def _(fmnist, jax, jnp, lax, mo, optax, time):
     fm_test_acc = _acc(fm_params, fm_Xte, fm_yte)
     _rows = "\n".join(_rows)
     mo.md(
-        "Each epoch is one `jit`-compiled function: shuffle with a key, then `lax.scan` over 220 minibatches "
+        "Each epoch is one [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit)-compiled function: shuffle with a key, then [`lax.scan`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html#jax.lax.scan) over 220 minibatches "
         "(Module 08) with Adam (Module 05).\n\n"
         "| epoch | train loss | train acc | val acc |\n|---|---|---|---|\n" + _rows
         + f"\n\n8 epochs in **{_secs:.1f} s**. **Test accuracy: {fm_test_acc:.1%}** — measured once, now that "

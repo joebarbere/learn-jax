@@ -29,10 +29,10 @@ def _(mo):
 
     **You will:** inspect shapes and axes · index, reshape and reduce along an axis · learn the three
     broadcasting rules (and predict shapes before running code) · see how JAX picks dtypes · meet JAX's
-    immutable arrays and `.at[]` · move data between NumPy, the CPU and the GPU · write `einsum`
+    immutable arrays and [`.at[]`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.ndarray.at.html#jax.numpy.ndarray.at) · move data between NumPy, the CPU and the GPU · write `einsum`
     · time a Python loop against a vectorized version on the GPU.
 
-    If you know NumPy, `jax.numpy` will feel familiar: same function names, same semantics, with three
+    If you know NumPy, [`jax.numpy`](https://docs.jax.dev/en/latest/jax.numpy.html#module-jax.numpy) will feel familiar: same function names, same semantics, with three
     differences you'll meet below (immutability, out-of-bounds indexing, default dtypes).
     """)
     return
@@ -73,7 +73,7 @@ def _(jnp, mo):
     mo.md(f"""
     ## 2 · Indexing and slicing
 
-    `grid = jnp.arange(20).reshape(4, 5)`:
+    [`grid = jnp.arange(20).reshape(4, 5)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.arange.html#jax.numpy.arange):
 
     ```
     {_g}
@@ -87,7 +87,7 @@ def _(jnp, mo):
     | `grid[1:3, ::2]` | `{grid[1:3, ::2].tolist()}` | `{grid[1:3, ::2].shape}` |
     | `grid[-1]` (last row) | `{grid[-1]}` | `{grid[-1].shape}` |
     | `grid[grid % 2 == 0]` (boolean mask) | `{grid[grid % 2 == 0]}` | `{grid[grid % 2 == 0].shape}` |
-    | `grid[jnp.array([0, 3])]` (fancy index) | `{grid[jnp.array([0, 3])].tolist()}` | `{grid[jnp.array([0, 3])].shape}` |
+    | [`grid[jnp.array([0, 3])]`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.array.html#jax.numpy.array) (fancy index) | `{grid[jnp.array([0, 3])].tolist()}` | `{grid[jnp.array([0, 3])].shape}` |
 
     **JAX difference #1:** out-of-bounds indices don't raise. `grid[10, 0]` gives
     `{grid[10, 0]}` — the index is *clamped* to the last row. On a GPU there's no cheap way to raise an
@@ -109,7 +109,7 @@ def _(jnp, mo):
     |---|---|
     | `x.reshape(32, -1)` — flatten each image to a vector (`-1` = "work it out") | `{_imgs.reshape(32, -1).shape}` |
     | `x.transpose(0, 3, 1, 2)` — channels-first, as PyTorch likes | `{_imgs.transpose(0, 3, 1, 2).shape}` |
-    | `jnp.moveaxis(x, -1, 1)` — same thing, by naming one axis | `{jnp.moveaxis(_imgs, -1, 1).shape}` |
+    | [`jnp.moveaxis(x, -1, 1)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.moveaxis.html#jax.numpy.moveaxis) — same thing, by naming one axis | `{jnp.moveaxis(_imgs, -1, 1).shape}` |
     | `x[None]` or `x[jnp.newaxis]` — add a leading axis of size 1 | `{_imgs[None].shape}` |
     | `x[..., 0]` — `...` means "all the leading axes" | `{_imgs[..., 0].shape}` |
     | `x.reshape(4, 8, 28, 28, 3)` — split the batch into 4 groups of 8 | `{_imgs.reshape(4, 8, 28, 28, 3).shape}` |
@@ -228,7 +228,7 @@ def _(jnp, mo):
     | `bfloat16 + float32` | `{(_bf + _f32).dtype}` | wider float wins |
     | `bfloat16 * 2.0` (Python float) | `{(_bf * 2.0).dtype}` | Python scalars are **weakly typed**: they adopt the array's dtype |
     | `int8 + 1000` | `{(_i8 + 1000).dtype}` | weak too — and 1000 doesn't fit in int8, so watch for overflow |
-    | `bfloat16 * jnp.float32(2.0)` | `{(_bf * jnp.float32(2.0)).dtype}` | a *typed* scalar promotes the result |
+    | [`bfloat16 * jnp.float32(2.0)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.float32.html#jax.numpy.float32) | `{(_bf * jnp.float32(2.0)).dtype}` | a *typed* scalar promotes the result |
 
     Weak types matter in mixed-precision training: `x_bf16 * 0.5` stays bf16, which is what you want.
     64-bit floats are off unless you set `JAX_ENABLE_X64=1`; GPUs are much slower at them anyway.
@@ -262,7 +262,7 @@ def _(jnp, mo):
     | `v.at[jnp.array([1, 1, 3])].add(1.0)` | `{_add}` — repeated indices accumulate |
     | `v` afterwards | `{_v}` — unchanged |
 
-    Why? JAX transforms functions (`grad`, `jit`, `vmap`), and that's only safe for *pure* functions
+    Why? JAX transforms functions ([`grad`](https://docs.jax.dev/en/latest/_autosummary/jax.grad.html#jax.grad), [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit), [`vmap`](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html#jax.vmap)), and that's only safe for *pure* functions
     that don't mutate their inputs. Inside `jit`, XLA turns `.at[].set` into an in-place update when it
     can, so you don't pay for the copy.
     """)
@@ -281,9 +281,9 @@ def _(jax, jnp, mo, np):
     | object | type | lives on |
     |---|---|---|
     | `np.arange(4.0)` | `{type(_host).__name__}` | host RAM, `{_host.dtype}` |
-    | `jnp.asarray(that)` | `{type(_dev).__name__}` | `{_dev.devices()}` (copied to the GPU, now `{_dev.dtype}`) |
+    | [`jnp.asarray(that)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.asarray.html#jax.numpy.asarray) | `{type(_dev).__name__}` | `{_dev.devices()}` (copied to the GPU, now `{_dev.dtype}`) |
     | `np.asarray(that)` | `{type(_back).__name__}` | host RAM (copied back) |
-    | `jax.device_put(x, jax.devices('cpu')[0])` | `{type(_cpu).__name__}` | `{_cpu.devices()}` |
+    | [`jax.device_put(x, jax.devices('cpu')[0])`](https://docs.jax.dev/en/latest/_autosummary/jax.device_put.html#jax.device_put) | `{type(_cpu).__name__}` | `{_cpu.devices()}` |
 
     JAX runs an operation where its inputs live. Copies between host and GPU go over PCIe (your card
     has a 4.0 ×8 link, ~16 GB/s), which is slow compared to the GPU's own memory (~288 GB/s): load data
@@ -300,7 +300,7 @@ def _(jnp, mo):
     mo.md(f"""
     ## 9 · `einsum`: shapes as a sentence
 
-    `jnp.einsum` names each axis with a letter. Letters that appear in the inputs but not the output are
+    [`jnp.einsum`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.einsum.html#jax.numpy.einsum) names each axis with a letter. Letters that appear in the inputs but not the output are
     summed over. It's often the clearest way to write tensor code — attention in Module 15 is two einsums.
 
     | einsum | means | result shape |
@@ -381,7 +381,7 @@ def _(ex, jnp, lj, mo):
         else:
             _got = "error" if "ValueError" in _mine.error else "raised " + _mine.error.splitlines()[-1]
         _rows.append(f"| `{_a}` | `{_b}` | {_got} | {_ref} | {'✅' if _got == _ref else '·'} |")
-    mo.md("**`broadcast_shape`** vs JAX's own `jnp.broadcast_shapes`:\n\n"
+    mo.md("**`broadcast_shape`** vs JAX's own [`jnp.broadcast_shapes`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.broadcast_shapes.html#jax.numpy.broadcast_shapes):\n\n"
           "| a | b | yours | JAX | |\n|---|---|---|---|---|\n" + "\n".join(_rows))
     return
 

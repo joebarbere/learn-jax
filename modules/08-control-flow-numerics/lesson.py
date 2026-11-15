@@ -25,11 +25,11 @@ def _(mo):
     mo.md(r"""
     # 08 · Control flow, scan, and mixed precision
 
-    **Goal:** write loops and branches that survive `jax.jit`, and understand the number formats your GPU
+    **Goal:** write loops and branches that survive [`jax.jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit), and understand the number formats your GPU
     computes in well enough to know when bfloat16 is safe and when it quietly lies.
 
-    **You will:** see why a Python `if` on a traced value fails · use `lax.cond`, `lax.switch`,
-    `fori_loop`, `while_loop` and `lax.scan` · measure why `scan` beats an unrolled Python loop · read the
+    **You will:** see why a Python `if` on a traced value fails · use [`lax.cond`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.cond.html#jax.lax.cond), [`lax.switch`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.switch.html#jax.lax.switch),
+    `fori_loop`, `while_loop` and [`lax.scan`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html#jax.lax.scan) · measure why `scan` beats an unrolled Python loop · read the
     bits of float32, bfloat16 and float16 · watch bfloat16 accumulation stall · catch XLA deleting your
     rounding · reproduce, in miniature, the bf16 gradient study from your deepseek-v3-jax run.
 
@@ -69,7 +69,7 @@ def _(jax, jnp, mo):
 
     The fixes, from simplest to most general:
 
-    * **`jnp.where(x > 0, x, 0)`** — compute both sides, select elementwise. Best for cheap, elementwise choices.
+    * **[`jnp.where(x > 0, x, 0)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.where.html#jax.numpy.where)** — compute both sides, select elementwise. Best for cheap, elementwise choices.
     * **`lax.cond(pred, true_fn, false_fn, x)`** — a real branch; only one side runs on the device.
     * **`lax.switch(index, [f0, f1, f2], x)`** — the n-way version.
     * Or mark the argument **static** (`static_argnums`, Module 06) when it's a configuration value, not data.
@@ -84,13 +84,13 @@ def _(mo):
 
     | Primitive | Use when | Shape of the computation |
     |---|---|---|
-    | `lax.fori_loop(lo, hi, body, init)` | fixed number of steps, only the final state matters | `state = body(i, state)` |
-    | `lax.while_loop(cond, body, init)` | stop on a condition (convergence) | `while cond(state): state = body(state)` |
+    | [`lax.fori_loop(lo, hi, body, init)`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.fori_loop.html#jax.lax.fori_loop) | fixed number of steps, only the final state matters | `state = body(i, state)` |
+    | [`lax.while_loop(cond, body, init)`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.while_loop.html#jax.lax.while_loop) | stop on a condition (convergence) | `while cond(state): state = body(state)` |
     | `lax.scan(f, carry, xs)` | walk over a sequence and **keep every step's output** | `carry, y_t = f(carry, x_t)` |
 
     `scan` is the workhorse of deep learning: RNNs, cumulative statistics, the layer loop in some
     transformer implementations, and diffusion samplers are all scans. It's also the only one of the three
-    that `jax.grad` can differentiate in reverse mode without restrictions (`while_loop` has a data-dependent
+    that [`jax.grad`](https://docs.jax.dev/en/latest/_autosummary/jax.grad.html#jax.grad) can differentiate in reverse mode without restrictions (`while_loop` has a data-dependent
     trip count, so reverse-mode can't know how many steps to store).
 
     Below: Newton's method for $\sqrt{a}$ written with `while_loop` — iterate $x \leftarrow (x + a/x)/2$
@@ -336,7 +336,7 @@ def _(jax, jnp, lax, mo):
     | rounding error of π via… | eager | under `jit` |
     |---|---|---|
     | `.astype(bf16).astype(f32)` | {float(_astype_trip(_x)):.3e} | **{float(jax.jit(_astype_trip)(_x)):.3e}** |
-    | `lax.reduce_precision(x, 8, 7)` | {float(_reduce_precision(_x)):.3e} | {float(jax.jit(_reduce_precision)(_x)):.3e} |
+    | [`lax.reduce_precision(x, 8, 7)`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.reduce_precision.html#jax.lax.reduce_precision) | {float(_reduce_precision(_x)):.3e} | {float(jax.jit(_reduce_precision)(_x)):.3e} |
 
     Under `jit` the round trip vanished. The compiled program computes:
 
@@ -355,7 +355,7 @@ def _(mo):
     ## 6 · Matrix multiply: bf16 in, float32 out
 
     The GPU's matrix units multiply bf16 numbers but can **accumulate the dot products in float32**. In JAX
-    you ask for that with `preferred_element_type=jnp.float32`. Each product $a_{ik}b_{kj}$ is exact-ish;
+    you ask for that with [`preferred_element_type=jnp.float32`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.float32.html#jax.numpy.float32). Each product $a_{ik}b_{kj}$ is exact-ish;
     what matters is that the long sum over $k$ doesn't stall the way Section 5's did.
     """)
     return

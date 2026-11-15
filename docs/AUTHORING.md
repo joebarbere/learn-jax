@@ -110,3 +110,18 @@ matters *for this module*). Prefer arXiv abs links or DOIs. The lesson renders t
 - Weights download once into the HF cache volume. Don't modify learnjax/llama.py from a module — copy
   and adapt into the module if a lesson needs a variant, and report it.
 - PyTorch image has transformers 5.23 / peft 0.21 / accelerate 1.15 for side-by-side notebooks.
+- To measure what XLA *would* allocate for a huge shape without allocating it, compile only with autotuning
+  off: `jax.jit(f).lower(x).compile(compiler_options={"xla_gpu_autotune_level": 0})` (autotuning
+  materializes buffers and can OOM).
+
+## Links: attribution and JAX docs (every module)
+- **Attribute every external link** to who made it: authors for papers ("Kingma & Ba, [Adam](…)"), the person or
+  organization for posts, talks, videos, docs, repos, models and datasets ("JAX docs: […](…)", "Horace He, […](…)",
+  "ggml-org, [llama.cpp server README](…)", "[SmolLM2-360M-Instruct](…) by Hugging Face"). When a lesson builds on
+  or quotes someone's work (code, an exercise idea, a bug), name them and link it at that point, not only in
+  Further reading. New major sources also go in the README's Credits.
+- **Link the first mention of each JAX API** in a lesson's prose to its reference page:
+  `containers/run.sh python tools/link_jax_docs.py modules/NN-slug/lesson.py` (targets come from the docs' own
+  Sphinx inventory, so they exist; it skips code, f-string values and already-linked mentions; idempotent).
+- `make links` checks every external link resolves (`tools/check_links.py`; `--list` prints each with context
+  for an attribution review). `make papers` does the same for papers and companion videos.

@@ -339,7 +339,7 @@ def _(ex, jnp, lj, mh_H, mh_params, mh_reference, mh_x, mo):
     if _mha.ok:
         _err = float(jnp.abs(_mha.value - mh_reference).max())
         _items.append(mo.md(
-            f"**Your `multi_head_attention`** vs `jax.nn.dot_product_attention` (JAX's built-in, which takes "
+            f"**Your `multi_head_attention`** vs [`jax.nn.dot_product_attention`](https://docs.jax.dev/en/latest/_autosummary/jax.nn.dot_product_attention.html#jax.nn.dot_product_attention) (JAX's built-in, which takes "
             f"the same B, T, H, d layout): max difference **{_err:.1e}** "
             f"{'✅' if _err < 1e-4 else '— should be below 1e-4'}."))
     else:

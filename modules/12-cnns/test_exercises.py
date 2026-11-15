@@ -77,3 +77,38 @@ def test_conv2d_matches_lax_on_gpu_dtype(impl):
     out = impl.conv2d(img, ker, padding="VALID")
     ref = _naive_conv2d_valid(np.asarray(img[0], np.float32), np.asarray(ker, np.float32))
     np.testing.assert_allclose(np.asarray(out[0], np.float32), ref, rtol=0.05, atol=0.1)
+
+
+def _naive_causal(x, w, d):
+    x, w = np.asarray(x, np.float64), np.asarray(w, np.float64)
+    b, t, _ = x.shape
+    k = w.shape[0]
+    out = np.zeros((b, t, w.shape[2]))
+    for ti in range(t):
+        for ki in range(k):
+            src = ti - (k - 1 - ki) * d
+            if src >= 0:
+                out[:, ti] += x[:, src] @ w[ki]
+    return out
+
+
+def test_causal_conv1d(impl):
+    kx, kw = jax.random.split(jax.random.key(30))
+    x = jax.random.normal(kx, (2, 20, 3))
+    for k, d in [(2, 1), (2, 4), (3, 2), (1, 1)]:
+        w = jax.random.normal(jax.random.fold_in(kw, 10 * k + d), (k, 3, 5))
+        with jax.default_matmul_precision("highest"):
+            out = impl.causal_conv1d(x, w, d)
+        assert out.shape == (2, 20, 5)
+        np.testing.assert_allclose(out, _naive_causal(x, w, d), rtol=1e-4, atol=1e-4, err_msg=f"K={k} d={d}")
+    # no future leakage: changing inputs after step 9 must not change outputs up to step 9
+    w = jax.random.normal(kw, (2, 3, 5))
+    x2 = x.at[:, 10:].set(100.0)
+    np.testing.assert_array_equal(impl.causal_conv1d(x, w, 2)[:, :10], impl.causal_conv1d(x2, w, 2)[:, :10])
+
+
+def test_receptive_field(impl):
+    assert impl.receptive_field(2, [1, 2, 4, 8]) == 16
+    assert impl.receptive_field(3, [1, 2, 4]) == 15
+    assert impl.receptive_field(2, [1, 1, 1, 1]) == 5      # undilated: grows only linearly
+    assert impl.receptive_field(2, []) == 1

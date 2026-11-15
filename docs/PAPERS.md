@@ -19,17 +19,31 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 
 - **[LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)** — Hu et al., 2021. Fine-tune by learning a low-rank update instead of all weights.
 - **[Intrinsic Dimensionality Explains the Effectiveness of Language Model Fine-Tuning](https://arxiv.org/abs/2012.13255)** — Aghajanyan, Zettlemoyer, Gupta, 2020. Why low-rank updates are enough: fine-tuning lives in a small subspace.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Vectors (Essence of linear algebra, ch. 1)](https://www.youtube.com/watch?v=fNk_zzaMoSs). Arrows, lists of numbers, and both.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Linear transformations and matrices (ch. 3)](https://www.youtube.com/watch?v=kYB8IZa5AuE). A matrix is where the basis vectors land.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Matrix multiplication as composition (ch. 4)](https://www.youtube.com/watch?v=XkY2DOUCWMU). Why multiplying matrices composes transformations.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [The determinant (ch. 6)](https://www.youtube.com/watch?v=Ip3X9LOh2dk). How much a transformation scales area.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Inverse matrices, column space and null space (ch. 7)](https://www.youtube.com/watch?v=uQhTuRlWMxw). Undoing a transformation, and when you can't.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Dot products and duality (ch. 9)](https://www.youtube.com/watch?v=LyGKycYT2v0). Why the dot product measures alignment.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Eigenvectors and eigenvalues (ch. 14)](https://www.youtube.com/watch?v=PFDu9oVAE-g). Directions a matrix only stretches.
 
 ### 03 · Derivatives and autodiff, built from scratch
 
 - **[Learning representations by back-propagating errors](https://doi.org/10.1038/323533a0)** — Rumelhart, Hinton, Williams, 1986. Backpropagation made multi-layer networks trainable.
 - **[Automatic differentiation in machine learning: a survey](https://arxiv.org/abs/1502.05767)** — Baydin et al., 2015. Forward vs reverse mode, dual numbers, tapes: the theory behind jax.grad.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [The spelled-out intro to neural networks and backpropagation: building micrograd](https://www.youtube.com/watch?v=VMj-3S1tku0). The same Value-class autodiff you built, live-coded.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [The essence of calculus (ch. 1)](https://www.youtube.com/watch?v=WUvTyaaNkzM). Derivatives and integrals, visually.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Visualizing the chain rule and product rule (calculus ch. 4)](https://www.youtube.com/watch?v=YG15m2VwSjA). The rule backprop is built on.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Backpropagation, intuitively (Deep learning ch. 3)](https://www.youtube.com/watch?v=Ilg3gGewQ5U). What backprop is really doing.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Backpropagation calculus (Deep learning ch. 4)](https://www.youtube.com/watch?v=tIeHLnjs5U8). The chain rule through a network.
 
 ### 04 · Probability, softmax, cross-entropy and JAX random keys
 
 - **[A Mathematical Theory of Communication](https://doi.org/10.1002/j.1538-7305.1948.tb01338.x)** — Shannon, 1948. Entropy and cross-entropy start here; a language model's loss is measured in Shannon's bits.
 - **[Parallel random numbers: as easy as 1, 2, 3](https://doi.org/10.1145/2063384.2063405)** — Salmon et al., 2011. Counter-based RNGs (Threefry): the design behind JAX's splittable random keys.
 - **[Categorical Reparameterization with Gumbel-Softmax](https://arxiv.org/abs/1611.01144)** — Jang, Gu, Poole, 2016. The Gumbel-max trick for sampling categories, made differentiable.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Reinventing Entropy (Compression is Intelligence, part 1)](https://www.youtube.com/watch?v=l6DKRf-fAAM). Entropy from first principles.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [But what is cross-entropy? (Compression is Intelligence, part 2)](https://www.youtube.com/watch?v=GlYgs6v2YfU). Cross-entropy as compression: the loss every language model minimizes.
 
 ### 05 · Optimization: gradient descent to Adam
 
@@ -37,6 +51,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Decoupled Weight Decay Regularization](https://arxiv.org/abs/1711.05101)** — Loshchilov, Hutter, 2017. AdamW: why weight decay is not L2 regularization under Adam.
 - **[SGDR: Stochastic Gradient Descent with Warm Restarts](https://arxiv.org/abs/1608.03983)** — Loshchilov, Hutter, 2016. Cosine learning-rate schedules.
 - **[On the difficulty of training Recurrent Neural Networks](https://arxiv.org/abs/1211.5063)** — Pascanu, Mikolov, Bengio, 2012. Exploding gradients and gradient-norm clipping.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Gradient descent, how neural networks learn (Deep learning ch. 2)](https://www.youtube.com/watch?v=IHZwWFHWa-w). Cost functions and walking downhill.
 
 ## Part 2 — JAX core
 
@@ -67,21 +82,27 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Learning representations by back-propagating errors](https://doi.org/10.1038/323533a0)** — Rumelhart, Hinton, Williams, 1986. Backpropagation made multi-layer networks trainable.
 - **[Approximation by superpositions of a sigmoidal function](https://doi.org/10.1007/BF02551274)** — Cybenko, 1989. The universal approximation theorem.
 - **[Gaussian Error Linear Units (GELUs)](https://arxiv.org/abs/1606.08415)** — Hendrycks, Gimpel, 2016. The smooth activation used in GPT-2 and BERT.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [But what is a neural network? (Deep learning ch. 1)](https://www.youtube.com/watch?v=aircAruvnKk). Layers, weights and activations.
 
 ### 11 · Training craft: init, norms, schedules, checkpoints
 
 - **[Understanding the difficulty of training deep feedforward neural networks](https://proceedings.mlr.press/v9/glorot10a.html)** — Glorot, Bengio, 2010. Xavier initialization and activation statistics.
 - **[Delving Deep into Rectifiers](https://arxiv.org/abs/1502.01852)** — He et al., 2015. He initialization for ReLU nets.
 - **[Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)** — He et al., 2015. Residual connections: how very deep networks became trainable.
+- **[Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift](https://arxiv.org/abs/1502.03167)** — Ioffe, Szegedy, 2015. Normalize over the batch; the layer that made deep CNNs easy to train (and awkward in JAX).
 - **[Layer Normalization](https://arxiv.org/abs/1607.06450)** — Ba, Kiros, Hinton, 2016. Normalize over features, not the batch; standard in Transformers.
 - **[Root Mean Square Layer Normalization](https://arxiv.org/abs/1910.07467)** — Zhang, Sennrich, 2019. RMSNorm: LayerNorm without the mean; used by Llama and DeepSeek.
 - **[Dropout: A Simple Way to Prevent Neural Networks from Overfitting](https://jmlr.org/papers/v15/srivastava14a.html)** — Srivastava et al., 2014. Randomly drop units during training.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Building makemore Part 3: Activations & Gradients, BatchNorm](https://www.youtube.com/watch?v=P6sfmUTpUmc). Activation/gradient statistics in deep nets, and BatchNorm.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Building makemore Part 4: Becoming a Backprop Ninja](https://www.youtube.com/watch?v=q8SA3rM6ckI). Backpropagate by hand through cross-entropy, linear, tanh and BatchNorm layers.
 
 ### 12 · Convolutional networks
 
 - **[Gradient-based learning applied to document recognition](https://doi.org/10.1109/5.726791)** — LeCun et al., 1998. LeNet: convolution + pooling, trained end to end.
 - **[ImageNet Classification with Deep Convolutional Neural Networks](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks)** — Krizhevsky, Sutskever, Hinton, 2012. AlexNet: CNNs on GPUs win ImageNet, the start of the deep-learning boom.
+- **[WaveNet: A Generative Model for Raw Audio](https://arxiv.org/abs/1609.03499)** — van den Oord et al., 2016. Dilated causal convolutions: exponentially growing context for sequences.
 - **[Visualizing and Understanding Convolutional Networks](https://arxiv.org/abs/1311.2901)** — Zeiler, Fergus, 2013. What learned filters and feature maps respond to.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Building makemore Part 5: Building a WaveNet](https://www.youtube.com/watch?v=t3YJ5hKiMQ0). Deepening the MLP into a tree of dilated causal convolutions.
 
 ## Part 4 — Sequences, attention, transformers
 
@@ -90,18 +111,23 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Neural Machine Translation of Rare Words with Subword Units](https://arxiv.org/abs/1508.07909)** — Sennrich, Haddow, Birch, 2015. Byte-pair encoding for neural models.
 - **[SentencePiece: A simple and language independent subword tokenizer](https://arxiv.org/abs/1808.06226)** — Kudo, Richardson, 2018. Tokenization from raw text, no pre-splitting.
 - **[Language Models are Unsupervised Multitask Learners](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf)** — Radford et al., 2019. GPT-2: byte-level BPE and a scaled-up decoder-only Transformer.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Let's build the GPT Tokenizer](https://www.youtube.com/watch?v=zduSFxRajkE). Byte-level BPE from scratch, and the LLM quirks tokenization causes.
 
 ### 14 · Language modeling basics: bigrams to MLP LMs
 
 - **[A Neural Probabilistic Language Model](https://jmlr.org/papers/v3/bengio03a.html)** — Bengio et al., 2003. The MLP language model you built: embeddings + context window.
 - **[Prediction and Entropy of Printed English](https://doi.org/10.1002/j.1538-7305.1951.tb01366.x)** — Shannon, 1951. Humans as language models; the entropy of English.
 - **[Efficient Estimation of Word Representations in Vector Space](https://arxiv.org/abs/1301.3781)** — Mikolov et al., 2013. word2vec: embeddings as a product in their own right.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [The spelled-out intro to language modeling: building makemore](https://www.youtube.com/watch?v=PaCmpygFfXo). Bigram language model, sampling and negative log-likelihood.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Building makemore Part 2: MLP](https://www.youtube.com/watch?v=TCH_1BHY58I). Bengio-style MLP language model, learning-rate tuning, splits.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [But what is cross-entropy? (Compression is Intelligence, part 2)](https://www.youtube.com/watch?v=GlYgs6v2YfU). A language model's loss as bits needed to compress text.
 
 ### 15 · Attention from scratch
 
 - **[Neural Machine Translation by Jointly Learning to Align and Translate](https://arxiv.org/abs/1409.0473)** — Bahdanau, Cho, Bengio, 2014. Attention is introduced, as alignment in translation.
 - **[Attention Is All You Need](https://arxiv.org/abs/1706.03762)** — Vaswani et al., 2017. The Transformer: self-attention replaces recurrence. Everything in Part 4 builds on it.
 - **[FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness](https://arxiv.org/abs/2205.14135)** — Dao et al., 2022. Attention reorganized around memory traffic, not FLOPs.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Attention in transformers, step-by-step (Deep learning ch. 6)](https://www.youtube.com/watch?v=eMlx5fFNoYc). Queries, keys, values and masking, visualized.
 
 ### 16 · Build and train a GPT on your GPU
 
@@ -110,6 +136,9 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Using the Output Embedding to Improve Language Models](https://arxiv.org/abs/1608.05859)** — Press, Wolf, 2016. Weight tying between the embedding and the output head.
 - **[Scaling Laws for Neural Language Models](https://arxiv.org/abs/2001.08361)** — Kaplan et al., 2020. Loss falls as a power law in parameters, data and compute.
 - **[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556)** — Hoffmann et al., 2022. Scale tokens with parameters (~20 tokens/param) for a fixed compute budget.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Let's build GPT: from scratch, in code, spelled out.](https://www.youtube.com/watch?v=kCc8FmEb1nY). A character-level GPT on Shakespeare, built up from a bigram model.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Transformers, the tech behind LLMs (Deep learning ch. 5)](https://www.youtube.com/watch?v=wjZofJX0v4M). The whole GPT pipeline, visually.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [Large Language Models explained briefly](https://www.youtube.com/watch?v=LPZh9BOjkQs). The big picture in eight minutes.
 
 ### 17 · Modern LLM architecture: RoPE, RMSNorm, SwiGLU, MLA, MoE
 
@@ -126,6 +155,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Auxiliary-Loss-Free Load Balancing Strategy for Mixture-of-Experts](https://arxiv.org/abs/2408.15664)** — Wang et al., 2024. Balance experts with a bias term instead of an extra loss.
 - **[Better & Faster Large Language Models via Multi-token Prediction](https://arxiv.org/abs/2404.19737)** — Gloeckle et al., 2024. Predict several future tokens per position.
 - **[DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)** — DeepSeek-AI, 2024. MLA + DeepSeekMoE + aux-loss-free balancing + MTP: the model you replicated in miniature.
+- *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [How might LLMs store facts (Deep learning ch. 7)](https://www.youtube.com/watch?v=9-Jl0dxWQs8). What the MLP / feed-forward blocks (SwiGLU, experts) may be doing.
 
 ## Part 5 — LLMs in practice
 
@@ -162,6 +192,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Roofline: An Insightful Visual Performance Model for Multicore Architectures](https://doi.org/10.1145/1498765.1498785)** — Williams, Waterman, Patterson, 2009. Compute-bound vs memory-bound in one picture; the lens for every speed measurement.
 - **[Data Movement Is All You Need: A Case Study on Optimizing Transformers](https://arxiv.org/abs/2007.00072)** — Ivanov et al., 2020. Transformers are often memory-bound; measure data movement, not FLOPs.
 - **[Operator Fusion in XLA: Analysis and Evaluation](https://arxiv.org/abs/2301.13062)** — Snider, Liang, 2023. How XLA's fusion decisions show up in a profile.
+- *Companion ([Andrej Karpathy, *Neural Networks: Zero to Hero*](https://karpathy.ai/zero-to-hero.html)):* [Let's reproduce GPT-2 (124M)](https://www.youtube.com/watch?v=l8pRSuU81PU). Make GPT training fast step by step: precision, compilation, flash attention, nice numbers.
 
 ### 23 · Kernels: Pallas, HIP and fusion
 
@@ -183,3 +214,22 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556)** — Hoffmann et al., 2022. Scale tokens with parameters (~20 tokens/param) for a fixed compute budget.
 - **[Efficiently Scaling Transformer Inference](https://arxiv.org/abs/2211.05102)** — Pope et al., 2022. Cost per token for serving, the number to compare across hardware.
 - **[DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)** — DeepSeek-AI, 2024. MLA + DeepSeekMoE + aux-loss-free balancing + MTP: the model you replicated in miniature.
+
+## Part 8 — Reasoning
+
+### 26 · Reasoning models: inference scaling and RLVR with GRPO
+
+- **[Chain-of-Thought Prompting Elicits Reasoning in Large Language Models](https://arxiv.org/abs/2201.11903)** — Wei et al., 2022. Ask for the steps, get better answers: the start of reasoning prompts.
+- **[Self-Consistency Improves Chain of Thought Reasoning in Language Models](https://arxiv.org/abs/2203.11171)** — Wang et al., 2022. Sample many reasoning paths and majority-vote the answer.
+- **[Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168)** — Cobbe et al., 2021. GSM8K and verifier-reranked sampling: checkable answers as a training signal.
+- **[Let's Verify Step by Step](https://arxiv.org/abs/2305.20050)** — Lightman et al., 2023. Process vs outcome supervision: rewarding steps instead of only final answers.
+- **[Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)** — Schulman et al., 2017. The clipped policy-ratio objective GRPO inherits.
+- **[DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300)** — Shao et al., 2024. Introduces GRPO: group-relative advantages, no value network.
+- **[DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning](https://arxiv.org/abs/2501.12948)** — DeepSeek-AI, 2025. RL with verifiable rewards produces long reasoning; R1-Zero, distillation.
+- **[s1: Simple test-time scaling](https://arxiv.org/abs/2501.19393)** — Muennighoff et al., 2025. Budget forcing: controlling how long a model thinks at inference time.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 3: The Verifier for Evaluation and RL with Verifiable Rewards](https://www.youtube.com/watch?v=JQJ_8_jSAoY). The checker that is also the reward.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 4: Inference Scaling 1 (Temperature, Top-p, Self-Consistency)](https://www.youtube.com/watch?v=t5y-kS9nNxU). Sampling and majority voting.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 5: Inference Scaling 2 (Logprob Scoring, Self-Refinement)](https://www.youtube.com/watch?v=TVMyOJ_3Gxo). Scoring and critique-then-revise.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 6: Reinforcement Learning 1 (Implementing GRPO for RLVR)](https://www.youtube.com/watch?v=237Hf7Q3lgg). GRPO from scratch.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 7: Reinforcement Learning 2 (Tracking, KL Terms, And More)](https://www.youtube.com/watch?v=VxfUrUrrczs). Clipping, KL, format rewards, reward hacking.
+- *Companion ([Sebastian Raschka, *Build a Reasoning Model](https://magazine.sebastianraschka.com/p/building-reasoning-models)):* [Build A Reasoning Model From Scratch 8: Distillation](https://www.youtube.com/watch?v=msp69FR5NZs). Teaching a small model from a reasoning model's answers.

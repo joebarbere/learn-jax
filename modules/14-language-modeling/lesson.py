@@ -34,7 +34,7 @@ def _(mo):
     **You will:** count which character follows which in Shakespeare and sample text from the counts ·
     measure a language model with the cross-entropy and perplexity from Module 04 · rebuild the bigram
     model as a neural network and watch gradient descent find the same answer as counting · write the
-    windowed-batch sampler used by most pure-JAX LLM code (`vmap` + `dynamic_slice`) · train an MLP that
+    windowed-batch sampler used by most pure-JAX LLM code ([`vmap`](https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html#jax.vmap) + `dynamic_slice`) · train an MLP that
     reads several previous characters, and see what longer context buys · find the limit that motivates
     attention.
 
@@ -86,7 +86,7 @@ def _(mo):
 
     A **bigram** model only looks at the previous character: $P(\text{next} \mid \text{prev})$. Estimate it by
     counting: how often is `h` followed by `e`? Divide each row of the count table by its total and you have
-    a probability table. Implement `bigram_counts` in `exercises.py` (one `.at[].add` — no loops).
+    a probability table. Implement `bigram_counts` in `exercises.py` (one [`.at[].add`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.ndarray.at.html#jax.numpy.ndarray.at) — no loops).
     """)
     return
 
@@ -251,9 +251,9 @@ def _(mo):
 
     Longer context needs training examples that are *windows* of text. The standard pure-JAX recipe:
 
-    1. draw `batch_size` random start positions with `jax.random.randint`,
-    2. cut `block_size + 1` tokens at each with `jax.lax.dynamic_slice` — the start can be a traced value
-       but the **size must be a static Python int**, so the whole thing compiles under `jit`,
+    1. draw `batch_size` random start positions with [`jax.random.randint`](https://docs.jax.dev/en/latest/_autosummary/jax.random.randint.html#jax.random.randint),
+    2. cut `block_size + 1` tokens at each with [`jax.lax.dynamic_slice`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.dynamic_slice.html#jax.lax.dynamic_slice) — the start can be a traced value
+       but the **size must be a static Python int**, so the whole thing compiles under [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit),
     3. `jax.vmap` the slice over the starts (Module 07) to get a `(batch, block + 1)` array in one op,
     4. inputs are the first `block` tokens, targets the last `block` — **shifted by one**, so every
        position has a "next token" to predict.
@@ -288,7 +288,7 @@ def _(mo):
     concatenate the $k$ vectors, feed them through a hidden layer (tanh), and output 65 logits. That is the
     neural language model of Bengio et al. — the first to beat counting methods. Implement `mlp_lm_init` and
     `mlp_lm_apply`; the cell below trains one per context length on the GPU (8,000 steps of 512 windows
-    each, with the whole training loop compiled as one `lax.scan`, Module 10's trick).
+    each, with the whole training loop compiled as one [`lax.scan`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html#jax.lax.scan), Module 10's trick).
     """)
     return
 

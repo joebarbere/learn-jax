@@ -156,7 +156,7 @@ def _(mo):
     A ReLU network computes a **piecewise linear** function: each hidden unit adds one "kink". Give it
     enough units and it can approximate any reasonable curve — the *universal approximation theorem*. The
     slider sets the hidden width; each fit trains for 1,500 Adam steps on the GPU (well under a second,
-    thanks to `jax.lax.scan`, which Module 08 explains).
+    thanks to [`jax.lax.scan`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html#jax.lax.scan), which Module 08 explains).
     """)
     return
 
@@ -295,7 +295,7 @@ def _(mo):
     mo.md(r"""
     **Minibatches.** Each step uses 128 images, not all 55,000: the gradient is noisier (Module 05) but
     you get 430 updates per pass over the data (an **epoch**) instead of one. Shuffle every epoch with a
-    fresh key so batches differ, and keep every batch the same size so `jit` compiles once.
+    fresh key so batches differ, and keep every batch the same size so [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit) compiles once.
     """)
     return
 
@@ -651,7 +651,7 @@ def _(jax, mo, nnx, nnx_model):
     ```
 
     `nnx.merge(graphdef, state)` puts them back together. This split is how NNX works with `jax.jit`,
-    `jax.grad` and Orbax checkpoints (Module 11): transformations only ever see arrays.
+    [`jax.grad`](https://docs.jax.dev/en/latest/_autosummary/jax.grad.html#jax.grad) and Orbax checkpoints (Module 11): transformations only ever see arrays.
 
     | you wrote | Flax NNX |
     |---|---|
@@ -659,7 +659,7 @@ def _(jax, mo, nnx, nnx_model):
     | `he_init` | `kernel_init=nnx.initializers.he_normal()` |
     | `mlp_apply(params, x)` | `model(x)` |
     | `opt_state = optimizer.init(params)` | `nnx.Optimizer(model, tx, wrt=nnx.Param)` |
-    | `jax.value_and_grad(loss_fn)(params, x, y)` | `nnx.value_and_grad(loss_fn)(model)` |
+    | [`jax.value_and_grad(loss_fn)(params, x, y)`](https://docs.jax.dev/en/latest/_autosummary/jax.value_and_grad.html#jax.value_and_grad) | `nnx.value_and_grad(loss_fn)(model)` |
     | `params = optax.apply_updates(...)` (returns new) | `optimizer.update(model, grads)` (updates in place) |
     | `jax.jit` on a pure function | `nnx.jit`, which handles the in-place updates for you |
     """)

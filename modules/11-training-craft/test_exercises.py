@@ -79,3 +79,48 @@ def test_save_and_restore(impl, tmp_path):
     for a, b in zip(jax.tree.leaves(state), jax.tree.leaves(restored), strict=True):
         np.testing.assert_array_equal(np.asarray(a), np.asarray(b))
     assert (tmp_path / "ckpt").exists()
+
+
+def test_batch_norm(impl):
+    x = jax.random.normal(jax.random.key(20), (64, 10)) * 3 + jnp.arange(10.0)
+    g, b = jnp.ones(10), jnp.zeros(10)
+    rm, rv = jnp.zeros(10), jnp.ones(10)
+    y, nm, nv = impl.batch_norm(x, g, b, rm, rv, momentum=0.1, train=True)
+    np.testing.assert_allclose(y.mean(0), 0, atol=1e-5)          # per *feature*, over the batch
+    np.testing.assert_allclose(y.std(0), 1, atol=1e-3)
+    np.testing.assert_allclose(nm, 0.1 * x.mean(0), rtol=1e-5, atol=1e-6)
+    np.testing.assert_allclose(nv, 0.9 + 0.1 * x.var(0), rtol=1e-5)
+    # eval mode: running stats, unchanged
+    rm2, rv2 = jnp.full(10, 2.0), jnp.full(10, 4.0)
+    ye, em, ev = impl.batch_norm(x, g * 3, b + 1, rm2, rv2, train=False)
+    np.testing.assert_allclose(ye, (x - 2.0) / jnp.sqrt(4.0 + 1e-5) * 3 + 1, rtol=1e-5, atol=1e-5)
+    np.testing.assert_array_equal(em, rm2)
+    np.testing.assert_array_equal(ev, rv2)
+    # many training steps on same-distribution batches: running stats converge to the data's stats
+    m, v = rm, rv
+    for i in range(200):
+        xb = jax.random.normal(jax.random.key(100 + i), (256, 10)) * 2 + 5
+        _, m, v = impl.batch_norm(xb, g, b, m, v, momentum=0.1, train=True)
+    np.testing.assert_allclose(m, 5, atol=0.1)
+    np.testing.assert_allclose(v, 4, atol=0.3)
+
+
+def test_manual_backward(impl):
+    k = jax.random.split(jax.random.key(21), 5)
+    params = {"w1": jax.random.normal(k[0], (12, 32)) * 0.3, "b1": jax.random.normal(k[1], (32,)) * 0.1,
+              "w2": jax.random.normal(k[2], (32, 5)) * 0.3, "b2": jnp.zeros(5)}
+    x = jax.random.normal(k[3], (40, 12))
+    y = jax.random.randint(k[4], (40,), 0, 5)
+
+    def loss(p):  # an independent reference forward pass
+        logits = jnp.tanh(x @ p["w1"] + p["b1"]) @ p["w2"] + p["b2"]
+        return -jnp.mean(jax.nn.log_softmax(logits)[jnp.arange(40), y])
+
+    with jax.default_matmul_precision("highest"):
+        ref = jax.grad(loss)(params)
+        _, cache = impl.forward_with_cache(params, x, y)
+        mine = impl.manual_backward(params, cache, y)
+    assert set(mine) == set(params)
+    for name, value in params.items():
+        assert mine[name].shape == value.shape, name
+        np.testing.assert_allclose(mine[name], ref[name], rtol=1e-4, atol=1e-5, err_msg=name)

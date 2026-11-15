@@ -50,7 +50,7 @@ def _(mo):
 
     Module 15 built attention and Module 16 a GPT. Everything here is a refinement of that GPT block —
     each one solving a specific problem that showed up at scale. Code excerpts quoted below are from
-    [deepseek-v3-jax](https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax) (MIT), which you replicated.
+    Vaibhaav Tiwari's [deepseek-v3-jax](https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax) (MIT), which you replicated.
     """)
     return
 
@@ -113,7 +113,7 @@ def _(mo):
       $(m-n)\theta$: **attention sees relative position**, for free, with no extra parameters.
 
     **Two ways to write it.** Treat each pair $(a, b)$ as a complex number $a + ib$; rotating by $\phi$ is
-    multiplying by $e^{i\phi}$. That's the style of a popular "Llama 3 in pure JAX" blog post, and it pairs
+    multiplying by $e^{i\phi}$. That's the style of Saurabh Alone's ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax) (2025), and it pairs
     **neighbouring** features $(x_0,x_1), (x_2,x_3), \dots$ — the *interleaved* convention. deepseek_v3.py
     instead pairs feature $i$ with feature $i + D/2$ — the *halves* ("rotate-half") convention — and uses
     only cos and sin:
@@ -387,8 +387,8 @@ def _(mo):
     mo.md(r"""
     ## 6 · Find the bugs
 
-    `buggy_cached_attention` in your `exercises.py` is adapted from a published "Llama 3 from scratch in
-    pure JAX" tutorial. It looks reasonable and contains **two real bugs**. Here it is, run as a 5-token
+    `buggy_cached_attention` in your `exercises.py` is adapted from
+    Saurabh Alone's ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax) (2025), whose RoPE explanation is excellent. It looks reasonable and contains **two real bugs**. Here it is, run as a 5-token
     prefill then decode steps, against the correct all-at-once answer:
 
     ```python
@@ -506,7 +506,7 @@ def _(mo):
     **Dense vs sparse compute.** deepseek_v3.py runs *every* expert on *every* token and zeroes the unpicked
     ones (`einsum("nd,edh->neh", ...)`) — simple, jit-friendly, and on a small model fast enough. It wastes
     $(E-k)/E$ of the FFN FLOPs. Real systems **dispatch**: sort tokens by expert, run each expert only on its
-    tokens (`jax.lax.ragged_dot`), and with expert parallelism put different experts on different GPUs
+    tokens ([`jax.lax.ragged_dot`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.ragged_dot.html#jax.lax.ragged_dot)), and with expert parallelism put different experts on different GPUs
     (Module 24).
 
     **Load balancing.** Left alone, routing collapses: an expert that's slightly better gets picked more,
@@ -820,7 +820,7 @@ def _(mo):
     * Meta, [The Llama 3 Herd of Models](https://arxiv.org/abs/2407.21783) (2024) — Section 3 is the architecture
     * DeepSeek-AI, [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437) (2024) — MLA, DeepSeekMoE,
       aux-loss-free balancing, MTP
-    * [deepseek-v3-jax](https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax) — the 190-line model you replicated;
+    * Vaibhaav Tiwari, [deepseek-v3-jax](https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax) — the 190-line model you replicated;
       reread it now, every line should be familiar
 
     **Next:** Module 18 — inference: KV-cache decoding for real, sampling strategies, speculative decoding

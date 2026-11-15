@@ -80,13 +80,40 @@ answers, unless you ask for the answer outright.
 | 20 | Fine-tuning and LoRA *(+ PyTorch/PEFT)* | ✅ |
 | 21 | Evaluating language models | ✅ |
 | **Part 6 — Performance & ROCm** | | |
-| 22 | Profiling JAX on ROCm | |
-| 23 | Kernels: Pallas, HIP and fusion | |
+| 22 | Profiling JAX on ROCm | ✅ |
+| 23 | Kernels: Pallas, HIP and fusion | ✅ |
 | **Part 7 — Scale & cloud** | | |
 | 24 | Parallelism and sharding (on simulated devices) | |
 | 25 | JAX on AWS, and the capstone: your own small LLM end to end | |
+| **Part 8 — Reasoning** | | |
+| 26 | Reasoning models: inference scaling and RLVR with GRPO | |
 
 ✅ = written and verified. The rest are being built in phases.
+
+## Credits
+
+This course stands on other people's work. Every lesson cites its sources inline: authors for papers,
+creators for videos, posts and docs. Most of all:
+
+- **Vaibhaav Tiwari**, [deepseek-v3-jax](https://github.com/Vaibhaav-Tiwari/deepseek-v3-jax) (MIT). It started
+  this course. Module 17 quotes its model code, and Modules 16 and 21 train and evaluate on its published corpus.
+- **The JAX team**, the [JAX documentation](https://docs.jax.dev/en/latest/jax.html), including
+  [The Training Cookbook](https://docs.jax.dev/en/latest/the-training-cookbook.html). Each lesson links the
+  first mention of every JAX API to its reference page.
+- **Andrej Karpathy**, [Neural Networks: Zero to Hero](https://karpathy.ai/zero-to-hero.html),
+  **Grant Sanderson**, [3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks), and
+  **Sebastian Raschka**, [Build a Reasoning Model (From Scratch)](https://magazine.sebastianraschka.com/p/building-reasoning-models).
+  These are companion lectures, listed in each lesson and in [docs/PAPERS.md](docs/PAPERS.md).
+- **Saurabh Alone**, ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax).
+  Its RoPE explanation and two real KV-cache bugs became Module 17's exercises.
+- **Models:** [SmolLM2](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) by Hugging Face (Apache-2.0)
+  and [Qwen2.5-Coder](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF) by the Qwen Team (Apache-2.0),
+  served with [llama.cpp](https://github.com/ggml-org/llama.cpp) by ggml-org (MIT).
+- **Data:** [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) by Zalando Research (MIT);
+  [tiny Shakespeare](https://github.com/karpathy/char-rnn) from Andrej Karpathy's char-rnn; public-domain
+  detective novels from Standard Ebooks and Project Gutenberg, via deepseek-v3-jax;
+  [ARC](https://allenai.org/data/arc) by the Allen Institute for AI (CC BY-SA 4.0).
+- **Papers:** the 90-plus seminal papers are credited to their authors in every lesson and in docs/PAPERS.md.
 
 ## Layout
 

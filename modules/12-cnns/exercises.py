@@ -59,3 +59,28 @@ def im2col(image, kh: int, kw: int):
     (H', W', C_out) equals the VALID convolution of `img` with an HWIO `kernel`. (Convolution is a matmul!)
     """
     raise NotImplementedError
+
+
+def causal_conv1d(x, w, dilation: int = 1):
+    """Dilated *causal* 1-D convolution over time (WaveNet). Output position t only sees inputs ≤ t.
+
+    x: (B, T, C_in); w: (K, C_in, C_out); returns (B, T, C_out) — same length as the input.
+        out[b, t] = Σ_k  x[b, t - (K - 1 - k)·dilation] @ w[k]      (terms with a negative time index are 0)
+    So w[K-1] multiplies the current step, w[K-2] the step `dilation` back, and so on.
+    Pad on the LEFT only — padding on the right would let the future leak in. Two ways:
+      * shift-and-add (recommended): left-pad x by (K-1)·dilation with jnp.pad, then sum K matmuls of
+        time-shifted slices with w[k];
+      * jax.lax.conv_general_dilated (padding [((K-1)·dilation, 0)], rhs_dilation=(dilation,),
+        dimension_numbers ("NWC", "WIO", "NWC")) — correct, but the lesson measures it ~30× slower on
+        the RX 7600 XT, and the lesson trains a model with *your* function.
+    """
+    raise NotImplementedError
+
+
+def receptive_field(kernel_size: int, dilations) -> int:
+    """How many input time steps one output of a stack of causal convs can see (including its own step).
+
+    Each layer with kernel K and dilation d reaches (K - 1)·d further back. E.g. K=2 with dilations
+    1, 2, 4, 8 → 1 + 1 + 2 + 4 + 8 = 16. An empty stack sees only 1 step.
+    """
+    raise NotImplementedError

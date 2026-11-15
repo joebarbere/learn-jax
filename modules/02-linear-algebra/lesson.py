@@ -109,7 +109,7 @@ def _(jnp, mo):
     |---|---|
     | $(1, 0)\cdot(0, 1)$ | `{jnp.dot(jnp.array([1., 0.]), jnp.array([0., 1.]))}` — perpendicular |
     | $(1, 2)\cdot(2, 4)$ | `{jnp.dot(jnp.array([1., 2.]), jnp.array([2., 4.]))}` — same direction, big |
-    | length of $(3, 4)$, `jnp.linalg.norm` | `{jnp.linalg.norm(jnp.array([3., 4.]))}` — length, $\sqrt{{a \cdot a}}$ |
+    | length of $(3, 4)$, [`jnp.linalg.norm`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.linalg.norm.html#jax.numpy.linalg.norm) | `{jnp.linalg.norm(jnp.array([3., 4.]))}` — length, $\sqrt{{a \cdot a}}$ |
 
     This is *the* similarity measure for embeddings: two words, images or documents are "close" when
     their vectors point the same way. Attention (Module 15) is a table of dot products between every
@@ -231,8 +231,8 @@ def _(jax, jnp, mo):
 
     | method | max error in $x$ |
     |---|---|
-    | `jnp.linalg.solve(A, b)` | `{float(jnp.abs(_x_solve - _x_true).max()):.2e}` |
-    | `jnp.linalg.inv(A) @ b` | `{float(jnp.abs(_x_inv - _x_true).max()):.2e}` |
+    | [`jnp.linalg.solve(A, b)`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.linalg.solve.html#jax.numpy.linalg.solve) | `{float(jnp.abs(_x_solve - _x_true).max()):.2e}` |
+    | [`jnp.linalg.inv(A) @ b`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.linalg.inv.html#jax.numpy.linalg.inv) | `{float(jnp.abs(_x_inv - _x_true).max()):.2e}` |
 
     Both work here, but prefer `solve`: it's cheaper and usually more accurate, because forming the
     inverse explicitly amplifies rounding error. A singular matrix like $\begin{{bmatrix}}1&2\\2&4\end{{bmatrix}}$
@@ -260,7 +260,7 @@ def _(draw_transform, jnp, mo, np, small_fig):
     Most arrows change direction under $M$. An **eigenvector** $v$ doesn't: $Mv = \lambda v$ — it's only
     stretched by its **eigenvalue** $\lambda$.
 
-    For the symmetric matrix $M = \begin{{bmatrix}}2 & 0.8\\0.8 & 1\end{{bmatrix}}$, `jnp.linalg.eigh` gives
+    For the symmetric matrix $M = \begin{{bmatrix}}2 & 0.8\\0.8 & 1\end{{bmatrix}}$, [`jnp.linalg.eigh`](https://docs.jax.dev/en/latest/_autosummary/jax.numpy.linalg.eigh.html#jax.numpy.linalg.eigh) gives
     $\lambda$ = `{', '.join(f'{float(_x):.3f}' for _x in _vals)}`. The dashed black arrows are the eigenvectors;
     the solid ones are where $M$ sends them — same line, scaled by $\lambda$. They line up with the long
     and short axes of the orange ellipse.

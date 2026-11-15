@@ -37,3 +37,15 @@ def im2col(image, kh: int, kw: int):
     xs = jnp.arange(wo)[None, :, None, None] + jnp.arange(kw)[None, None, None, :]   # (1, wo, 1, kw)
     patches = image[ys, xs]                                                          # (ho, wo, kh, kw, c)
     return patches.reshape(ho * wo, kh * kw * c)
+
+
+def causal_conv1d(x, w, dilation: int = 1):
+    # Shift-and-add: K matmuls on left-padded, shifted copies. Same result as
+    # lax.conv_general_dilated(..., padding=[((K-1)*d, 0)], rhs_dilation=(d,)) but much faster on this GPU.
+    k, t = w.shape[0], x.shape[1]
+    xp = jnp.pad(x, ((0, 0), ((k - 1) * dilation, 0), (0, 0)))
+    return sum(xp[:, i * dilation: i * dilation + t] @ w[i] for i in range(k))
+
+
+def receptive_field(kernel_size: int, dilations) -> int:
+    return 1 + sum((kernel_size - 1) * d for d in dilations)

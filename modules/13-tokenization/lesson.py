@@ -411,7 +411,7 @@ def _(ex, lj, mo):
     | your deepseek-v3-jax model | 8,192 × 384 | **{_ds_emb.value / 1e6:.1f}M** | {_ds_emb.value / 36.2e6:.0%} of 36.2M |
     | Llama 3 8B | 128,256 × 4,096 | **{_ll3_emb.value / 1e9:.2f}B** | {_ll3_emb.value / 8.03e9:.0%} of 8.0B |
 
-    **A cautionary tale.** A popular blog post builds "LLaMA 3 in pure JAX" with the GPT-2 tokenizer
+    **A cautionary tale.** Saurabh Alone's ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax) (2025) — a nicely written walkthrough — uses the GPT-2 tokenizer
     (50,257 tokens), `dim=256`, 6 layers, 8 query heads and 4 key/value heads, and calls it "~2 million
     parameters". The 6 transformer layers really are small — about {_layers / 1e6:.1f}M (attention
     {_attn:,} + feed-forward {_ffn:,} per layer, with Llama's 768-wide feed-forward). But the vocabulary adds

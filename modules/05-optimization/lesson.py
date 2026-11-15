@@ -237,7 +237,7 @@ def _(mo):
 
     $L(x,y)=(1-x)^2+100\,(y-x^2)^2$ is the classic hard case: a curved, very narrow valley with the minimum
     at $(1,1)$. All four optimizers start at $(-1.5,\,2)$ and get 1,000 steps, each with a learning rate
-    tuned to be roughly as large as it can stably be. (These run as one compiled `lax.scan` each —
+    tuned to be roughly as large as it can stably be. (These run as one compiled [`lax.scan`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html#jax.lax.scan) each —
     Module 08 explains `scan`.)
     """)
     return
@@ -494,7 +494,7 @@ def _(mo):
     ## 10 · Your turn: build the optimizers
 
     Open `modules/05-optimization/exercises.py`. Six functions: `sgd_step`, `momentum_step`, `adam_step`,
-    `warmup_cosine`, `clip_by_global_norm`, `fit`. Each works on pytrees via `jax.tree.map`. The cells
+    `warmup_cosine`, `clip_by_global_norm`, `fit`. Each works on pytrees via [`jax.tree.map`](https://docs.jax.dev/en/latest/_autosummary/jax.tree.map.html#jax.tree.map). The cells
     below check your step functions against optax over several steps on a small pytree.
     """)
     return
@@ -651,10 +651,10 @@ def _(mo):
     * Kingma & Ba, [Adam: A Method for Stochastic Optimization](https://arxiv.org/abs/1412.6980) — short
       and readable; Algorithm 1 is your `adam_step`.
     * Loshchilov & Hutter, [Decoupled Weight Decay Regularization](https://arxiv.org/abs/1711.05101) — AdamW.
-    * [Optax documentation](https://optax.readthedocs.io/) — especially "Gradient transformations".
+    * Google DeepMind, [Optax documentation](https://optax.readthedocs.io/) — especially "Gradient transformations".
     * Sebastian Ruder, [An overview of gradient descent optimization algorithms](https://www.ruder.io/optimizing-gradient-descent/).
 
-    **Next:** Module 06 — `jit` and XLA: what actually happens when you compile a training step.
+    **Next:** Module 06 — [`jit`](https://docs.jax.dev/en/latest/_autosummary/jax.jit.html#jax.jit) and XLA: what actually happens when you compile a training step.
     """)
     return
 

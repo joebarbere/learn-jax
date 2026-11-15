@@ -9,6 +9,7 @@ PARTS = {
     5: "LLMs in practice",
     6: "Performance & ROCm",
     7: "Scale & cloud",
+    8: "Reasoning",
 }
 
 MODULES = [
@@ -38,6 +39,7 @@ MODULES = [
     (23, "23-kernels", "Kernels: Pallas, HIP and fusion", 6),
     (24, "24-parallelism", "Parallelism and sharding", 7),
     (25, "25-aws", "JAX on AWS, and the capstone", 7),
+    (26, "26-reasoning", "Reasoning models: inference scaling and RLVR with GRPO", 8),
 ]
 
 

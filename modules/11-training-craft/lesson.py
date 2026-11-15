@@ -36,10 +36,10 @@ def _(mo):
     "the loss is flat" — and the debugging habits that tell you which one you're looking at.
 
     **You will:** watch signals vanish or explode through a 20-layer network and fix it with the right
-    initialization · fix it again with LayerNorm and RMSNorm (the one in your deepseek-v3-jax model) · see
+    initialization · fix it again with LayerNorm and RMSNorm (the one in your deepseek-v3-jax model) and see why BatchNorm fell out of favor for language models · see
     why residual connections let gradients reach the first layer · make a small model overfit on purpose and
     rein it in with dropout and weight decay · learn a debugging playbook (overfit one batch, watch the
-    gradient norm, catch NaNs at the source) · checkpoint with Orbax and resume *bit-identically*.
+    gradient norm, catch NaNs at the source) · checkpoint with Orbax and resume *bit-identically* · write a backward pass by hand and match [`jax.grad`](https://docs.jax.dev/en/latest/_autosummary/jax.grad.html#jax.grad) ("Backprop Ninja").
 
     Module 10 got an MLP to ~88% on Fashion-MNIST with defaults that quietly did a lot of work. This module
     is about those defaults — and what to do when they aren't enough.
@@ -94,6 +94,9 @@ def _(jax, jnp):
                 _h = _rms(_h)
             elif norm == "layer":
                 _h = _ln(_h)
+            elif norm == "batch":  # over the batch axis (train-mode statistics)
+                _bm = _h.mean(0, keepdims=True)
+                _h = (_h - _bm) * jax.lax.rsqrt(((_h - _bm) ** 2).mean(0, keepdims=True) + 1e-5)
             _out.append(float(_h.std()))
         return _out
 
@@ -149,7 +152,7 @@ def _(mo):
     * **RMSNorm:** $\displaystyle \frac{x}{\sqrt{\operatorname{mean}(x^2) + \epsilon}}\,w$ — skip the mean
       subtraction and the bias. Cheaper and works as well in transformers, so modern LLMs (Llama, DeepSeek)
       use it. Your deepseek-v3-jax model's `rms_norm` is literally
-      `x * jax.lax.rsqrt(jnp.mean(x * x, -1, keepdims=True) + eps) * w`.
+      [`x * jax.lax.rsqrt(jnp.mean(x * x, -1, keepdims=True) + eps) * w`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.rsqrt.html#jax.lax.rsqrt).
 
     Here the same 20-layer network with a **bad** init (gain 0.7 or 1.3), with and without a norm after
     each layer:
@@ -193,6 +196,127 @@ def _(ex, jax, jnp, lj, mo, nnx):
                             f"row means are *not* zero ({float(_rn.value.mean()):.3f}): RMSNorm only fixes scale."))
     else:
         _items.append(_rn.view(mo))
+    mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ### 2b · BatchNorm: normalizing over the *batch* instead
+
+    The original normalization layer (Ioffe & Szegedy, 2015) took the statistics over a different axis:
+    for each **feature**, the mean and variance across the **examples in the batch**. It's what made deep
+    CNNs like ResNet easy to train, and it's still common in vision. But it has two awkward properties:
+
+    1. **An example's output depends on its batch-mates.** Change the other 31 images in the batch and
+       image #1's activations change. With small batches the statistics are noisy.
+    2. **Train and inference behave differently.** At inference you may have one example — no batch to take
+       statistics over. So during training BatchNorm keeps **running averages** of the mean and variance,
+       and at inference uses those instead. That's *state that changes during the forward pass*.
+
+    In PyTorch that state hides inside the module (`model.train()` / `model.eval()` flip a flag). In
+    functional JAX there is no hidden state, so it becomes explicit: the function takes the running stats
+    and returns updated ones — exactly the signature of your exercise below. Flax NNX wraps this in a
+    `BatchStat` variable and a `use_running_average` flag.
+
+    Transformers use LayerNorm/RMSNorm instead: per-example statistics, no batch dependence, no running
+    state, and identical behavior when generating one token at a time.
+    """)
+    return
+
+
+@app.cell
+def _(act_stds, jax, jnp, plt):
+    # (left) BatchNorm rescues the bad-init deep stack too; (right) but one example's output depends on its batch
+    def _deep_out(x, norm, depth=10, width=128):
+        _h = x
+        for _i in range(depth):
+            _w = jax.random.normal(jax.random.key(1000 + _i), (width, width)) * (2 / width) ** 0.5
+            _h = jax.nn.relu(_h @ _w)
+            if norm == "batch":
+                _m = _h.mean(0, keepdims=True)
+                _h = (_h - _m) * jax.lax.rsqrt(((_h - _m) ** 2).mean(0, keepdims=True) + 1e-5)
+            else:
+                _m = _h.mean(-1, keepdims=True)
+                _h = (_h - _m) * jax.lax.rsqrt(((_h - _m) ** 2).mean(-1, keepdims=True) + 1e-5)
+        return _h
+
+    _x0 = jax.random.normal(jax.random.key(1), (1, 128))
+    _sizes = [2, 4, 8, 16, 64, 256]
+    _runs = {"batch1": ("batch", 1), "batch10": ("batch", 10), "layer": ("layer", 10)}
+    _wobble = {_k: [] for _k in _runs}
+    for _B in _sizes:
+        for _k, (_norm, _depth) in _runs.items():
+            _outs = []
+            for _t in range(16):  # the same example, 16 different sets of batch-mates
+                _mates = jax.random.normal(jax.random.key(10_000 * _B + _t), (_B - 1, 128))
+                _outs.append(_deep_out(jnp.concatenate([_x0, _mates]), _norm, depth=_depth)[0])
+            _outs = jnp.stack(_outs)
+            _wobble[_k].append(float(_outs.std(0).mean() / (jnp.abs(_outs).mean() + 1e-9)))
+    bn_wobble = dict(sizes=_sizes, **_wobble)
+
+    _fig, _axes = plt.subplots(1, 2, figsize=(10.5, 3.4))
+    _axes[0].semilogy(range(1, 21), act_stds(1.3), label="no norm")
+    _axes[0].semilogy(range(1, 21), act_stds(1.3, "batch"), "--", label="BatchNorm")
+    _axes[0].semilogy(range(1, 21), act_stds(1.3, "layer"), ":", lw=2.5, label="LayerNorm")
+    _axes[0].set(title="gain 1.3: BatchNorm fixes the scale too", xlabel="layer", ylabel="activation std")
+    _axes[0].legend(fontsize=8)
+    _axes[1].loglog(_sizes, _wobble["batch1"], "o-", label="BatchNorm, 1 layer")
+    _axes[1].loglog(_sizes, _wobble["batch10"], "o--", label="BatchNorm, 10 layers")
+    _axes[1].loglog(_sizes, [_wobble["batch1"][0] * (2 / _b) ** 0.5 for _b in _sizes], ":", color="gray",
+                    label="∝ 1/√B")
+    _axes[1].set(title="same example, different batch-mates", xlabel="batch size",
+                 ylabel="relative change in its output")
+    _axes[1].set_xticks(_sizes, labels=[str(_b) for _b in _sizes])
+    _axes[1].minorticks_off()
+    _axes[1].legend(fontsize=8)
+    _fig.tight_layout()
+    _fig
+    return (bn_wobble,)
+
+
+@app.cell
+def _(bn_wobble, mo):
+    _b1, _b10 = bn_wobble["batch1"], bn_wobble["batch10"]
+    mo.md(f"""
+    After **one** BatchNorm layer, a fixed example's output moves by **{_b1[0]:.0%}** of its size when its
+    batch-mates change at batch size 2, **{_b1[2]:.0%}** at 8 and **{_b1[-1]:.0%}** at 256 — batch-statistics
+    noise shrinking roughly like 1/√B (dotted line). Through **ten** layers the noise compounds: still
+    **{_b10[-1]:.0%}** at batch 256. With LayerNorm the change is exactly **{max(bn_wobble['layer']):.0f}** at every
+    batch size — each example is normalized on its own, so it isn't even on the log plot. That batch dependence is
+    why BatchNorm needs large batches and running statistics, and why language models (trained and served one
+    sequence at a time) don't use it.
+    """)
+    return
+
+
+@app.cell
+def _(ex, jax, jnp, lj, mo, nnx):
+    _x = jax.random.normal(jax.random.key(8), (32, 6)) * 2 + 3
+    _a = lj.attempt(ex.batch_norm, _x, jnp.ones(6), jnp.zeros(6), jnp.zeros(6), jnp.ones(6), 0.1, True)
+    _items = [mo.md("### Your turn: `batch_norm`\n\nOne training step on a batch of 32, compared with "
+                    "`nnx.BatchNorm` (Flax's `momentum=0.9` means *keep* 90% — the same as your 0.1 "
+                    "weight on the new batch), then 300 steps to see the running stats converge:")]
+    if _a.ok:
+        _y, _m, _v = _a.value
+        _bn = nnx.BatchNorm(6, momentum=0.9, epsilon=1e-5, rngs=nnx.Rngs(0))
+        _ref = _bn(_x, use_running_average=False)
+        _rows = [f"output vs `nnx.BatchNorm`: **{float(jnp.abs(_y - _ref).max()):.1e}** · running mean vs Flax: "
+                 f"**{float(jnp.abs(_m - _bn.mean[...]).max()):.1e}** · running var vs Flax: "
+                 f"**{float(jnp.abs(_v - _bn.var[...]).max()):.1e}**"]
+        _m, _v = jnp.zeros(6), jnp.ones(6)
+        for _i in range(300):
+            _xb = jax.random.normal(jax.random.key(500 + _i), (64, 6)) * 2 + 3
+            _, _m, _v = ex.batch_norm(_xb, jnp.ones(6), jnp.zeros(6), _m, _v, 0.1, True)
+        _ye, _, _ = ex.batch_norm(_x[:1], jnp.ones(6), jnp.zeros(6), _m, _v, 0.1, False)
+        _rows.append(f"after 300 steps on data with mean 3 and variance 4: running mean ≈ "
+                     f"**{float(_m.mean()):.2f}**, running var ≈ **{float(_v.mean()):.2f}**. In eval mode a "
+                     f"*single* example (batch of 1) normalizes fine with those: output mean "
+                     f"{float(_ye.mean()):.2f} — in train mode a batch of 1 would be all zeros.")
+        _items += [mo.md(_r) for _r in _rows]
+    else:
+        _items.append(_a.view(mo))
     mo.vstack(_items)
     return
 
@@ -532,9 +656,9 @@ def _(jax, jnp, mo):
     > `{_caught}`
 
     It's slow, so turn it on only while hunting: either globally with
-    `jax.config.update("jax_debug_nans", True)` at the top of a script, or — as this cell does — scoped with
-    `with jax.debug_nans(True):`, which switches itself off when the block ends. The fix is the log-sum-exp form
-    from Module 04 — `jax.nn.log_softmax` gives the finite loss **{_fixed:.4f}**.
+    [`jax.config.update("jax_debug_nans", True)`](https://docs.jax.dev/en/latest/_autosummary/jax.config.html#jax.config) at the top of a script, or — as this cell does — scoped with
+    [`with jax.debug_nans(True):`](https://docs.jax.dev/en/latest/_autosummary/jax.debug_nans.html#jax.debug_nans), which switches itself off when the block ends. The fix is the log-sum-exp form
+    from Module 04 — [`jax.nn.log_softmax`](https://docs.jax.dev/en/latest/_autosummary/jax.nn.log_softmax.html#jax.nn.log_softmax) gives the finite loss **{_fixed:.4f}**.
     """)
     return
 
@@ -622,6 +746,61 @@ def _(ex, jnp, lj, mo, runs_dir, shutil):
                             f"loop in this course resumable."))
     else:
         _items.append(_a.view(mo))
+    mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## 8 · Backprop Ninja: the backward pass by hand
+
+    `jax.grad` has done every backward pass in this course. Once, do it yourself — in **tensor** form, not
+    one scalar at a time like Module 03's `Value` class — for a 2-layer MLP on Fashion-MNIST:
+
+    $$h_\text{pre} = xW_1 + b_1,\quad h = \tanh(h_\text{pre}),\quad \text{logits} = hW_2 + b_2,\quad
+    L = -\tfrac{1}{N}\textstyle\sum_n \log \operatorname{softmax}(\text{logits}_n)_{y_n}.$$
+
+    Walk backwards, keeping every gradient the same shape as the thing it's the gradient *of*:
+
+    * **Softmax + cross-entropy** collapse into one beautiful line: $\partial L/\partial\,\text{logits} =
+      (\text{probs} - \text{onehot}(y))/N$. Push the right class's probability up, everything else down.
+    * **A linear layer** $\text{out} = xW + b$ gives three rules you'll use forever: $dW = x^\top\,d\text{out}$,
+      $db = \sum_\text{rows} d\text{out}$ (the bias was broadcast over rows, so its gradient sums over them),
+      $dx = d\text{out}\,W^\top$. Check the shapes: they're the only ones that fit.
+    * **tanh** is elementwise: $\tanh'(z) = 1 - \tanh(z)^2$, and you already have $\tanh(z) = h$ in the cache.
+
+    `forward_with_cache` (provided) keeps the intermediates; `manual_backward` is yours. The table compares
+    every parameter's gradient with `jax.grad` — once those numbers are ~1e-7, autodiff holds no mystery:
+    it's this, done systematically.
+    """)
+    return
+
+
+@app.cell
+def _(ex, jax, jnp, lj, mo, train_x, train_y):
+    _k = jax.random.split(jax.random.key(42), 2)
+    _params = {"w1": jax.random.normal(_k[0], (784, 64)) * (1 / 784) ** 0.5, "b1": jnp.zeros(64),
+               "w2": jax.random.normal(_k[1], (64, 10)) * (1 / 64) ** 0.5, "b2": jnp.zeros(10)}
+    _x, _y = jnp.asarray(train_x[:256]), jnp.asarray(train_y[:256])
+    _fwd = lj.attempt(ex.forward_with_cache, _params, _x, _y)
+    _items = [mo.md("### Your turn: `manual_backward`")]
+    if _fwd.ok:
+        _loss, _cache = _fwd.value
+        _mine = lj.attempt(ex.manual_backward, _params, _cache, _y)
+        if _mine.ok:
+            with jax.default_matmul_precision("highest"):
+                _ref = jax.grad(lambda p: ex.forward_with_cache(p, _x, _y)[0])(_params)
+            _rows = ["| parameter | shape | max abs error vs `jax.grad` | relative error |", "|---|---|---|---|"]
+            for _n in ("w1", "b1", "w2", "b2"):
+                _err = float(jnp.abs(_mine.value[_n] - _ref[_n]).max())
+                _rel = _err / (float(jnp.abs(_ref[_n]).max()) + 1e-30)
+                _rows.append(f"| `{_n}` | {tuple(_ref[_n].shape)} | {_err:.1e} | {_rel:.1e} |")
+            _items.append(mo.md(f"Loss on 256 Fashion-MNIST images: {float(_loss):.4f}\n\n" + "\n".join(_rows)))
+        else:
+            _items.append(_mine.view(mo))
+    else:
+        _items.append(_fwd.view(mo))
     mo.vstack(_items)
     return
 
