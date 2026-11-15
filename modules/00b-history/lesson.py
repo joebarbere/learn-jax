@@ -35,7 +35,8 @@ def _(mo):
     **You will:** explore an interactive timeline of about 50 milestones and every seminal paper the
     course cites · read the story era by era, each with pointers to the modules that rebuild it ·
     meet the two big traditions, symbolic and statistical AI · see how GPUs, CUDA, ROCm, XLA and JAX
-    made it all practical · write a few small timeline tools.
+    made it all practical · trace the family tree of about fifty models and the building blocks each one
+    added · write a few small timeline and graph tools.
 
     No GPU needed here. Read it now, and come back whenever a later module mentions a name or a year.
     """)
@@ -384,8 +385,8 @@ def _(mo):
     mo.md(r"""
     ## 11 · Your turn: timeline tools
 
-    Open `modules/00b-history/exercises.py`. Five small functions, plain Python, no JAX. The lesson
-    uses them to answer questions about the timeline above.
+    Open `modules/00b-history/exercises.py`. Seven small functions, plain Python, no JAX. The first five
+    answer questions about the timeline above; `ancestors` and `new_blocks` power Section 12's family tree.
     """)
     return
 
@@ -478,6 +479,217 @@ def _(mo, q1, q2, q3):
         _fb.append(mo.callout(mo.md(("Right. " if _q.value == _right else "Not quite. ") + _why),
                               kind="success" if _q.value == _right else "warn"))
     mo.vstack(_fb) if _fb else mo.md("")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## 12 · The family tree: models and the blocks they're built from
+
+    A modern LLM is assembled from parts, each introduced by some paper to fix a specific problem. RoPE
+    replaced learned positions, RMSNorm replaced LayerNorm, GQA and MLA shrank the KV cache, and MoE made
+    parameters cheap. `learnjax/lineage.py` records about fifty models: the models each one builds on, and
+    the **building blocks** it uses. Each block is filed under a *slot* (position, normalization, sequence
+    mixing, feed-forward, …), cites the paper that introduced it, and links the module where you build it.
+
+    Two views of the same data follow. The **lineage graph** shows who built on whom, over time. The
+    **taxonomy** shows, slot by slot, which choice each model made.
+
+    *How the data is checked:* tests enforce the registry's rules (parents are older than their children,
+    every block cites a registered paper, no model uses a block before the model that introduced it).
+    `make lineage` also downloads the `config.json` of every open model and checks GQA, MLA, MoE, shared
+    experts, partial RoPE, sliding windows, multi-token prediction and NoPE layers against what the
+    registry claims. The tables are in `docs/LINEAGE.md`.
+    """)
+    return
+
+
+@app.cell
+def _():
+    import learnjax.lineage as LIN
+
+    lin_models = LIN.by_id()
+    lin_blocks = LIN.blocks_by_id()
+    lin_parents = {m.id: m.parents for m in LIN.MODELS}
+    lin_uses = {m.id: m.uses for m in LIN.MODELS}
+    lin_children = {m.id: [] for m in LIN.MODELS}
+    for _m in LIN.MODELS:
+        for _p in _m.parents:
+            lin_children[_p].append(_m.id)
+
+    def lin_reach(start, edges):
+        # the lesson's own graph walk, so the views work before you finish `ancestors`
+        _seen, _stack = set(), list(edges[start])
+        while _stack:
+            _x = _stack.pop()
+            if _x not in _seen:
+                _seen.add(_x)
+                _stack.extend(edges[_x])
+        return _seen
+
+    def lin_added(mid):
+        _inh = {b for a in lin_reach(mid, lin_parents) for b in lin_uses[a]}
+        return [b for b in lin_uses[mid] if b not in _inh]
+
+    return LIN, lin_added, lin_blocks, lin_children, lin_models, lin_parents, lin_reach, lin_uses
+
+
+@app.cell
+def _(LIN, lin_models, mo):
+    lin_fams = mo.ui.multiselect(options=LIN.FAMILIES, value=LIN.FAMILIES, label="families")
+    lin_pick = mo.ui.dropdown(options={f"{m.name} ({m.year})": m.id for m in sorted(lin_models.values(), key=lambda m: (m.year, m.name))},
+                              value="DeepSeek-V3 (2024)", label="highlight a model")
+    mo.hstack([lin_pick, lin_fams], justify="start")
+    return lin_fams, lin_pick
+
+
+@app.cell
+def _(LIN, lin_children, lin_fams, lin_models, lin_parents, lin_pick, lin_reach, plt):
+    _fams = [f for f in LIN.FAMILIES if f in lin_fams.value]
+    _sel = lin_pick.value
+    _anc, _desc = lin_reach(_sel, lin_parents), lin_reach(_sel, lin_children)
+    # layout: x = year; one lane per family; inside a lane, a label never overlaps the next node in its row
+    _pos, _y, _bands = {}, 0.0, []
+    for _f in _fams:
+        _ms = sorted((m for m in lin_models.values() if m.family == _f), key=lambda m: (m.year, m.name))
+        _row_end = []
+        for _m in _ms:
+            _r = next((i for i, e in enumerate(_row_end) if _m.year > e), len(_row_end))
+            if _r == len(_row_end):
+                _row_end.append(0)
+            _row_end[_r] = _m.year + 0.16 * len(_m.name) + 0.4
+            _pos[_m.id] = (_m.year, _y - 0.55 * _r)
+        _h = 0.55 * max(len(_row_end), 1)
+        _bands.append((_f, _y + 0.3, _y - _h + 0.25))
+        _y -= _h + 0.35
+    _fig, _ax = plt.subplots(figsize=(12, max(3.0, -_y * 0.42 + 0.8)))
+    for _i, (_f, _top, _bot) in enumerate(_bands):
+        if _i % 2 == 0:
+            _ax.axhspan(_bot, _top, color="gray", alpha=0.07, lw=0)
+        _ax.text(1995.6, (_top + _bot) / 2, _f, fontsize=7.5, ha="right", va="center", color="dimgray")
+    _hl = _anc | _desc | {_sel}
+    for _c, (_xc, _yc) in _pos.items():
+        for _p in lin_models[_c].parents:
+            if _p in _pos:
+                _on = ((_c == _sel or _c in _anc) and _p in _anc) or ((_p == _sel or _p in _desc) and _c in _desc)
+                _ax.plot([_pos[_p][0], _xc], [_pos[_p][1], _yc], color="C3" if _on else "gray",
+                         alpha=0.9 if _on else 0.18, lw=1.4 if _on else 0.7, zorder=1)
+    for _mid, (_x, _yy) in _pos.items():
+        _col = "C3" if _mid == _sel else "C1" if _mid in _anc else "C0" if _mid in _desc else "lightgray"
+        _ax.scatter([_x], [_yy], s=28, color=_col, zorder=3, edgecolor="white", lw=0.5)
+        _ax.text(_x + 0.25, _yy, lin_models[_mid].name, fontsize=7, va="center",
+                 fontweight="bold" if _mid == _sel else "normal", color="black" if _mid in _hl else "dimgray")
+    _ax.set(xlim=(1996, 2028), yticks=[], xlabel="year")
+    _ax.spines[["left", "right", "top"]].set_visible(False)
+    _ax.set_title(f"{lin_models[_sel].name}: ancestors (orange), descendants (blue)", fontsize=10)
+    _fig.tight_layout()
+    _fig
+    return
+
+
+@app.cell
+def _(LIN, lin_added, lin_blocks, lin_children, lin_models, lin_parents, lin_pick, lin_reach, mo):
+    _m = lin_models[lin_pick.value]
+    _paper_of = {p.url: p for ps in LIN.PAPERS.values() for p in ps}
+
+    def _cite(url):
+        _p = _paper_of.get(url)
+        return f"[{_p.authors}, {_p.year}]({url})" if _p else f"[{LIN.SOURCES.get(url, 'source')}]({url})"
+
+    _added = lin_added(_m.id)
+    _added_md = "\n".join(
+        f"* **{lin_blocks[b].name}** ({lin_blocks[b].slot}): {lin_blocks[b].what} {_cite(lin_blocks[b].paper)}"
+        + (f" · Module {lin_blocks[b].module}" if lin_blocks[b].module else "") for b in _added) or "* nothing new: a recombination or a scale-up of what its ancestors used"
+    _by_slot = {}
+    for _b in _m.uses:
+        _by_slot.setdefault(lin_blocks[_b].slot, []).append(lin_blocks[_b].name)
+    _uses = " · ".join(f"*{s}:* {', '.join(_by_slot[s])}" for s in LIN.SLOTS if s in _by_slot)
+    _parents = ", ".join(lin_models[p].name for p in _m.parents) or "none in this registry"
+    _kids = ", ".join(lin_models[c].name for c in lin_children[_m.id]) or "none yet"
+    mo.md(f"""
+### {_m.name} · {_m.year} · {_m.org}
+
+{_m.note} ([source]({_m.source}){f"; in this course: Module {_m.module}" if _m.module else ""})
+
+**Builds on:** {_parents}  ·  **Built on by:** {_kids}  ·  **Ancestors in total:** {len(lin_reach(_m.id, lin_parents))}
+
+**New compared with all of its ancestors:**
+
+{_added_md}
+
+**Everything it uses:** {_uses}
+""")
+    return
+
+
+@app.cell
+def _(LIN, mo):
+    lin_slot = mo.ui.dropdown(options=LIN.SLOTS, value="position", label="slot")
+    mo.vstack([mo.md("### The taxonomy, one slot at a time"), lin_slot])
+    return (lin_slot,)
+
+
+@app.cell
+def _(LIN, lin_blocks, lin_fams, lin_models, lin_slot, mo, plt):
+    import numpy as _np
+
+    _bl = [b for b in LIN.BLOCKS if b.slot == lin_slot.value]
+    _ms = sorted((m for m in lin_models.values() if m.family in lin_fams.value and any(b.id in m.uses for b in _bl)),
+                 key=lambda m: (m.year, m.name))
+    _out = mo.md("*No model in the selected families uses this slot.*")
+    if _ms:
+        _grid = _np.array([[(2 if b.first_model == m.id else 1) if b.id in m.uses else 0 for m in _ms] for b in _bl])
+        _fig, _ax = plt.subplots(figsize=(min(12, 1.8 + 0.22 * len(_ms)), 0.9 + 0.3 * len(_bl)))
+        _ax.imshow(_grid, cmap=plt.matplotlib.colors.ListedColormap(["#f2f2f2", "#7aa6d6", "#c44e52"]),
+                   vmin=0, vmax=2, aspect="auto")
+        _ax.set_yticks(range(len(_bl)), [b.name for b in _bl], fontsize=8)
+        _ax.set_xticks(range(len(_ms)), [f"{m.name} ({m.year})" for m in _ms], rotation=90, fontsize=7)
+        _ax.set_title(f"{lin_slot.value}: blue = uses it, red = the model whose paper introduced it", fontsize=9)
+        _fig.tight_layout()
+        _paper_of = {p.url: p for ps in LIN.PAPERS.values() for p in ps}
+
+        def _cite(url):
+            _p = _paper_of.get(url)
+            return f"[{_p.authors}, {_p.year}]({url})" if _p else f"[{LIN.SOURCES.get(url, 'source')}]({url})"
+
+        _rows = "\n".join(
+            f"| {b.name} | {b.what} | {_cite(b.paper)} | {sum(b.id in m.uses for m in lin_models.values())} | "
+            f"{b.module or '—'} |" for b in _bl)
+        _out = mo.vstack([_fig, mo.md("| block | what it does | introduced in | models using it | module |\n"
+                                      "|---|---|---|---|---|\n" + _rows)])
+    _out
+    return
+
+
+@app.cell
+def _(ex, lin_blocks, lin_models, lin_parents, lin_uses, lj, mo):
+    _cases = ["gpt2", "llama", "mistral", "deepseek_v2", "deepseek_v3", "smollm3", "mamba", "clip"]
+    _a = lj.attempt(ex.ancestors, "deepseek_v3", lin_parents)
+    _n = lj.attempt(ex.new_blocks, "llama", lin_parents, lin_uses)
+    _items = [mo.md("### Your turn: `ancestors` and `new_blocks`"),
+              mo.md("`ancestors('deepseek_v3', parents)`:"), _a.view(mo, show_value=False),
+              mo.md("`new_blocks('llama', parents, uses)`:"), _n.view(mo, show_value=False)]
+    if _a.ok and _n.ok:
+        _rows = []
+        for _c in _cases:
+            _new = ex.new_blocks(_c, lin_parents, lin_uses)
+            _rows.append(f"| {lin_models[_c].name} ({lin_models[_c].year}) | {len(ex.ancestors(_c, lin_parents))} | "
+                         + (", ".join(sorted(lin_blocks[b].name for b in _new)) or "—") + " |")
+        _items.append(mo.md(f"""
+DeepSeek-V3 has **{len(_a.value)} ancestors** in the registry, from the LSTM (1997) to DeepSeek-V2.
+LLaMA added **{len(_n.value)}** block(s) that none of its ancestors used: {", ".join(sorted(lin_blocks[b].name for b in _n.value)) or "none"}.
+
+| model | ancestors | new compared with every ancestor |
+|---|---|---|
+{chr(10).join(_rows)}
+
+Notice how little most famous models add. LLaMA took pre-norm from GPT-2 and GPT-3, SwiGLU from PaLM,
+and RoPE from PaLM and GPT-NeoX. RMSNorm is the only block new to its lineage. Its real
+contribution was the *combination*, trained on public data and released openly. "New" here means new to the lineage,
+not invented by that paper: a block can enter a lineage long after its paper.
+"""))
+    mo.vstack(_items)
     return
 
 

@@ -50,3 +50,25 @@ def module_for_concept(concept: str, index: dict[str, str]) -> str | None:
     Return None if nothing matches.
     """
     raise NotImplementedError
+
+
+
+
+# ---------------------------------------------------------------- the family tree (Section 12)
+def ancestors(model_id: str, parents: dict[str, tuple]) -> set[str]:
+    """Every model `model_id` builds on, directly or indirectly: its parents, their parents, and so on.
+
+    `parents` maps each model id to a tuple of parent ids (roots map to ()). The result does not include
+    `model_id` itself, and a model reached along two paths (a "diamond") appears once.
+    Raise KeyError if `model_id` is not in `parents`.
+    """
+    raise NotImplementedError
+
+
+def new_blocks(model_id: str, parents: dict[str, tuple], uses: dict[str, tuple]) -> set[str]:
+    """What a model *added*: the blocks it uses that none of its ancestors use.
+
+    `uses` maps each model id to the tuple of building-block ids it uses. A root model (no ancestors)
+    added everything it uses. Reuse `ancestors`.
+    """
+    raise NotImplementedError

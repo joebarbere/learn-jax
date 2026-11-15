@@ -16,6 +16,11 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[A Proposal for the Dartmouth Summer Research Project on Artificial Intelligence](http://www-formal.stanford.edu/jmc/history/dartmouth/dartmouth.html)** — McCarthy, Minsky, Rochester, Shannon, 1955. The document that named the field.
 - **[The perceptron: a probabilistic model for information storage and organization in the brain](https://doi.org/10.1037/h0042519)** — Rosenblatt, 1958. The first learning machine for patterns.
 - **[Deep learning](https://doi.org/10.1038/nature14539)** — LeCun, Bengio, Hinton, 2015. The field's own summary of how deep learning came back.
+- **[Convolutional Sequence to Sequence Learning](https://arxiv.org/abs/1705.03122)** — Gehring et al., 2017. Family tree: learned absolute position embeddings, later used by GPT and BERT.
+- **[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)** — Dosovitskiy et al., 2020. Family tree: ViT, the Transformer on image patches.
+- **[Longformer: The Long-Document Transformer](https://arxiv.org/abs/2004.05150)** — Beltagy, Peters, Cohan, 2020. Family tree: sliding-window attention, later used by Mistral.
+- **[Query-Key Normalization for Transformers](https://arxiv.org/abs/2010.04245)** — Henry et al., 2020. Family tree: normalize queries and keys before attention (QK-Norm, used by Qwen3).
+- **[GPT-NeoX-20B: An Open-Source Autoregressive Language Model](https://arxiv.org/abs/2204.06745)** — Black et al., 2022. Family tree: an open 20B model with partial rotary embeddings.
 
 ## Part 1 — Math in code
 
@@ -318,6 +323,7 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Deep contextualized word representations](https://arxiv.org/abs/1802.05365)** — Peters et al., 2018. ELMo: context-dependent embeddings.
 - **[BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805)** — Devlin et al., 2018. Masked language modeling with an encoder.
 - **[RoBERTa: A Robustly Optimized BERT Pretraining Approach](https://arxiv.org/abs/1907.11692)** — Liu et al., 2019. BERT, trained properly.
+- **[Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683)** — Raffel et al., 2019. T5: the encoder-decoder answer, every task as text-to-text.
 - **[Language Models are Unsupervised Multitask Learners](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf)** — Radford et al., 2019. GPT-2: byte-level BPE and a scaled-up decoder-only Transformer.
 
 ### 33 · GANs, VAEs, diffusion and CLIP (2014–2022)

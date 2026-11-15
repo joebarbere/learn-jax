@@ -45,3 +45,20 @@ def module_for_concept(concept: str, index: dict[str, str]) -> str | None:
         if key in c:
             return slug
     return None
+
+
+
+
+def ancestors(model_id: str, parents: dict[str, tuple]) -> set[str]:
+    seen, stack = set(), list(parents[model_id])
+    while stack:
+        p = stack.pop()
+        if p not in seen:
+            seen.add(p)
+            stack.extend(parents[p])
+    return seen
+
+
+def new_blocks(model_id: str, parents: dict[str, tuple], uses: dict[str, tuple]) -> set[str]:
+    inherited = {b for a in ancestors(model_id, parents) for b in uses[a]}
+    return set(uses[model_id]) - inherited

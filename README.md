@@ -67,7 +67,9 @@ answers, unless you ask for the answer outright.
 The site and book are the *reading edition*: prose, figures and measured results, rendered with the reference
 solutions; the code and exercises stay in the notebooks. They're built in a separate, GPU-free image
 (`make book-image`: Chromium, Paged.js, KaTeX, fonts). Every term the course uses is defined in
-[docs/GLOSSARY.md](docs/GLOSSARY.md), with the module that teaches it.
+[docs/GLOSSARY.md](docs/GLOSSARY.md), with the module that teaches it. About fifty models, the building blocks
+each one uses and who introduced each block are in [docs/LINEAGE.md](docs/LINEAGE.md) (drawn as a graph in
+module 00b).
 
 ## Syllabus
 
@@ -168,7 +170,7 @@ containers/   Containerfile (JAX), Containerfile.torch, run.sh (GPU passthrough 
 learnjax/     small shared helpers: exercise loading, timing, GPU info, syllabus, progress
 modules/      one directory per module
 tools/        lesson_outputs.py: run a lesson and print what each cell shows
-docs/         AUTHORING.md (how modules are written and verified), PAPERS.md, ROCM_GOTCHAS.md
+docs/         AUTHORING.md (how modules are written and verified), PAPERS.md, LINEAGE.md, ROCM_GOTCHAS.md
 ```
 
 `make check` is the course's own test. Every lesson runs headless, and every test passes against the

@@ -139,6 +139,10 @@ papers: ## Check every paper link and regenerate docs/PAPERS.md
 	$(RUN) python tools/check_papers.py
 	$(RUN) python tools/gen_papers.py
 
+lineage: ## Check the model family tree (registry rules, arXiv titles, HF configs), regenerate docs/LINEAGE.md
+	$(RUN) python tools/check_lineage.py
+	$(RUN) python tools/gen_lineage.py
+
 links: ## Link the first JAX API mentions to the docs, then check every external link
 	$(RUN) python tools/link_jax_docs.py modules/*/lesson.py
 	$(RUN) python tools/check_links.py
@@ -146,4 +150,4 @@ links: ## Link the first JAX API mentions to the docs, then check every external
 lint: ## Ruff
 	$(RUN) ruff check learnjax modules
 
-.PHONY: help build build-torch up url down lesson torch-lesson read md test progress check shell papers links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary
+.PHONY: help build build-torch up url down lesson torch-lesson read md test progress check shell papers lineage links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary
