@@ -40,15 +40,17 @@ $R marimo check $M/lesson.py                                         # structure
 $R python -m pytest $M                                               # must FAIL (stubs)
 LEARNJAX_SOLUTIONS=1 $R python -m pytest $M                          # must PASS
 $R python $M/lesson.py                                               # runs with stubs, exit 0
-LEARNJAX_SOLUTIONS=1 $R python tools/lesson_outputs.py $M/lesson.py  # read every rendered output; 0 errors
+LEARNJAX_SOLUTIONS=1 $R python tools/lesson_outputs.py --full $M/lesson.py  # read every output; 0 errors
 $R ruff check $M/exercises.py $M/solutions.py $M/test_exercises.py
 ```
 Read the `lesson_outputs.py` text yourself: numbers sensible, prose matches what the cells show.
 
 ## Known marimo pitfalls
-- A multi-line value (an array repr, joined rows) interpolated into an indented `mo.md(f"""...""")`
-  breaks the dedent and renders as a code block. Re-indent it: `text.replace("\n", "\n    ")`, or
-  build the markdown without indentation.
+- A multi-line value (an array repr, joined rows) interpolated into `mo.md(f"""...""")` whose text is indented
+  *deeper than the cell body* (e.g. inside a helper `def` in the cell) breaks the dedent and renders as code
+  blocks. marimo dedents each cell body first, so markdown at the usual 4-space indent is fine, even inside an
+  `if`. `python3 tools/check_md_indent.py modules/*/lesson.py` finds the risky cases (0 in the course, Nov 2026).
+  Note the exported notebook stores already-dedented markdown, so rendered outputs can't reveal this.
 - A literal `|` inside LaTeX in a markdown table cell (`$|v|$`) splits the column. Use `\lvert v \rvert`.
 - float32 results from `jnp.linalg.*` print float noise via `.tolist()`; format numbers explicitly.
 - `tools/lesson_outputs.py` shows top-level images and text; callouts and plots nested in
@@ -90,7 +92,19 @@ Read the `lesson_outputs.py` text yourself: numbers sensible, prose matches what
   the default falls back to plain XLA.
 - marimo markdown swallows `<|endoftext|>`-style tokens as HTML even in backticks: `html.escape` them.
 - Pass large arrays (token datasets) into jitted functions as arguments, don't close over them —
-  closures bake multi-MB constants into the compiled program.
+  closures bake multi-MB constants into the compiled program. Small closed-over arrays bite too: if a big
+  intermediate depends *only* on constants (e.g. an (L, D, N) kernel from closed-over parameters and
+  `arange(L)`), XLA constant-folds it on the CPU at compile time (module 36: 3+ min).
+- On ROCm, `x ** arange(L)` (broadcast power) inside a reduction compiles very slowly even with arguments;
+  write `exp(k * log(x))` for positive x (module 36: 193 s → 1 s). If a cell logs XLA's "Very slow
+  compile?" alarm, find the op and fix it — lessons don't use a persistent compilation cache.
+- ROCm codegen bugs found in module 38 (both reproducible on an idle GPU, both with workarounds):
+  gathering rows of a big bf16 table and projecting them in one fused kernel under jit + scan + grad
+  page-faults and hangs the GPU → project the whole table first, then gather; and fusing scoring with
+  `top_k` in one jitted program can fail with `hipError_t(98)` "Failed to set shared memory size"
+  (shape-dependent; `optimization_barrier` doesn't help) → split into two jitted functions.
+- Run GPU jobs one at a time (`flock <lockfile> containers/run.sh ...`): concurrent jobs slowed a 3-minute
+  run to 81 minutes and coincided with a NaN and a segfault that didn't reproduce alone.
 
 ## Seminal papers (every module)
 Add the module's 2–5 seminal papers to `learnjax/papers.py` (title, authors, year, link, one line on why it
@@ -125,3 +139,17 @@ matters *for this module*). Prefer arXiv abs links or DOIs. The lesson renders t
   Sphinx inventory, so they exist; it skips code, f-string values and already-linked mentions; idempotent).
 - `make links` checks every external link resolves (`tools/check_links.py`; `--list` prints each with context
   for an attribution review). `make papers` does the same for papers and companion videos.
+
+## History (every module) and Part 10 milestone modules
+- Every lesson opens (right after its intro cell) with a **Where this came from** callout (`# history box`):
+  3–6 plain-language sentences — who, when, what problem they were stuck on, what came before and after —
+  grounded in the module's registered papers; ends with "Timeline: Module 00b". No invented quotes; use the
+  year or decade when an exact date is uncertain.
+- Module numbers are registry keys; the **display label** is the slug prefix (`00b-history` → label "00b",
+  number 28). Use `learnjax.syllabus.number(slug)` / `label(slug)`; never parse numbers from slugs.
+- **Part 10 "Milestones, rebuilt in JAX"** (modules 29–37) retells the field's history by rebuilding each
+  milestone at small scale on the RX 7600 XT. Each one: states which earlier module to take first; tells the
+  story of the original (people, year, the problem, what it beat, what replaced it); rebuilds it in JAX the
+  way it was done *then* (period-faithful first), then shows what we'd do *now*; measures something real on
+  the GPU; and links forward/back to the main modules. JAX ecosystem libraries available in the image:
+  `mctx` (DeepMind MCTS), `pgx` (GPU game environments), `gymnax` (classic RL environments).

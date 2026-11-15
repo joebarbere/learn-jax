@@ -45,6 +45,22 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Shannon's 1948 paper already built text from letter and word statistics, the first n-gram language
+    models. Through the 1980s–2000s, n-gram models powered speech recognition and machine translation.
+    Bengio et al. (2003) replaced the counts with a neural network over learned word embeddings, the MLP
+    language model you build here, and word2vec (Mikolov et al., 2013) made embeddings famous on their own.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(jnp, mo, np, tiny_shakespeare):
     text = tiny_shakespeare()
     chars = sorted(set(text))

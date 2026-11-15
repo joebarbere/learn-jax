@@ -9,6 +9,7 @@ PyTorch side-by-side notebook imports this file too.
 """
 from __future__ import annotations
 
+import datetime
 import json
 import random
 
@@ -70,12 +71,12 @@ def make_splits(seed: int = 0, n_train: int = 2000, n_test: int = 200, n_heldout
     return {"train": train, "test": test, "heldout": heldout}
 
 
-def chatml_prompt(text: str) -> str:
+def chatml_prompt(text: str, instruction: str = INSTRUCTION) -> str:
     """SmolLM2-Instruct's chat format (the same string learnjax.llama.chat_prompt builds)."""
-    return f"<|im_start|>user\n{INSTRUCTION}{text}<|im_end|>\n<|im_start|>assistant\n"
+    return f"<|im_start|>user\n{instruction}{text}<|im_end|>\n<|im_start|>assistant\n"
 
 
-def encode_batch(tokenizer, examples: list[dict], max_len: int = 96) -> dict:
+def encode_batch(tokenizer, examples: list[dict], max_len: int = 96, instruction: str = INSTRUCTION) -> dict:
     """Tokenize prompt + answer + <|im_end|>; right-pad to max_len.
 
     Returns NumPy arrays: tokens [N, L] int32, loss_mask [N, L] float32 (1 where position t's *next*
@@ -88,7 +89,7 @@ def encode_batch(tokenizer, examples: list[dict], max_len: int = 96) -> dict:
     mask = np.zeros((n, max_len), np.float32)
     lengths = np.zeros(n, np.int32)
     for k, e in enumerate(examples):
-        p = tokenizer.encode(chatml_prompt(e["text"])).ids
+        p = tokenizer.encode(chatml_prompt(e["text"], instruction)).ids
         a = tokenizer.encode(e["answer"]).ids + [end]
         ids = (p + a)[:max_len]
         tokens[k, : len(ids)] = ids
@@ -106,3 +107,36 @@ def teacher_forced_exact_match(pred_next: np.ndarray, batch: dict) -> np.ndarray
     m = batch["loss_mask"] > 0
     wrong = (pred_next != target) & m
     return ~wrong.any(axis=1)
+
+
+# ---------------------------------------------------------------------- a second task, for task arithmetic
+# Section 12 trains a second adapter on this and adds the two. It needs a different instruction, so a merged
+# model can tell from the prompt which job it is doing.
+DATE_INSTRUCTION = "Rewrite the date in ISO format, YYYY-MM-DD.\n\n"
+MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+          "November", "December"]
+DATE_TEMPLATES = ["the {o} of {M}, {y}", "{M} {d}, {y}", "{d} {M} {y}", "{Mb} {o} {y}", "{M} {o}, {y}",
+                  "on {wd}, {M} {d}, {y}"]
+
+
+def _ordinal(d: int) -> str:
+    return f"{d}{'th' if 11 <= d <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(d % 10, 'th')}"
+
+
+def make_date_example(rng: random.Random) -> dict:
+    day = datetime.date(1990, 1, 1) + datetime.timedelta(days=rng.randrange(365 * 45))
+    text = rng.choice(DATE_TEMPLATES).format(o=_ordinal(day.day), d=day.day, M=MONTHS[day.month - 1],
+                                             Mb=MONTHS[day.month - 1][:3], y=day.year, wd=day.strftime("%A"))
+    return {"text": text, "answer": day.isoformat()}
+
+
+def make_date_splits(seed: int = 1, n_train: int = 2000, n_test: int = 200) -> dict:
+    rng = random.Random(seed)
+    train = [make_date_example(rng) for _ in range(n_train)]
+    seen = {e["text"] for e in train}
+    test = []
+    while len(test) < n_test:
+        e = make_date_example(rng)
+        if e["text"] not in seen:
+            test.append(e)
+    return {"train": train, "test": test}

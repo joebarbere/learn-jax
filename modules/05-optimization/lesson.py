@@ -40,6 +40,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Gradient descent is usually credited to Cauchy (1847), and stochastic approximation, the root of SGD, to
+    Robbins & Monro (1951). Polyak added momentum in 1964. Deep learning brought a new wave: gradient
+    clipping (Pascanu, Mikolov & Bengio, 2012), Adam (Kingma & Ba, 2014), cosine schedules (Loshchilov &
+    Hutter, 2016) and AdamW (2017). The latest chapter is Muon (Keller Jordan, 2024; scaled up by Moonshot
+    AI in 2025), which you meet in this lesson's sidebar.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · A loss is a landscape
 

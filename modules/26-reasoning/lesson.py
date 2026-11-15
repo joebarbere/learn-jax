@@ -70,6 +70,24 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Chain-of-thought prompting (Wei et al., 2022) showed that asking for intermediate steps improves
+    answers, and self-consistency (Wang et al., 2022) votes over many sampled solutions. Verifiers (Cobbe et
+    al., 2021) and process supervision (Lightman et al., 2023) turned checkable answers into training
+    signals. OpenAI's o1 (2024) popularized "reasoning models", and DeepSeek-R1 (January 2025) showed
+    reinforcement learning with verifiable rewards, using GRPO from DeepSeekMath (Shao et al., 2024), could
+    produce long reasoning in open weights.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(R, code, llama, mo):
     params, cfg, tok = llama.load(llama.SMOLLM_360M)
     STOPS = R.stop_ids(tok)
@@ -690,6 +708,36 @@ def _(baseline, distilled, live, mo, sc, trained):
     is better. Real reasoning models combine both — and the training signal is only as good as the
     verifier.""")
     _o
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## 7 · Beyond one chain: search, action, and RL as sequence modeling
+
+    Everything above improves *one* line of reasoning, or picks the best of several. Three ideas from
+    2021–2023 go further, and each lands elsewhere in this course:
+
+    * **Tree of Thoughts** (Yao et al., 2023) treats reasoning as *search*: the model proposes several
+      next steps, a verifier or the model itself scores the partial solutions, and a breadth- or depth-first
+      search keeps the promising branches. It's best-of-n (section 3) applied at every step instead of only
+      at the end, and the same propose, evaluate and expand loop as AlphaZero's tree search (Module 34),
+      with an LLM in place of the policy network.
+    * **ReAct** (Yao et al., 2022) interleaves *reasoning* with *acting*: think, call a tool (search, a
+      calculator, code), read the result, think again. Your verifier was a tool the *trainer* called;
+      ReAct gives the tools to the model. That loop is an agent, and Module 39 builds one.
+    * **Decision Transformer** (Chen et al., 2021) runs the analogy the other way: instead of using RL to
+      train a language model, it treats RL *as* language modeling. Feed a transformer sequences of
+      (desired return, state, action) and train it with the plain next-token loss; at test time, ask
+      for a high return and it predicts the actions that tend to get it. It's a reminder that the line between
+      "RL" and "sequence modeling" is thinner than the two vocabularies suggest (compare Module 34's DQN).
+
+    Training models to do these things, rather than prompting them, is where reasoning research went next:
+    multi-turn RL, with GRPO-style updates over whole tool-using episodes. In the JAX ecosystem, Google's
+    [Tunix](https://github.com/google/tunix) post-training library added agent and environment abstractions
+    for exactly that.
+    """)
     return
 
 

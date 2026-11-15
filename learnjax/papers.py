@@ -182,6 +182,12 @@ PAPERS: dict[int, list[Paper]] = {
                "LoRA on a 4-bit base model: fine-tuning large models on one GPU."),
          Paper("Parameter-Efficient Transfer Learning for NLP", "Houlsby et al.", 2019, arxiv("1902.00751"),
                "Adapters: the parameter-efficient fine-tuning idea before LoRA."),
+         Paper("Language Models are Few-Shot Learners", "Brown et al.", 2020, arxiv("2005.14165"),
+               "GPT-3 and in-context learning: tasks from examples in the prompt, no training (section 13)."),
+         Paper("Editing Models with Task Arithmetic", "Ilharco et al.", 2022, arxiv("2212.04089"),
+               "Task vectors: add fine-tuning deltas to combine skills, subtract them to remove one (section 12)."),
+         Paper("TIES-Merging: Resolving Interference When Merging Models", "Yadav et al.", 2023, arxiv("2306.01708"),
+               "Why naive sums interfere, and a fix: trim small changes, resolve sign conflicts, then merge."),
          Paper("Training language models to follow instructions with human feedback", "Ouyang et al.", 2022,
                arxiv("2203.02155"), "InstructGPT: supervised fine-tuning then RLHF.")],
     21: [Paper("Measuring Massive Multitask Language Understanding", "Hendrycks et al.", 2020, arxiv("2009.03300"),
@@ -200,7 +206,16 @@ PAPERS: dict[int, list[Paper]] = {
                "The tile-based kernel language behind Pallas's GPU backend and XLA's GEMM fusions."),
          FLASH,
          Paper("FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning", "Dao", 2023,
-               arxiv("2307.08691"), "Better work partitioning across the GPU.")],
+               arxiv("2307.08691"), "Better work partitioning across the GPU."),
+         Paper("Decoupling algorithms from schedules for easy optimization of image processing pipelines",
+               "Ragan-Kelley, Adams, Paris et al.", 2012, "https://doi.org/10.1145/2185520.2185528",
+               "Who decides the schedule: Halide splits *what* a kernel computes from *how* it runs."),
+         Paper("Halide: a language and compiler for optimizing parallelism, locality, and recomputation in image "
+               "processing pipelines", "Ragan-Kelley, Barnes, Adams et al.", 2013,
+               "https://doi.org/10.1145/2491956.2462176",
+               "The Halide compiler, with schedules searched automatically: the line XLA and Pallas descend from."),
+         Paper("TVM: An Automated End-to-End Optimizing Compiler for Deep Learning", "Chen, Moreau et al.", 2018,
+               arxiv("1802.04799"), "Halide's algorithm/schedule split applied to deep learning, with learned tuning.")],
     24: [Paper("Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism",
                "Shoeybi et al.", 2019, arxiv("1909.08053"), "Tensor parallelism inside Transformer layers."),
          Paper("ZeRO: Memory Optimizations Toward Training Trillion Parameter Models", "Rajbhandari et al.", 2019,
@@ -225,7 +240,13 @@ PAPERS: dict[int, list[Paper]] = {
          Paper("DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning", "DeepSeek-AI", 2025,
                arxiv("2501.12948"), "RL with verifiable rewards produces long reasoning; R1-Zero, distillation."),
          Paper("s1: Simple test-time scaling", "Muennighoff et al.", 2025, arxiv("2501.19393"),
-               "Budget forcing: controlling how long a model thinks at inference time.")],
+               "Budget forcing: controlling how long a model thinks at inference time."),
+         Paper("Tree of Thoughts: Deliberate Problem Solving with Large Language Models", "Yao et al.", 2023,
+               arxiv("2305.10601"), "Reasoning as search over partial solutions (section 7)."),
+         Paper("ReAct: Synergizing Reasoning and Acting in Language Models", "Yao et al.", 2022, arxiv("2210.03629"),
+               "Interleave thinking with tool calls: the agent loop of Module 39."),
+         Paper("Decision Transformer: Reinforcement Learning via Sequence Modeling", "Chen et al.", 2021,
+               arxiv("2106.01345"), "RL as next-token prediction over (return, state, action) sequences.")],
     27: [LORA,
          Paper("Fast Inference from Transformers via Speculative Decoding", "Leviathan, Kalman, Matias", 2022,
                arxiv("2211.17192"), "The draft-and-verify scheme behind LM Studio's speculative decoding."),
@@ -236,6 +257,162 @@ PAPERS: dict[int, list[Paper]] = {
                "Cost per token for serving, the number to compare across hardware."),
          DEEPSEEK_V3],
 }
+
+def _p(title, authors, year, url, why):
+    return Paper(title, authors, year, url, why)
+
+
+DOI = "https://doi.org/"
+ROSENBLATT = _p("The perceptron: a probabilistic model for information storage and organization in the brain",
+                "Rosenblatt", 1958, DOI + "10.1037/h0042519", "The first learning machine for patterns.")
+HOPFIELD = _p("Neural networks and physical systems with emergent collective computational abilities", "Hopfield", 1982,
+              DOI + "10.1073/pnas.79.8.2554", "Associative memory as energy minimization; cited by the 2024 physics Nobel.")
+PAPERS.update({
+    28: [_p("A logical calculus of the ideas immanent in nervous activity", "McCulloch, Pitts", 1943,
+            DOI + "10.1007/BF02478259", "The first mathematical model of a neuron."),
+         _p("Computing Machinery and Intelligence", "Turing", 1950, DOI + "10.1093/mind/LIX.236.433",
+            "Can machines think? The imitation game."),
+         _p("A Proposal for the Dartmouth Summer Research Project on Artificial Intelligence", "McCarthy, Minsky, "
+            "Rochester, Shannon", 1955, "http://www-formal.stanford.edu/jmc/history/dartmouth/dartmouth.html", "The document that named the field."),
+         ROSENBLATT,
+         _p("Deep learning", "LeCun, Bengio, Hinton", 2015, DOI + "10.1038/nature14539",
+            "The field's own summary of how deep learning came back.")],
+    29: [ROSENBLATT, HOPFIELD,
+         _p("Hopfield Networks is All You Need", "Ramsauer et al.", 2020, arxiv("2008.02217"),
+            "Modern Hopfield networks: their update rule is attention.")],
+    30: [_p("Efficient Estimation of Word Representations in Vector Space", "Mikolov et al.", 2013, arxiv("1301.3781"),
+            "word2vec's CBOW and skip-gram."),
+         _p("Distributed Representations of Words and Phrases and their Compositionality", "Mikolov et al.", 2013,
+            arxiv("1310.4546"), "Negative sampling and the famous analogies."),
+         _p("GloVe: Global Vectors for Word Representation", "Pennington, Socher, Manning", 2014,
+            "https://aclanthology.org/D14-1162/", "Embeddings from co-occurrence counts.")],
+    31: [_p("Finding Structure in Time", "Elman", 1990, DOI + "10.1207/s15516709cog1402_1", "The simple recurrent network."),
+         _p("Learning long-term dependencies with gradient descent is difficult", "Bengio, Simard, Frasconi", 1994,
+            DOI + "10.1109/72.279181", "Why gradients vanish through time."),
+         _p("Long Short-Term Memory", "Hochreiter, Schmidhuber", 1997, DOI + "10.1162/neco.1997.9.8.1735",
+            "Gated memory cells that let gradients flow."),
+         _p("Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation",
+            "Cho et al.", 2014, arxiv("1406.1078"), "The GRU and the encoder-decoder."),
+         _p("Sequence to Sequence Learning with Neural Networks", "Sutskever, Vinyals, Le", 2014, arxiv("1409.3215"),
+            "seq2seq with LSTMs."),
+         _p("Neural Machine Translation by Jointly Learning to Align and Translate", "Bahdanau, Cho, Bengio", 2014,
+            arxiv("1409.0473"), "Attention is born here.")],
+    32: [_p("Deep contextualized word representations", "Peters et al.", 2018, arxiv("1802.05365"),
+            "ELMo: context-dependent embeddings."),
+         _p("BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", "Devlin et al.", 2018,
+            arxiv("1810.04805"), "Masked language modeling with an encoder."),
+         _p("RoBERTa: A Robustly Optimized BERT Pretraining Approach", "Liu et al.", 2019, arxiv("1907.11692"),
+            "BERT, trained properly."),
+         GPT2],
+    33: [_p("Generative Adversarial Networks", "Goodfellow et al.", 2014, arxiv("1406.2661"), "Two networks in a game."),
+         _p("Auto-Encoding Variational Bayes", "Kingma, Welling", 2013, arxiv("1312.6114"), "The VAE."),
+         _p("Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks",
+            "Radford, Metz, Chintala", 2015, arxiv("1511.06434"), "DCGAN: GANs that train."),
+         _p("Deep Unsupervised Learning using Nonequilibrium Thermodynamics", "Sohl-Dickstein et al.", 2015,
+            arxiv("1503.03585"), "The first diffusion model."),
+         _p("Denoising Diffusion Probabilistic Models", "Ho, Jain, Abbeel", 2020, arxiv("2006.11239"),
+            "DDPM: diffusion that works."),
+         _p("Learning Transferable Visual Models From Natural Language Supervision", "Radford et al.", 2021,
+            arxiv("2103.00020"), "CLIP: contrastive image-text learning."),
+         _p("High-Resolution Image Synthesis with Latent Diffusion Models", "Rombach et al.", 2021, arxiv("2112.10752"),
+            "Latent diffusion, the basis of Stable Diffusion.")],
+    34: [_p("Q-learning", "Watkins, Dayan", 1992, DOI + "10.1007/BF00992698", "Learning action values from experience."),
+         _p("Playing Atari with Deep Reinforcement Learning", "Mnih et al.", 2013, arxiv("1312.5602"), "DQN."),
+         _p("Human-level control through deep reinforcement learning", "Mnih et al.", 2015, DOI + "10.1038/nature14236",
+            "DQN at human level on Atari."),
+         _p("Deep Reinforcement Learning with Double Q-learning", "van Hasselt, Guez, Silver", 2016,
+            arxiv("1509.06461"), "Double DQN: pick the next action with one network, score it with the other."),
+         _p("Mastering the game of Go with deep neural networks and tree search", "Silver et al.", 2016,
+            DOI + "10.1038/nature16961", "AlphaGo."),
+         _p("Mastering the game of Go without human knowledge", "Silver et al.", 2017, DOI + "10.1038/nature24270",
+            "AlphaGo Zero: self-play only."),
+         _p("Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm", "Silver et al.",
+            2017, arxiv("1712.01815"), "AlphaZero."),
+         _p("Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model", "Schrittwieser et al.", 2019,
+            arxiv("1911.08265"), "MuZero: planning without the rules."),
+         _p("Pgx: Hardware-Accelerated Parallel Game Simulators for Reinforcement Learning", "Koyamada et al.", 2023,
+            arxiv("2303.17503"), "The JAX game environments used here.")],
+    35: [_p("Rank Analysis of Incomplete Block Designs: I. The Method of Paired Comparisons", "Bradley, Terry", 1952,
+            DOI + "10.2307/2334029", "The preference model inside every reward model."),
+         _p("Deep reinforcement learning from human preferences", "Christiano et al.", 2017, arxiv("1706.03741"),
+            "RLHF begins."),
+         _p("Learning to summarize from human feedback", "Stiennon et al.", 2020, arxiv("2009.01325"),
+            "RLHF on language models."),
+         _p("Training language models to follow instructions with human feedback", "Ouyang et al.", 2022,
+            arxiv("2203.02155"), "InstructGPT."),
+         _p("Constitutional AI: Harmlessness from AI Feedback", "Bai et al.", 2022, arxiv("2212.08073"),
+            "Preferences from AI feedback."),
+         _p("Direct Preference Optimization: Your Language Model is Secretly a Reward Model", "Rafailov et al.", 2023,
+            arxiv("2305.18290"), "DPO: preferences without RL.")],
+    36: [_p("Efficiently Modeling Long Sequences with Structured State Spaces", "Gu, Goel, Ré", 2021,
+            arxiv("2111.00396"), "S4."),
+         _p("Resurrecting Recurrent Neural Networks for Long Sequences", "Orvieto et al.", 2023, arxiv("2303.06349"),
+            "The linear recurrent unit."),
+         _p("Mamba: Linear-Time Sequence Modeling with Selective State Spaces", "Gu, Dao", 2023, arxiv("2312.00752"),
+            "Selective SSMs."),
+         _p("Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality",
+            "Dao, Gu", 2024, arxiv("2405.21060"), "Mamba-2 and the SSM-attention link."),
+         _p("Prefix Sums and Their Applications", "Blelloch", 1990, "https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf",
+            "The parallel scan behind jax.lax.associative_scan."),
+         _p("Zoology: Measuring and Improving Recall in Efficient Language Models", "Arora et al.", 2023,
+            arxiv("2312.04927"), "Multi-query associative recall: where fixed-state models fall behind attention."),
+         _p("Jamba: A Hybrid Transformer-Mamba Language Model", "Lieber et al.", 2024, arxiv("2403.19887"),
+            "Interleave a few attention layers into a Mamba stack (1:7), plus MoE: the hybrid in section 9.")],
+    37: [_p("Zoom In: An Introduction to Circuits", "Olah et al.", 2020, "https://distill.pub/2020/circuits/zoom-in/",
+            "Reading neural networks like circuits."),
+         _p("A Mathematical Framework for Transformer Circuits", "Elhage et al.", 2021,
+            "https://transformer-circuits.pub/2021/framework/index.html", "Attention heads as readable components."),
+         _p("In-context Learning and Induction Heads", "Olsson et al.", 2022,
+            "https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html",
+            "The circuit behind in-context copying."),
+         _p("Emergent World Representations: Exploring a Sequence Model Trained on a Synthetic Task", "Li et al.", 2022,
+            arxiv("2210.13382"), "Othello-GPT learns the board."),
+         _p("Emergent Linear Representations in World Models of Self-Supervised Sequence Models", "Nanda, Lee, Wattenberg",
+            2023, arxiv("2309.00941"), "The board is linearly readable."),
+         _p("Toy Models of Superposition", "Elhage et al.", 2022, arxiv("2209.10652"),
+            "Why neurons are polysemantic.")],
+    38: [_p("The Probabilistic Relevance Framework: BM25 and Beyond", "Robertson, Zaragoza", 2009,
+            DOI + "10.1561/1500000019", "BM25 explained by its authors: where idf and term saturation come from."),
+         _p("Reciprocal rank fusion outperforms Condorcet and individual rank learning methods",
+            "Cormack, Clarke, Büttcher", 2009, DOI + "10.1145/1571941.1572114", "RRF: fuse rankings with 1/(k + rank)."),
+         _p("Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks", "Reimers, Gurevych", 2019,
+            arxiv("1908.10084"), "One encoder, mean pooling, cosine similarity: the bi-encoder recipe."),
+         _p("Passage Re-ranking with BERT", "Nogueira, Cho", 2019, arxiv("1901.04085"),
+            "The cross-encoder reranker: read query and passage together."),
+         _p("Latent Retrieval for Weakly Supervised Open Domain Question Answering", "Lee, Chang, Toutanova", 2019,
+            arxiv("1906.00300"), "The Inverse Cloze Task: pretrain a retriever with sentences as pseudo-queries."),
+         _p("A Language Modeling Approach to Information Retrieval", "Ponte, Croft", 1998, DOI + "10.1145/290941.291008",
+            "Query likelihood: rank a document by how probably it generates the query (the reranker in section 8)."),
+         _p("Improving Passage Retrieval with Zero-Shot Question Generation", "Sachan et al.", 2022, arxiv("2204.07496"),
+            "UPR: rerank with an LLM's log p(question | passage), no relevance training."),
+         _p("Dense Passage Retrieval for Open-Domain Question Answering", "Karpukhin et al.", 2020, arxiv("2004.04906"),
+            "DPR: InfoNCE with in-batch negatives beats BM25 on open QA."),
+         _p("ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT",
+            "Khattab, Zaharia", 2020, arxiv("2004.12832"), "One vector per token: between bi- and cross-encoders."),
+         _p("Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", "Lewis et al.", 2020,
+            arxiv("2005.11401"), "RAG: retrieve passages, then generate conditioned on them."),
+         _p("Billion-scale similarity search with GPUs", "Johnson, Douze, Jégou", 2017, arxiv("1702.08734"),
+            "Faiss: IVF and product quantization on GPUs, the approximate search behind vector databases."),
+         _p("Improving language models by retrieving from trillions of tokens", "Borgeaud et al.", 2021,
+            arxiv("2112.04426"), "RETRO: retrieval inside the model, a 7.5B model matching 25x larger ones.")],
+    39: [_p("ReAct: Synergizing Reasoning and Acting in Language Models", "Yao et al.", 2022, arxiv("2210.03629"),
+            "Interleave thoughts with tool calls and observations: the loop this module builds."),
+         _p("Toolformer: Language Models Can Teach Themselves to Use Tools", "Schick et al.", 2023,
+            arxiv("2302.04761"), "A model that learns where an API call helps, from its own annotations."),
+         _p("Calibrate Before Use: Improving Few-Shot Performance of Language Models", "Zhao et al.", 2021,
+            arxiv("2102.09690"), "Small models lean toward some labels regardless of input; a content-free prompt "
+            "measures that bias so you can subtract it (the tool-choice fix in section 3)."),
+         _p("Generative Agents: Interactive Simulacra of Human Behavior", "Park et al.", 2023, arxiv("2304.03442"),
+            "A memory stream retrieved by recency, importance and relevance (the score in section 5)."),
+         _p("Reflexion: Language Agents with Verbal Reinforcement Learning", "Shinn et al.", 2023,
+            arxiv("2303.11366"), "An agent that critiques its failed attempts and retries: evaluator-optimizer."),
+         _p("MemGPT: Towards LLMs as Operating Systems", "Packer et al.", 2023, arxiv("2310.08560"),
+            "Context as RAM, external storage as disk: an agent that pages its own memory."),
+         _p("AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation", "Wu et al.", 2023,
+            arxiv("2308.08155"), "Multi-agent conversation as a programming model (the framework, now in maintenance)."),
+         _p("Fundamentals of Building Autonomous LLM Agents", "de Lamo Castrillo et al.", 2025, arxiv("2510.09244"),
+            "A survey (no experiments): perception, reasoning, memory, execution; useful vocabulary.")],
+})
 
 
 class Lecture(NamedTuple):
@@ -257,11 +434,13 @@ JAXFORMER = "Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer* (written 
 SCALING = "Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model* (written guide, JAX)"
 ULTRA = "Hugging Face nanotron team, *The Ultra-Scale Playbook* (written guide, PyTorch)"
 NANOCHAT = "Andrej Karpathy, *nanochat* (MIT-licensed repo, a full ChatGPT-style pipeline in PyTorch)"
+KISS = "Csongor Kiss, *Write your own kernel optimiser* (blog post, 2026)"
 SERIES = {ZTH: "https://karpathy.ai/zero-to-hero.html",
           JAXFORMER: "https://jaxformer.com/",
           SCALING: "https://jax-ml.github.io/scaling-book/",
           ULTRA: "https://huggingface.co/spaces/nanotron/ultrascale-playbook",
           NANOCHAT: "https://github.com/karpathy/nanochat",
+          KISS: "https://blog.csongor.co.uk/cachet-grids-and-tiles/",
           B3: "https://www.3blue1brown.com/?topic=neural-networks",
           RASCHKA: "https://magazine.sebastianraschka.com/p/building-reasoning-models"}
 
@@ -283,7 +462,10 @@ EXTRA: dict[int, dict[str, list[Lecture]]] = {
     21: {NANOCHAT: [_r(NC, "nanochat's evaluation (base_eval, chat_eval)", "CORE score, bits per byte, ARC, GSM8K, MMLU in one harness.")]},
     22: {SCALING: [_r(SB + "roofline", "All about rooflines", "Compute vs memory vs communication bounds, worked out."),
                    _r(SB + "profiling", "How to profile TPU programs", "Reading JAX profiler traces (TPU-focused, same ideas on GPU).")]},
-    23: {SCALING: [_r(SB + "gpus", "How to think about GPUs", "SMs, memory hierarchy and collectives from the scaling-book view.")]},
+    23: {SCALING: [_r(SB + "gpus", "How to think about GPUs", "SMs, memory hierarchy and collectives from the scaling-book view.")],
+         KISS: [_r("https://blog.csongor.co.uk/cachet-grids-and-tiles/", "Write your own kernel optimiser",
+                   "A matmul climbing from 1% of OpenBLAS to parity by checked schedule rewrites (the Cachet language)"
+                   " — this module's speed ladder at the loop level.")]},
     24: {JAXFORMER: [_r(JF + "sharded/", "Part 3: Inside the sharded model", "Mesh, shard_map, FSDP, GPipe pipelines and tensor parallelism.")],
          SCALING: [_r(SB + "sharding", "Sharded matrices and how to multiply them", "Which collective each sharded matmul needs."),
                    _r(SB + "jax-stuff", "Programming TPUs in JAX", "Explicit sharding and shard_map from the JAX side.")],
@@ -367,7 +549,7 @@ def all_companions(module: int) -> dict[str, list[Lecture]]:
 def companions_md(module: int) -> list[str]:
     lines = []
     for series, lectures in all_companions(module).items():
-        kind = "Companion reading" if series in (JAXFORMER, SCALING, ULTRA, NANOCHAT) else "Companion lectures"
+        kind = "Companion reading" if series in (JAXFORMER, SCALING, ULTRA, NANOCHAT, KISS) else "Companion lectures"
         lines += ["", f"**{kind}** — [{series.rsplit(' (', 1)[0]}]({SERIES[series]}) ({series.rsplit(' (', 1)[1]}", ""]
         lines += [f"* [{v.title}]({v.url}){f' ({v.length})' if v.length else ''}. {v.why}" for v in lectures]
     return lines
@@ -382,3 +564,46 @@ def papers_md(module: int) -> str:
         lines += [f"* **[{p.title}]({p.url})** — {p.authors}, {p.year}. {p.why}" for p in items]
     lines += companions_md(module)
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------------------------- books
+# Rendered at the end of docs/PAPERS.md. Free official editions first; `modules` = where each one helps most.
+class Book(NamedTuple):
+    title: str
+    authors: str
+    year: int
+    url: str
+    why: str
+    modules: str
+
+
+BOOKS = [
+    Book("Dive into Deep Learning", "Zhang, Lipton, Li, Smola", 2023, "https://d2l.ai/",
+         "Free, interactive, and has JAX implementations alongside PyTorch: the closest textbook to this course.",
+         "01–17"),
+    Book("Understanding Deep Learning", "Simon J. D. Prince", 2023, "https://udlbook.github.io/udlbook/",
+         "Free. Clear figures and intuition for everything from backprop to transformers and diffusion.", "03–17, 33"),
+    Book("Deep Learning: Foundations and Concepts", "Christopher M. Bishop, Hugh Bishop", 2024,
+         "https://www.bishopbook.com/", "Free to read online. The probabilistic view, carefully derived.", "04–12, 33"),
+    Book("Deep Learning", "Goodfellow, Bengio, Courville", 2016, "https://www.deeplearningbook.org/",
+         "Free. The 2016 reference: optimization, regularization and the math behind modules 02–12.", "02–12"),
+    Book("Probabilistic Machine Learning: An Introduction", "Kevin P. Murphy", 2022,
+         "https://probml.github.io/pml-book/book1.html", "Free. Probability and linear models done properly.", "04, 09"),
+    Book("Reinforcement Learning: An Introduction (2nd ed.)", "Richard S. Sutton, Andrew G. Barto", 2018,
+         "http://incompleteideas.net/book/the-book-2nd.html", "Free. The RL textbook: Q-learning, policy gradients.",
+         "26, 34, 35"),
+    Book("Speech and Language Processing (3rd ed. draft)", "Dan Jurafsky, James H. Martin", 2025,
+         "https://web.stanford.edu/~jurafsky/slp3/", "Free. N-grams to transformers, from the NLP side.", "13–16, 30–32"),
+    Book("Reinforcement Learning from Human Feedback", "Nathan Lambert", 2025, "https://rlhfbook.com/",
+         "Free. Post-training: reward models, RLHF, DPO, RLVR.", "26, 35"),
+    Book("Build a Large Language Model (From Scratch)", "Sebastian Raschka", 2024,
+         "https://www.manning.com/books/build-a-large-language-model-from-scratch",
+         "GPT from tokenizer to fine-tuning, in PyTorch; a good second pass over modules 13–20.", "13–20"),
+    Book("AI Engineering", "Chip Huyen", 2025, "https://huyenchip.com/books/",
+         "Building products on foundation models: evaluation, RAG, agents, fine-tuning trade-offs.", "21, 38, 39"),
+    Book("Artificial Intelligence: A Modern Approach (4th ed.)", "Stuart Russell, Peter Norvig", 2020,
+         "https://aima.cs.berkeley.edu/", "The classic survey of AI beyond deep learning: search, logic, planning.",
+         "00b, 34"),
+    Book("Artificial Intelligence: A Guide for Thinking Humans", "Melanie Mitchell", 2019,
+         "https://melaniemitchell.me/aibook/", "A readable history of AI's hype cycles and real limits.", "00b"),
+]

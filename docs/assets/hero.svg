@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 980" width="880" height="980" font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+  <title>The decoder-only transformer built in this course, each part labelled with the module that builds it</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6472"/>
+    </marker>
+    <style>
+      .box   { fill: #ffffff; stroke: #c9ced6; stroke-width: 1.4; }
+      .norm  { fill: #f3f5f8; stroke: #c9ced6; stroke-width: 1.2; }
+      .attn  { fill: #eaf2ff; stroke: #7aa3e5; stroke-width: 1.4; }
+      .ffn   { fill: #fff3e6; stroke: #e6a35c; stroke-width: 1.4; }
+      .io    { fill: #eef7ee; stroke: #8cc08c; stroke-width: 1.4; }
+      .label { font-size: 15px; fill: #1d2330; font-weight: 600; }
+      .sub   { font-size: 12px; fill: #4a5363; }
+      .tag   { font-size: 11px; fill: #ffffff; font-weight: 700; }
+      .tagbg { fill: #3b4a63; }
+      .side  { font-size: 12px; fill: #4a5363; }
+      .wire  { stroke: #5b6472; stroke-width: 1.6; fill: none; }
+      .plus  { fill: #ffffff; stroke: #5b6472; stroke-width: 1.6; }
+    </style>
+  </defs>
+
+  <!-- next token (top) -->
+  <rect class="io" x="230" y="20" width="300" height="52" rx="10"/>
+  <text class="label" x="380" y="44" text-anchor="middle">next token</text>
+  <text class="sub" x="380" y="62" text-anchor="middle">sample: temperature, top-k, speculative decoding</text>
+  <rect class="tagbg" x="538" y="34" width="34" height="20" rx="4"/><text class="tag" x="555" y="48" text-anchor="middle">18</text>
+
+  <!-- LM head -->
+  <rect class="box" x="230" y="100" width="300" height="46" rx="8"/>
+  <text class="label" x="380" y="122" text-anchor="middle">LM head (tied embedding) → softmax</text>
+  <text class="sub" x="380" y="138" text-anchor="middle">logits over the vocabulary</text>
+  <rect class="tagbg" x="538" y="113" width="34" height="20" rx="4"/><text class="tag" x="555" y="127" text-anchor="middle">16</text>
+  <rect class="norm" x="230" y="166" width="300" height="32" rx="8"/>
+  <text class="sub" x="380" y="187" text-anchor="middle">final RMSNorm</text>
+
+  <!-- repeated block -->
+  <rect x="110" y="222" width="540" height="560" rx="16" fill="#fafbfc" stroke="#9aa3b1" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <text class="label" x="636" y="250" text-anchor="end">× N layers</text>
+  <text class="sub" x="636" y="268" text-anchor="end">stacked + lax.scan</text>
+  <rect class="tagbg" x="580" y="276" width="56" height="20" rx="4"/><text class="tag" x="608" y="290" text-anchor="middle">10 · 16</text>
+
+  <!-- FFN half -->
+  <circle class="plus" cx="380" cy="262" r="13"/><text x="380" y="267" text-anchor="middle" font-size="18" fill="#1d2330">+</text>
+  <rect class="ffn" x="230" y="296" width="300" height="104" rx="10"/>
+  <text class="label" x="380" y="322" text-anchor="middle">feed-forward: SwiGLU</text>
+  <text class="sub" x="380" y="342" text-anchor="middle">or mixture of experts: a router picks</text>
+  <text class="sub" x="380" y="358" text-anchor="middle">top-k of many SwiGLU experts per token</text>
+  <text class="sub" x="380" y="384" text-anchor="middle">(module 36: Mamba layers can stand in for attention)</text>
+  <rect class="tagbg" x="538" y="306" width="34" height="20" rx="4"/><text class="tag" x="555" y="320" text-anchor="middle">17</text>
+  <rect class="norm" x="230" y="418" width="300" height="32" rx="8"/>
+  <text class="sub" x="380" y="439" text-anchor="middle">RMSNorm (pre-norm)</text>
+  <rect class="tagbg" x="538" y="424" width="34" height="20" rx="4"/><text class="tag" x="555" y="438" text-anchor="middle">17</text>
+
+  <!-- attention half -->
+  <circle class="plus" cx="380" cy="478" r="13"/><text x="380" y="483" text-anchor="middle" font-size="18" fill="#1d2330">+</text>
+  <rect class="attn" x="230" y="510" width="300" height="168" rx="10"/>
+  <text class="label" x="380" y="536" text-anchor="middle">causal self-attention</text>
+  <text class="sub" x="380" y="558" text-anchor="middle">grouped-query attention (shared K/V heads)</text>
+  <text class="sub" x="380" y="576" text-anchor="middle">RoPE: position as rotation of q and k</text>
+  <text class="sub" x="380" y="594" text-anchor="middle">causal mask · softmax(qkᵀ/√d)·v</text>
+  <text class="sub" x="380" y="612" text-anchor="middle">KV cache for decoding (or a compressed MLA latent)</text>
+  <text class="sub" x="380" y="636" text-anchor="middle">LoRA adapters on the q and v projections</text>
+  <rect class="tagbg" x="538" y="520" width="34" height="20" rx="4"/><text class="tag" x="555" y="534" text-anchor="middle">15</text>
+  <rect class="tagbg" x="538" y="546" width="34" height="20" rx="4"/><text class="tag" x="555" y="560" text-anchor="middle">17</text>
+  <rect class="tagbg" x="538" y="600" width="34" height="20" rx="4"/><text class="tag" x="555" y="614" text-anchor="middle">18</text>
+  <rect class="tagbg" x="538" y="626" width="34" height="20" rx="4"/><text class="tag" x="555" y="640" text-anchor="middle">20</text>
+  <rect class="norm" x="230" y="696" width="300" height="32" rx="8"/>
+  <text class="sub" x="380" y="717" text-anchor="middle">RMSNorm (pre-norm)</text>
+
+  <!-- residual stream -->
+  <path class="wire" d="M380,770 L380,730"/>
+  <path class="wire" d="M380,696 L380,680" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,510 L380,493" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,465 L380,452" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,418 L380,402" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,296 L380,277" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,249 L380,200" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,166 L380,148" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,100 L380,74" marker-end="url(#arrow)"/>
+  <!-- skip connections -->
+  <path class="wire" d="M380,752 L170,752 L170,478 L365,478" marker-end="url(#arrow)"/>
+  <path class="wire" d="M380,470 L190,470 L190,262 L365,262" marker-end="url(#arrow)" stroke-dasharray="0"/>
+  <text class="side" x="122" y="620" transform="rotate(-90 122 620)">residual stream</text>
+
+  <!-- embeddings + tokenizer -->
+  <rect class="box" x="230" y="806" width="300" height="46" rx="8"/>
+  <text class="label" x="380" y="828" text-anchor="middle">token embedding</text>
+  <text class="sub" x="380" y="844" text-anchor="middle">(word2vec's idea, learned end to end)</text>
+  <rect class="tagbg" x="538" y="819" width="34" height="20" rx="4"/><text class="tag" x="555" y="833" text-anchor="middle">14</text>
+  <path class="wire" d="M380,806 L380,784" marker-end="url(#arrow)"/>
+  <rect class="io" x="230" y="878" width="300" height="52" rx="10"/>
+  <text class="label" x="380" y="900" text-anchor="middle">BPE tokenizer</text>
+  <text class="sub" x="380" y="918" text-anchor="middle">"The detective opened the safe…" → ids</text>
+  <rect class="tagbg" x="538" y="892" width="34" height="20" rx="4"/><text class="tag" x="555" y="906" text-anchor="middle">13</text>
+  <path class="wire" d="M380,878 L380,854" marker-end="url(#arrow)"/>
+
+  <!-- side rails: the JAX machinery under everything -->
+  <g class="side">
+    <text x="680" y="250" font-weight="700" fill="#1d2330">underneath it all</text>
+    <text x="680" y="272">arrays · linear algebra</text><text x="820" y="272" font-weight="700">01–02</text>
+    <text x="680" y="292">autodiff · grad</text><text x="820" y="292" font-weight="700">03</text>
+    <text x="680" y="312">optimizers · AdamW</text><text x="820" y="312" font-weight="700">05</text>
+    <text x="680" y="332">jit · XLA</text><text x="820" y="332" font-weight="700">06</text>
+    <text x="680" y="352">vmap · pytrees</text><text x="820" y="352" font-weight="700">07</text>
+    <text x="680" y="372">scan · bf16</text><text x="820" y="372" font-weight="700">08</text>
+    <text x="680" y="392">init · training craft</text><text x="820" y="392" font-weight="700">11</text>
+    <text x="680" y="420" font-weight="700" fill="#1d2330">around it</text>
+    <text x="680" y="442">profiling on ROCm</text><text x="820" y="442" font-weight="700">22</text>
+    <text x="680" y="462">kernels · Pallas</text><text x="820" y="462" font-weight="700">23</text>
+    <text x="680" y="482">sharding</text><text x="820" y="482" font-weight="700">24</text>
+    <text x="680" y="502">reasoning · GRPO</text><text x="820" y="502" font-weight="700">26</text>
+    <text x="680" y="522">GGUF · LM Studio</text><text x="820" y="522" font-weight="700">27</text>
+    <text x="680" y="542">RAG</text><text x="820" y="542" font-weight="700">38</text>
+    <text x="680" y="562">agents</text><text x="820" y="562" font-weight="700">39</text>
+  </g>
+  <text class="sub" x="440" y="962" text-anchor="middle">Dark tags: the module that builds each part. Run on an RX 7600 XT (ROCm), in JAX.</text>
+</svg>

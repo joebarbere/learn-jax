@@ -1,0 +1,61 @@
+/* Page geometry for the book (Paged.js). Letter size: comfortable on screens, prints anywhere. */
+
+@page {
+  size: 8.5in 11in;
+  margin: 0.85in 0.9in 0.9in 0.9in;
+  background: var(--bg);
+  @bottom-center { content: counter(page); font-family: Inter, sans-serif; font-size: 8pt; color: var(--muted); }
+}
+@page :blank { @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+@page cover { margin: 0.7in 0.8in; background: var(--cover-bg);
+  @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+@page front { @top-left { content: none; } @top-right { content: none; } @bottom-center { content: counter(page); } }
+@page part { background: var(--part-bg); @top-left { content: none; } @top-right { content: none; } @bottom-center { content: none; } }
+
+.pagedjs_page { background: var(--bg); }
+.pagedjs_cover_page, .pagedjs_named_page.pagedjs_cover_page { background: var(--cover-bg); }
+
+.cover { page: cover; display: flex; flex-direction: column; height: 9.6in; }
+.cover-title { font-size: 44pt; margin-top: 0.1in; }
+.cover-art { flex: 1; display: flex; align-items: center; justify-content: center; margin: 0.1in 0; }
+.cover-art svg.hero { width: auto; max-width: 100%; max-height: 6.9in; }
+.colophon, .toc { page: front; break-before: page; }
+.colophon { padding-top: 5in; font-size: 9pt; color: var(--muted); }
+.colophon .col-title { font-family: Inter, sans-serif; font-weight: 700; color: var(--fg); font-size: 11pt; }
+.toc-title { font-size: 26pt; }
+.toc ol li a { color: var(--fg); display: flex; }
+.toc ol li a::after { content: attr(data-page); color: var(--muted); margin-left: auto; padding-left: 0.6em; font-family: Inter, sans-serif; font-variant-numeric: tabular-nums; }
+.toc-mod { font-size: 9.5pt; margin: 0.12em 0; }
+
+.part { page: part; break-before: right; padding-top: 2.6in; }
+.part-num { font-size: 12pt; font-weight: 700; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; }
+.part-title { font-size: 30pt; margin: 0.2em 0 1em; string-set: part content(text); }
+.part-list { list-style: none; padding: 0; font-family: Inter, sans-serif; font-size: 10.5pt; }
+.part-list li { margin: 0.3em 0; }
+
+section.module { break-before: page; counter-reset: footnote; }
+.running { display: block; font-size: 0; height: 0; overflow: hidden; }
+.running-chapter { display: block; font-size: 0; height: 0; overflow: hidden; }
+section.module h1 { font-size: 24pt; margin-top: 0.3in; }
+section.module h1 code { font-size: 0.85em; }
+h2, h3, h4 { break-after: avoid; }
+img.plot, table, pre, .hl, .callout, .quiz, .math.display { break-inside: avoid; }
+p { orphans: 3; widows: 3; }
+img.plot { max-height: 7.4in; width: auto; }
+pre { white-space: pre-wrap; }
+
+.appendix { break-before: right; }
+.app-title { font-size: 24pt; string-set: modtitle content(text); }
+.app-body h1 { font-size: 16pt; }
+.ix-cols { columns: 2; column-gap: 0.35in; }
+.ix-entry { break-inside: avoid; }
+a.ixref::after { content: attr(data-page); }
+#app-glossary .app-body { columns: 2; column-gap: 0.35in; }
+.gl { break-inside: avoid; font-size: 9pt; }
+.gl-letter, .ix-letter { column-span: none; break-after: avoid; }
+
+/* running headers, written by finishPages() in build.py */
+.pagedjs_pagebox { position: relative; }
+.runhead { position: absolute; top: 0.42in; left: 0.9in; right: 0.9in; display: flex; justify-content: space-between;
+           font-family: Inter, sans-serif; font-size: 7.5pt; color: var(--muted); letter-spacing: 0.03em;
+           border-bottom: 0.5px solid var(--rule); padding-bottom: 3px; }

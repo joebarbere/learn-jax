@@ -47,6 +47,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Running large language models at home became practical in early 2023, after Meta's LLaMA weights spread
+    and Georgi Gerganov released llama.cpp, a C/C++ engine built on his ggml library with aggressive
+    quantization. Iwan Kawrakow's k-quants (2023) and the GGUF file format (August 2023) followed. Server
+    systems such as vLLM (Kwon et al., 2023) solved the opposite problem, serving many users at once. Coding
+    models such as Qwen2.5-Coder (2024) made local coding assistants genuinely useful.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · The setup
 

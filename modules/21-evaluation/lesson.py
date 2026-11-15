@@ -53,6 +53,22 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Benchmarks have steered the field: ImageNet (2009) for vision, and perplexity for language since the
+    n-gram era. As models grew, single scores gave way to suites: GLUE (2018), MMLU (Hendrycks et al., 2020)
+    and HELM (Liang et al., 2022). ARC (Clark et al., 2018) is the science-question benchmark used here.
+    Zheng et al. (2023) studied using a strong model as a judge, alongside the crowd-voted Chatbot Arena.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · What a single number hides
 

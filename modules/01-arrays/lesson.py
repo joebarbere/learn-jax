@@ -39,6 +39,23 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Array programming is older than deep learning: Kenneth Iverson's APL (1960s) let you write whole-array
+    operations without loops. In Python, Numeric (1995) and Numarray were merged into NumPy (Travis
+    Oliphant, 2006), whose model of shapes, strides and broadcasting Harris et al. described in 2020. Every
+    deep-learning framework copied that model, and `jax.numpy` deliberately mirrors NumPy's API so the same
+    code runs on a GPU.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(jnp, mo):
     _examples = {
         "scalar `jnp.array(3.0)`": jnp.array(3.0),

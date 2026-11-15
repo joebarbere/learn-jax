@@ -56,6 +56,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    In the BERT and GPT era (2018–19), adapting a model meant fine-tuning every weight. Adapters (Houlsby et
+    al., 2019) added small trainable layers instead, and Aghajanyan et al. (2020) showed fine-tuning lives
+    in a small subspace. LoRA (Hu et al., 2021) learned a low-rank update to frozen weights, and QLoRA
+    (Dettmers et al., 2023) combined it with 4-bit base models to fine-tune very large models on one GPU.
+    InstructGPT (Ouyang et al., 2022) showed what fine-tuning on instructions could do.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     _rows = []
     for _name, _n in [("SmolLM2-135M", 135e6), ("SmolLM2-360M (this lesson)", 362e6), ("SmolLM2-1.7B", 1.7e9),
                       ("Llama-3-8B", 8.0e9)]:
@@ -530,6 +547,127 @@ containers/run.sh python modules/20-lora/train.py
 ```
 It trains ranks 1–32 on q,v and on every projection, and writes `runs/20-lora/sweep.json`.
 """), kind="info")
+    _out
+    return
+
+
+@app.cell
+def _(LM, STEPS, TARGETS, adapters, alpha, cfg, enc, ex, exact_match, jax, jnp, mo, params, rank, task, time,
+      tok, train_step):
+    if adapters is None:
+        merge_table = None
+        _out = mo.md("")
+    else:
+        _t0 = time.perf_counter()
+        _dates = task.make_date_splits()
+        _denc = {_k: task.encode_batch(tok, _v, instruction=task.DATE_INSTRUCTION) for _k, _v in _dates.items()}
+        _opt, _ = LM.make_trainer(cfg, ex.lora_apply, alpha, rank, lr=1e-3, steps=STEPS)
+        _ad = LM.init_adapters(jax.random.key(2), cfg, rank, TARGETS, ex.lora_init, ex.TARGET_SHAPES)
+        _st, _it = _opt.init(_ad), LM.batches(jax.random.key(3), _denc["train"], 16)
+        for _s in range(STEPS):
+            _x, _m = next(_it)
+            _ad, _st, _ = train_step(_ad, _st, params, _x, _m)
+        adapters_dates = _ad
+
+        def _combine(la, lb):
+            """la·ΔW_orders + lb·ΔW_dates as ONE adapter of rank 2r: stack the A's side by side, the B's on top."""
+            return {_n: {"A": jnp.concatenate([adapters[_n]["A"], adapters_dates[_n]["A"]], axis=-1),
+                         "B": jnp.concatenate([la * adapters[_n]["B"], lb * adapters_dates[_n]["B"]], axis=-2)}
+                    for _n in adapters}
+
+        _variants = [("base model", {}), ("orders adapter only", adapters), ("dates adapter only", adapters_dates),
+                     ("sum: orders + dates", _combine(1.0, 1.0)), ("average: ½ orders + ½ dates", _combine(0.5, 0.5))]
+        merge_table = {_name: (float(exact_match(params, _a, enc["heldout"], task).mean()),
+                               float(exact_match(params, _a, _denc["test"], task).mean()))
+                       for _name, _a in _variants}
+        _rows = "\n".join(f"| {_k} | {_o:.0%} | {_d:.0%} |" for _k, (_o, _d) in merge_table.items())
+        _ex = "\n".join(f"* `{_e['text']}` → `{_e['answer']}`" for _e in _dates["test"][:3])
+        _b, _s, _a = merge_table["base model"], merge_table["sum: orders + dates"], merge_table["average: ½ orders + ½ dates"]
+        _better = "beats" if sum(_a) > sum(_s) + 0.02 else "loses to" if sum(_a) < sum(_s) - 0.02 else "ties with"
+        _reading = (f"Reading it: the base model already gets **{_b[1]:.0%}** of dates right, because SmolLM2-Instruct has "
+                    f"seen ISO dates, while orders start at {_b[0]:.0%}. Adding both deltas at full strength keeps most of "
+                    f"each skill (**{_s[0]:.0%}** / **{_s[1]:.0%}**) but not all: both adapters move the same query and "
+                    f"value weights, so they **interfere**. Here the average (½ + ½) **{_better}** the sum "
+                    f"(**{_a[0]:.0%}** / **{_a[1]:.0%}**): halving each delta limits how far the pair can push shared "
+                    "weights. TIES-Merging (papers below) goes further: it drops each delta's small entries and resolves "
+                    "sign conflicts before adding. Merging is cheap to try, and you measure it per task like this.")
+        _out = mo.md(f"""
+## 12 · Task arithmetic: add two adapters
+
+A second adapter, same rank and recipe, trained for {STEPS} steps on a different job: dates to ISO format.
+
+{_ex}
+
+Each adapter is a weight *delta*, $\\Delta W = \\frac{{\\alpha}}{{r}}AB$. **Task arithmetic** (Ilharco et al., 2022)
+treats those deltas as vectors you can add: $W + \\Delta W_\\text{{orders}} + \\Delta W_\\text{{dates}}$. Two
+rank-$r$ adapters add up to one rank-$2r$ adapter, because stacking does the sum for you:
+
+$$x\\,[A_1\\;A_2]\\begin{{bmatrix}}B_1\\\\B_2\\end{{bmatrix}} = xA_1B_1 + xA_2B_2$$
+
+so the merged model runs through your own `lora_apply`, unchanged. Exact match on each task's test set:
+
+| weights | orders (heldout) | dates |
+|---|---|---|
+{_rows}
+
+(Dates trained in {time.perf_counter() - _t0:.0f} s, evaluations included.)
+
+{_reading}
+""")
+    _out
+    return (merge_table,)
+
+
+@app.cell
+def _(STEPS, exact_match, merge_table, mo, params, task, tok):
+    if merge_table is None:
+        _out = mo.md("")
+    else:
+        _dates = task.make_date_splits()
+        _shots = _dates["train"][:16]
+        _turn = "<|im_end|>\n<|im_start|>assistant\n{a}<|im_end|>\n<|im_start|>user\n"
+        icl, _extra = {}, {}
+        for _k in (0, 1, 2, 4, 8, 16):
+            _inline = task.DATE_INSTRUCTION + ("Examples:\n" + "".join(f"{_e['text']} -> {_e['answer']}\n"
+                                                                       for _e in _shots[:_k]) + "\n" if _k else "")
+            _turns = task.DATE_INSTRUCTION + "".join(_e["text"] + _turn.format(a=_e["answer"]) + task.DATE_INSTRUCTION
+                                                     for _e in _shots[:_k])
+            for _fmt, _instr in (("inline", _inline), ("turns", _turns)):
+                _b = task.encode_batch(tok, _dates["test"], max_len=96 + 40 * _k, instruction=_instr)
+                icl[_fmt, _k] = float(exact_match(params, {}, _b, task).mean())
+                _extra[_fmt, _k] = len(tok.encode(_instr).ids) - len(tok.encode(task.DATE_INSTRUCTION).ids)
+        _lora = merge_table["dates adapter only"][1]
+        _ks = (0, 1, 2, 4, 8, 16)
+        _rows = "\n".join(f"| {_k} | {icl['inline', _k]:.0%} | {icl['turns', _k]:.0%} | {_extra['turns', _k]} |" for _k in _ks)
+        _worse = [_k for _k in _ks[1:] if icl["inline", _k] < icl["inline", 0] - 0.2]
+        _one = icl["turns", 1]
+        _why = ((f"Look at the inline column: at k = {', '.join(map(str, _worse))} the examples made it *worse* than none. "
+                 "The model reads `text -> answer` lines and starts its reply by imitating that line format instead of "
+                 "answering, so exact match fails on the first token. " if _worse else "")
+                + f"As chat turns, even one example gets **{_one:.0%}**: the examples look like what the model was "
+                "trained on, earlier questions in this conversation answered the right way. ")
+        _out = mo.md(f"""
+## 13 · Or don't train at all: in-context learning
+
+GPT-3's surprise (Brown et al., 2020) was that a big enough language model can pick up a task from a
+few examples *in the prompt*, with no gradient step: **in-context learning**. Same base model, no
+adapter, the date task with $k$ worked examples, given two ways: **inline** in the instruction
+(`January 20th, 2002 -> 2002-01-20`, one per line), or as earlier **turns** of the chat, each example a
+user message answered by the assistant.
+
+| examples ($k$) | inline | as chat turns | extra prompt tokens (turns) |
+|---|---|---|---|
+{_rows}
+| *LoRA adapter, {STEPS} steps (section 12)* | | *{_lora:.0%}* | *0* |
+
+{_why}This is Module 21's lesson again (prompt format is part of the result), and Module 27's chat
+templates: a chat model learns most from examples in the shape it was trained on.
+
+The trade: in-context learning costs nothing up front but pays on **every** request (the examples are
+re-read each time: {_extra["turns", 16]} extra prompt tokens at $k=16$, Module 18's prefill cost), and how
+much a model learns from examples grows with its size. Fine-tuning pays once, then the prompt stays short.
+Try the cheap thing first, measure, and train only when it isn't enough.
+""")
     _out
     return
 

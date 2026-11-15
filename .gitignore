@@ -11,3 +11,5 @@ infra/aws/.terraform/
 infra/aws/*.tfstate*
 infra/aws/terraform.tfvars
 .figs/
+markdown/
+site/

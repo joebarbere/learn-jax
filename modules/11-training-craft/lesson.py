@@ -49,6 +49,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    In the 2000s, deep networks were notoriously hard to train. Glorot & Bengio (2010) traced the problem to
+    activation and gradient statistics drifting layer by layer, giving Xavier initialization; He et al.
+    (2015) adjusted it for ReLU. Dropout (Srivastava et al., 2014) fought overfitting, BatchNorm (Ioffe &
+    Szegedy, 2015) steadied training, and residual connections (He et al., 2015) let networks reach 100+
+    layers. LayerNorm (2016) and RMSNorm (2019) became the transformer-era normalizations.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · Initialization: keep the signal alive
 

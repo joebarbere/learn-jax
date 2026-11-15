@@ -45,6 +45,24 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Frank Rosenblatt's perceptron (1958) learned simple patterns and drew huge excitement. In 1969 Minsky
+    and Papert's book "Perceptrons" showed a single-layer perceptron cannot compute XOR, and interest
+    collapsed into the first "AI winter". Multi-layer networks came back when backpropagation (Rumelhart,
+    Hinton & Williams, 1986) showed how to train hidden layers, and Cybenko (1989) proved they can
+    approximate any continuous function. Later activations such as ReLU (around 2010) and GELU (2016) made
+    deep stacks train better.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · What a linear model can't do
 

@@ -48,6 +48,23 @@ def _(g_note, mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Performance engineering for deep learning grew with GPUs. The roofline model (Williams, Waterman &
+    Patterson, 2009) framed compute- versus memory-bound code; Ivanov et al. (2020) showed Transformers
+    spend much of their time moving data; and Google's PaLM paper (Chowdhery et al., 2022) popularized model
+    FLOPs utilization (MFU). Karpathy's "Let's reproduce GPT-2" (2024) walked through the speed-up ladder
+    this lesson rebuilds in JAX.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(L, mo):
     mo.md(rf"""
     ## 1 · The speed ladder

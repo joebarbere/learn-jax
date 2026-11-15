@@ -80,3 +80,22 @@ def detective_corpus() -> dict:
         out[split] = np.fromfile(_download(DETECTIVE_URL + f"{split}.bin", d / f"{split}.bin"), np.uint16)
     out["tokenizer_path"] = _download(DETECTIVE_URL + "tokenizer.json", d / "tokenizer.json")
     return out
+
+
+RADIO_FILE = "radio-abstracts.jsonl"
+
+
+def radio_abstracts() -> list[dict]:
+    """~50,000 radio-astronomy arXiv abstracts (1993–2026), one dict per paper (Module 38's RAG corpus).
+
+    Keys: id, version, published, category, title, abstract. The same file the owner's aws-ai `local-kb`
+    benchmark uses, so retrieval numbers compare with it. Not downloaded automatically (arXiv asks for one
+    request every 3 s): run `make rag-data` once, which copies it from aws-ai if present, else fetches it.
+    """
+    import json
+
+    path = CACHE / "radio" / RADIO_FILE
+    if not path.exists():
+        raise FileNotFoundError(f"{path} is missing: run `make rag-data` on the host first.")
+    with path.open(encoding="utf-8") as f:
+        return [json.loads(line) for line in f if line.strip()]

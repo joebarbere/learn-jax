@@ -1,0 +1,27 @@
+# The book image: turns rendered lessons into a static site and two PDFs (light and dark). No GPU, no JAX.
+#   podman build -t learn-jax-book -f containers/Containerfile.book containers      (make book-image)
+# Everything the pages load (Paged.js, KaTeX, fonts) is downloaded here, pinned, so the PDF build runs offline.
+FROM docker.io/library/python:3.12-slim
+
+RUN python3 -m pip install --no-cache-dir playwright==1.64.1 pygments==2.21.0 markdown==3.11.2 beautifulsoup4==4.15.0 \
+ && python3 -m playwright install --with-deps chromium \
+ && apt-get update && apt-get install -y --no-install-recommends curl unzip && rm -rf /var/lib/apt/lists/*
+
+# Front-end assets, exact versions (jsDelivr's npm mirror).
+ARG NPM=https://cdn.jsdelivr.net/npm
+WORKDIR /opt/book/vendor
+RUN curl -fsSL -o paged.polyfill.js $NPM/pagedjs@0.4.3/dist/paged.polyfill.js \
+ && mkdir -p katex && cd katex \
+ && curl -fsSL -o katex.min.js $NPM/katex@0.19.1/dist/katex.min.js \
+ && curl -fsSL -o katex.min.css $NPM/katex@0.19.1/dist/katex.min.css \
+ && curl -fsSL -o auto-render.min.js $NPM/katex@0.19.1/dist/contrib/auto-render.min.js \
+ && mkdir -p fonts && for f in $(grep -o 'fonts/[^)]*\.woff2' katex.min.css | sort -u); do curl -fsSL -o "$f" "$NPM/katex@0.19.1/dist/$f"; done
+# Fonts (SIL Open Font License): Source Serif 4 for text, Inter for headings, JetBrains Mono for code.
+RUN mkdir -p fonts && cd fonts \
+ && for w in 400 600 700; do curl -fsSL -o source-serif-4-$w.woff2 $NPM/@fontsource/source-serif-4@5.3.1/files/source-serif-4-latin-$w-normal.woff2; done \
+ && curl -fsSL -o source-serif-4-400-italic.woff2 $NPM/@fontsource/source-serif-4@5.3.1/files/source-serif-4-latin-400-italic.woff2 \
+ && for w in 400 600 700 800; do curl -fsSL -o inter-$w.woff2 $NPM/@fontsource/inter@5.3.0/files/inter-latin-$w-normal.woff2; done \
+ && for w in 400 700; do curl -fsSL -o jetbrains-mono-$w.woff2 $NPM/@fontsource/jetbrains-mono@5.3.0/files/jetbrains-mono-latin-$w-normal.woff2; done
+
+ENV BOOK_VENDOR=/opt/book/vendor
+WORKDIR /course

@@ -37,6 +37,24 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Reverse-mode automatic differentiation was described by Seppo Linnainmaa in 1970. Applied to neural
+    networks it became backpropagation, proposed by Paul Werbos in 1974 and popularized by Rumelhart, Hinton
+    & Williams in 1986, which made multi-layer networks trainable. For years researchers still derived
+    gradients by hand; then autodiff became a library feature: Theano (2007), Autograd for NumPy (around
+    2015, whose authors went on to build JAX), TensorFlow (2015), PyTorch (2016) and JAX (2018). Baydin et
+    al.'s 2015 survey ties the history together.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · A derivative is a slope
 

@@ -1,0 +1,3 @@
+# Light theme for the book: matplotlib defaults, with the figure background matching the page.
+figure.facecolor: ffffff
+savefig.facecolor: ffffff

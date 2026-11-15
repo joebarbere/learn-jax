@@ -70,6 +70,23 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    The local-model ecosystem grew around llama.cpp in 2023: the ggml library, then the single-file GGUF
+    model format (August 2023). Desktop apps such as LM Studio and Ollama (both 2023) wrapped those engines
+    with model catalogs and OpenAI-compatible servers. The techniques you combine here come from earlier
+    modules: LoRA (Hu et al., 2021) for adapting, GPTQ-style quantization (Frantar et al., 2022) for
+    shrinking, and speculative decoding (Leviathan et al., 2022) for speed.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(BASE, lmclient, mo):
     if BASE:
         _keys = sorted(lmclient.available(BASE))
@@ -715,6 +732,42 @@ def _(mo, read_json):
     fraction of a 360M target's step for speculation to pay off. It shines when the draft is ~10–50× smaller
     than the target (e.g. a 0.5B draft for a 14B model) and the text is predictable (code).
     """)
+    return
+
+
+@app.cell
+def _(BASE, lj, lmclient, mo, np):
+    def _embed():
+        if not BASE:
+            return mo.callout(mo.md("Start LM Studio (`make lms-up`) to try the embeddings endpoint."), kind="info")
+        emb = [m["key"] for m in lmclient.models(BASE) if m.get("type") == "embedding"]
+        if not emb:
+            return mo.callout(mo.md(
+                "No embedding model in LM Studio yet. Get the one the owner's aws-ai `local-kb` uses, then re-run:\n\n"
+                "```\ncontainers/lmstudio.sh lms get Qwen/Qwen3-Embedding-0.6B-GGUF\n```"), kind="info")
+        key = emb[0]
+        lmclient.ensure_loaded(BASE, key)
+        texts = ["The interferometer was calibrated against a bright quasar.",
+                 "Phase calibration of the radio array used a strong compact source.",
+                 "The kettle on the stove began to whistle."]
+        r = lmclient.post(BASE, "/v1/embeddings", {"model": key, "input": texts})
+        v = np.array([d["embedding"] for d in r["data"]], np.float32)
+        v /= np.linalg.norm(v, axis=1, keepdims=True)
+        s = v @ v.T
+        lmclient.unload_all(BASE)
+        return mo.md(f"`{key}` returned {v.shape[0]} vectors of **{v.shape[1]}** dimensions. Cosine similarity: "
+                     f"sentences 1–2 (same meaning, different words) **{s[0, 1]:.2f}**, 1–3 (unrelated) **{s[0, 2]:.2f}**.")
+
+    _a = lj.attempt(_embed)
+    mo.vstack([mo.md(r"""
+    ## 14 · Embeddings: the other endpoint
+
+    `/v1/embeddings` turns text into a vector instead of more text: `{"model": ..., "input": [...]}` in,
+    one unit-length vector per input out. Texts with similar meaning land close together, so "find the passages
+    nearest this question" becomes a matrix multiply. That is the retrieval half of **RAG**, which Module 38
+    builds from scratch in JAX (BM25, a bi-encoder you train, hybrid search, reranking) and compares with an
+    embedding model served exactly like this one.
+    """), _a.value if _a.ok else _a.view(mo)])
     return
 
 

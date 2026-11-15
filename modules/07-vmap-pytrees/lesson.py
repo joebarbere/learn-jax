@@ -40,6 +40,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Mapping a function over data is an old functional-programming idea, as old as Lisp's map (1958). JAX
+    made it a composable transformation: `vmap` (2018) batches a function written for one example. That
+    turned some expensive techniques into one-liners, such as per-example gradients (Goodfellow, 2015), the
+    core of differentially private training (Abadi et al., 2016). Pytrees are JAX's way of applying the same
+    transformations to nested model parameters.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · `vmap`: write it for one, run it for many
 

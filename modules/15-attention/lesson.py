@@ -42,6 +42,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    By 2014, neural translation squeezed a whole sentence into one fixed vector (seq2seq). Bahdanau, Cho &
+    Bengio (2014) let the decoder look back at every input position and weight them, which was the birth of
+    attention. Vaswani et al. (2017) removed recurrence entirely, "Attention Is All You Need", and the
+    Transformer took over. FlashAttention (Dao et al., 2022) later reorganized attention around memory
+    traffic to make long sequences affordable.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · The problem with a fixed window
 

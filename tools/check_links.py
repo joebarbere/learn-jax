@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 UA = {"User-Agent": "Mozilla/5.0 (learn-jax course link checker)"}
-LINK = re.compile(r"\[([^\]\n]+)\]\((https?://[^)\s]+)\)")
+LINK = re.compile(r"\[([^\]\n]+)\]\((https?://(?:[^()\s]|\([^()\s]*\))+)\)")  # allows one level of (...) in URLs
 BOT_BLOCKED = {"doi.org", "platform.openai.com", "openai.com", "www.reddit.com", "x.com", "twitter.com",
                "www.linkedin.com", "dl.acm.org"}
 

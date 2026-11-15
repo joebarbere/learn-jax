@@ -65,6 +65,23 @@ def _(cpus, mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Training across many machines started with data parallelism, as in Google's DistBelief (Dean et al.,
+    2012). As models outgrew one device, Megatron-LM (Shoeybi et al., 2019) split layers across GPUs (tensor
+    parallelism), GPipe (Huang et al., 2018) split them into pipeline stages, and ZeRO (Rajbhandari et al.,
+    2019) sharded optimizer state, the idea behind FSDP. GShard (2020) and GSPMD (2021) let a compiler
+    insert the communication from sharding annotations, which is how JAX's sharding API works.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(AxisType, cpus, jax, mo):
     mesh = jax.make_mesh((4, 2), ("X", "Y"), devices=cpus, axis_types=(AxisType.Explicit,) * 2)
     _grid = "\n".join(f"    | X={_r} | " + " | ".join(f"CPU {d.id}" for d in _row) + " |"

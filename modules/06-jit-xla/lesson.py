@@ -41,6 +41,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Compiling whole array programs for speed has a long history in scientific computing. For deep learning,
+    Google built XLA (Accelerated Linear Algebra) as TensorFlow's optimizing compiler and announced it in
+    2017. JAX (Frostig, Johnson & Leary, 2018) took a different route to the same compiler: trace an
+    ordinary Python function and hand the result to XLA, which is what `jit` does. Snider & Liang (2023)
+    measured how much of XLA's speed comes from fusion, the effect you'll see here.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · Tracing: your function runs once, with stand-ins
 

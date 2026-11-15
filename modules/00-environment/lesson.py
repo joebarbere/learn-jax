@@ -39,6 +39,25 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    GPUs began as graphics chips. In 2007 NVIDIA's CUDA made them programmable for general computing, and in
+    2012 AlexNet (Krizhevsky, Sutskever & Hinton) trained on two consumer gaming GPUs and won the ImageNet
+    competition by a wide margin, which started the deep-learning boom. AMD released ROCm, its open-source
+    GPU computing stack, in 2016. JAX came out of Google research on tracing Python programs into the XLA
+    compiler (Frostig, Johnson & Leary, 2018). And the roofline model (Williams, Waterman & Patterson, 2009)
+    gave the simple question behind every speed number in this course: is this limited by arithmetic or by
+    memory?
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · The stack
 

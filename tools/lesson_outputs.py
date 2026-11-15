@@ -2,6 +2,7 @@
 
     LEARNJAX_SOLUTIONS=1 containers/run.sh python tools/lesson_outputs.py modules/00-environment/lesson.py
     ... lesson.py --images /course/.figs     # also save every plot as PNG (cell number in the name)
+    ... --full lesson.py                     # whole text of each cell (default: first 600 characters)
 
 Exits 1 if any cell produced an error output.
 """
@@ -56,12 +57,14 @@ def main(path: str, images: str | None = None) -> int:
             t = text_of(o)
             if t:
                 errors += t.startswith("!! ERROR") or "raised an error" in t
-                print(f"[{i:02d}] {t[:600]}")
+                print(f"[{i:02d}] {t if FULL else t[:600]}")
     print(f"\n{len(nb['cells'])} cells, {errors} with errors")
     return 1 if errors else 0
 
 
+FULL = "--full" in sys.argv   # print each cell's whole text (default: first 600 characters)
+
 if __name__ == "__main__":
-    args = sys.argv[1:]
+    args = [a for a in sys.argv[1:] if a != "--full"]
     img = args[args.index("--images") + 1] if "--images" in args else None
     sys.exit(main(args[0], img))

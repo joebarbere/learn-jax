@@ -36,6 +36,24 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    The ideas here are old. Matrices were developed as a subject in the 1800s, and the singular value
+    decomposition was found independently by Beltrami (1873) and Jordan (1874); Golub and Kahan made it
+    practical on computers in 1965. Deep learning is, underneath, a very large amount of matrix
+    multiplication. The low-rank idea came back in 2020–21: Aghajanyan, Zettlemoyer & Gupta showed fine-
+    tuning lives in a small subspace, and Hu et al. turned that into LoRA (2021), which you'll build in
+    Module 20.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(np, plt):
     def draw_transform(ax, m, title=""):
         """Plot the unit grid, unit circle and basis vectors before (faint) and after transform m."""

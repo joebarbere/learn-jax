@@ -5,6 +5,9 @@
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from learnjax.syllabus import number
+
 CELL = '''@app.cell
 def _(mo):
     import learnjax.papers as _papers
@@ -21,7 +24,7 @@ for arg in sys.argv[1:]:
     if "papers_md(" in src:
         print(f"skip (already has papers): {path}")
         continue
-    n = int(path.parent.name[:2])
+    n = number(path.parent.name)
     idx = src.find("## Further reading")
     if idx < 0:
         print(f"NO Further reading cell: {path}")

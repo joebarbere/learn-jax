@@ -56,6 +56,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    OpenAI's GPT (Radford et al., 2018) showed a decoder-only Transformer pretrained on lots of text could
+    then be fine-tuned for many tasks. GPT-2 (2019) scaled to 1.5B parameters with byte-level BPE, and GPT-3
+    (2020) to 175B, learning tasks from a few examples in the prompt. Kaplan et al. (2020) found loss falls
+    predictably with scale, Hoffmann et al.'s Chinchilla (2022) corrected the data-to-parameters ratio, and
+    ChatGPT arrived in November 2022. Weight tying (Press & Wolf, 2016) is in this lesson's model too.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · The architecture
 

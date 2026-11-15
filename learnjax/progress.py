@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from learnjax.syllabus import MODULES, PARTS
+from learnjax.syllabus import MODULES, PARTS, label
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -29,7 +29,7 @@ def main() -> None:
         s = status(slug)
         built += s != "·"
         done += s == "✓"
-        print(f"  {s} {n:02d}  {title}")
+        print(f"  {s} {label(slug):>3}  {title}")
     print(f"\n✓ done  ○ in progress  · not built yet   —   {done}/{built} built modules complete")
 
 

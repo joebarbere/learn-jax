@@ -46,6 +46,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Hubel and Wiesel's studies of the cat visual cortex (late 1950s–60s) found neurons that respond to local
+    edges. Fukushima's Neocognitron (1980) borrowed that design, and Yann LeCun trained convolutional
+    networks with backpropagation from 1989, culminating in LeNet (LeCun et al., 1998), which read
+    handwritten digits on bank checks. AlexNet (2012) scaled the idea up on GPUs and won ImageNet. WaveNet
+    (van den Oord et al., 2016) reused dilated causal convolutions for audio.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · Convolution is a sliding dot product
 

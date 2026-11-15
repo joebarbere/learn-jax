@@ -57,6 +57,23 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Early language systems split text into words and stumbled on words they had never seen. Byte-pair
+    encoding began as a 1994 data-compression trick (Philip Gage); Sennrich, Haddow & Birch adapted it to
+    neural translation in 2015 so rare words break into known pieces. SentencePiece (Kudo & Richardson,
+    2018) worked from raw text, and GPT-2 (2019) applied BPE to bytes so no input is ever unknown. Odd
+    tokens like "SolidGoldMagikarp" (2023) showed tokenizers still leave fingerprints on model behavior.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(html, mo):
     _palette = ["#fde68a", "#bfdbfe", "#bbf7d0", "#fbcfe8", "#ddd6fe", "#fed7aa"]
 

@@ -1,0 +1,17 @@
+# Dark theme for the dark edition of the book (tools/book/render.sh sets MATPLOTLIBRC to this file).
+# Background matches the dark page (--bg-plot in tools/book/book.css) so plots sit flush on the page.
+figure.facecolor: 1b1f27
+axes.facecolor: 1b1f27
+savefig.facecolor: 1b1f27
+axes.edgecolor: 6b7383
+axes.labelcolor: d9dee7
+axes.titlecolor: e8ecf2
+text.color: d9dee7
+xtick.color: aab2bf
+ytick.color: aab2bf
+grid.color: 39404c
+legend.facecolor: 222733
+legend.edgecolor: 39404c
+legend.labelcolor: d9dee7
+axes.prop_cycle: cycler('color', ['5aa9ff', 'ffa14a', '4cd07d', 'ff6b6b', 'b48cff', 'c49a74', 'ff8fd0', 'c9ced6', 'e2d84a', '41d3e0'])
+image.cmap: viridis

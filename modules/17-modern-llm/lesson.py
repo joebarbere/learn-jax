@@ -57,6 +57,24 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    After ChatGPT, open-weights models took off. Meta's LLaMA (Touvron et al., 2023) combined RMSNorm, RoPE
+    (Su et al., 2021) and SwiGLU (Shazeer, 2020) into the recipe most open models copy, and Llama 2 (2023)
+    used grouped-query attention (Ainslie et al., 2023) in its largest model. Mixture-of-experts goes back
+    to Shazeer et al. (2017) and Switch Transformers (2021); DeepSeek-V2 (2024) introduced multi-head latent
+    attention, and DeepSeek-V3 (December 2024) added auxiliary-loss-free balancing and multi-token
+    prediction.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · RMSNorm: LayerNorm minus the parts that don't matter
 

@@ -41,6 +41,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Probability theory goes back to Pascal and Fermat's letters in 1654. The part this course leans on most
+    is Claude Shannon's 1948 "A Mathematical Theory of Communication", which defined entropy and measured
+    information in bits. In 1951 he estimated the entropy of English by asking people to guess the next
+    letter, an early language-model experiment. Cross-entropy, the loss every model here minimizes, is that
+    idea. JAX's random keys come from counter-based generators such as Threefry (Salmon et al., 2011).
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · Random variables and distributions
 

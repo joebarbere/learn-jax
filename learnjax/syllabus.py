@@ -11,10 +11,13 @@ PARTS = {
     7: "Scale & cloud",
     8: "Reasoning",
     9: "Using your models",
+    10: "Milestones, rebuilt in JAX",
+    11: "Systems around the model: retrieval and agents",
 }
 
 MODULES = [
     (0, "00-environment", "Your GPU, the container, and the three ROCm settings", 0),
+    (28, "00b-history", "A short history of AI, and where each idea lives in this course", 0),
     (1, "01-arrays", "Arrays: NumPy → jax.numpy, shapes, broadcasting, dtypes", 1),
     (2, "02-linear-algebra", "Linear algebra as geometry", 1),
     (3, "03-autodiff", "Derivatives and autodiff, built from scratch", 1),
@@ -42,8 +45,29 @@ MODULES = [
     (25, "25-aws", "JAX on AWS, and the capstone", 7),
     (26, "26-reasoning", "Reasoning models: inference scaling and RLVR with GRPO", 8),
     (27, "27-lmstudio", "Your models in LM Studio: export, convert, serve", 9),
+    (29, "29-perceptron-hopfield", "Perceptron to Hopfield networks (1958–1982)", 10),
+    (30, "30-word2vec", "Word embeddings: word2vec (2013)", 10),
+    (31, "31-rnn-seq2seq", "RNNs, LSTMs and seq2seq with attention (1986–2014)", 10),
+    (32, "32-bert-vs-gpt", "BERT vs GPT: encoders and decoders (2018)", 10),
+    (33, "33-generative-images", "GANs, VAEs, diffusion and CLIP (2014–2022)", 10),
+    (34, "34-deep-rl-alphazero", "Deep RL: DQN to AlphaZero (2013–2019)", 10),
+    (35, "35-rlhf-dpo", "Learning from preferences: RLHF and DPO (2017–2023)", 10),
+    (36, "36-mamba-ssm", "State-space models and Mamba (2021–2023)", 10),
+    (37, "37-interpretability", "Interpretability: induction heads and world models (2020–2023)", 10),
+    (38, "38-rag", "Retrieval-augmented generation, from BM25 to rerankers (1994–2024)", 11),
+    (39, "39-agents", "Agents: tools, memory, workflows and multi-agent systems (2022–)", 11),
 ]
 
 
 def slug(n: int) -> str:
     return next(m[1] for m in MODULES if m[0] == n)
+
+
+def label(slug_: str) -> str:
+    """Display label: the slug's prefix ("00", "00b", "29")."""
+    return slug_.split("-", 1)[0]
+
+
+def number(slug_: str) -> int:
+    """Registry number for a module directory name (e.g. "00b-history" -> 28)."""
+    return next(m[0] for m in MODULES if m[1] == slug_)

@@ -45,10 +45,29 @@ Each module in `modules/NN-slug/` has:
 - `solutions.py`: reference answers. Try first, peek last.
 
 Each lesson ends with its **seminal papers**: the original sources for the ideas it teaches. All of
-them, by module, are in [docs/PAPERS.md](docs/PAPERS.md).
+them, by module, are in [docs/PAPERS.md](docs/PAPERS.md), followed by a short list of books.
+
+Everything that went wrong running JAX on this AMD card, and the fix for each, is collected in
+[docs/ROCM_GOTCHAS.md](docs/ROCM_GOTCHAS.md): the three environment variables the image sets, GPU hangs,
+missing fused attention, slow compiles, profiling, and llama.cpp/LM Studio backends.
 
 Claude Code in this repo works in **tutor mode** (see `CLAUDE.md`). It gives hints and questions, not
 answers, unless you ask for the answer outright.
+
+## Ways to read it
+
+| how | command | what you get |
+|---|---|---|
+| Interactive notebooks | `make up`, or `make lesson N=16` | the real thing: editable code, sliders, live GPU results |
+| Read-only app | `make read N=16` | one lesson as a clean page, code hidden, sliders still live |
+| Markdown | `make md` | prose and code for every lesson in `markdown/`, no outputs |
+| Static site | `make render` (GPU, once), then `make site` | every lesson pre-rendered, light and dark, in `site/`; no GPU needed to read |
+| The book | `make render`, then `make pdf` | *Arrays to Agents*: `site/arrays-to-agents.pdf` (light, for print) and `-dark.pdf` (for screens), with contents, running heads, appendices and an index |
+
+The site and book are the *reading edition*: prose, figures and measured results, rendered with the reference
+solutions; the code and exercises stay in the notebooks. They're built in a separate, GPU-free image
+(`make book-image`: Chromium, Paged.js, KaTeX, fonts). Every term the course uses is defined in
+[docs/GLOSSARY.md](docs/GLOSSARY.md), with the module that teaches it.
 
 ## Syllabus
 
@@ -56,6 +75,7 @@ answers, unless you ask for the answer outright.
 |---|---|---|
 | **Part 0 — Setup** | | |
 | 00 | Your GPU, the container, and the three ROCm settings | ✅ |
+| 00b | A short history of AI, and where each idea lives in this course | |
 | **Part 1 — Math in code** | | |
 | 01 | Arrays: NumPy → jax.numpy, shapes, broadcasting, dtypes | ✅ |
 | 02 | Linear algebra as geometry | ✅ |
@@ -92,8 +112,18 @@ answers, unless you ask for the answer outright.
 | 26 | Reasoning models: inference scaling and RLVR with GRPO | ✅ |
 | **Part 9 — Using your models** | | |
 | 27 | Your models in LM Studio: export what you built and trained, convert to GGUF, serve and use | ✅ |
+| **Part 10 — Milestones, rebuilt in JAX** | | |
+| 29 | Perceptron to Hopfield networks (1958–1982) | |
+| 30 | Word embeddings: word2vec (2013) | |
+| 31 | RNNs, LSTMs and seq2seq with attention (1986–2014) | |
+| 32 | BERT vs GPT: encoders and decoders (2018) | |
+| 33 | GANs, VAEs, diffusion and CLIP (2014–2022) | |
+| 34 | Deep RL: DQN to AlphaZero (2013–2019) | |
+| 35 | Learning from preferences: RLHF and DPO (2017–2023) | |
+| 36 | State-space models and Mamba (2021–2023) | |
+| 37 | Interpretability: induction heads and world models (2020–2023) | |
 
-✅ = written and verified. The rest are being built in phases.
+✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 
 ## Credits
 
@@ -137,7 +167,7 @@ containers/   Containerfile (JAX), Containerfile.torch, run.sh (GPU passthrough 
 learnjax/     small shared helpers: exercise loading, timing, GPU info, syllabus, progress
 modules/      one directory per module
 tools/        lesson_outputs.py: run a lesson and print what each cell shows
-docs/         AUTHORING.md: how modules are written and verified
+docs/         AUTHORING.md (how modules are written and verified), PAPERS.md, ROCM_GOTCHAS.md
 ```
 
 `make check` is the course's own test. Every lesson runs headless, and every test passes against the

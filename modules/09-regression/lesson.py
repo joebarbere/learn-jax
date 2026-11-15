@@ -43,6 +43,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Least squares is over two hundred years old: Legendre published it in 1805 and Gauss soon after. The
+    logistic curve dates to Verhulst in the 1830s and became a regression tool in mid-20th-century
+    statistics. Hoerl & Kennard introduced ridge regression in 1970 to stabilize ill-conditioned problems.
+    Fashion-MNIST (Xiao, Rasul & Vollgraf, 2017) was released as a harder drop-in replacement for the 1998
+    MNIST digits.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · Linear regression, two ways
 

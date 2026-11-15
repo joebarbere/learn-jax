@@ -15,7 +15,7 @@ args=(--rm)
 [[ -n "${PORT:-}" ]] && args+=(-p "127.0.0.1:${PORT}:${PORT}")
 # Join the llama.cpp server's network (module 19) so lessons can reach it at http://llama:8080.
 [[ -n "${NETWORK:-}" ]] && args+=(--network "$NETWORK")
-for v in LEARNJAX_SOLUTIONS JAX_PLATFORMS XLA_FLAGS HSA_OVERRIDE_GFX_VERSION; do
+for v in LEARNJAX_SOLUTIONS JAX_PLATFORMS XLA_FLAGS HSA_OVERRIDE_GFX_VERSION MATPLOTLIBRC; do
   [[ -n "${!v:-}" ]] && args+=(-e "$v=${!v}")
 done
 exec podman run "${args[@]}" \

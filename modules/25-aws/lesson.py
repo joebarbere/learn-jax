@@ -49,6 +49,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Renting GPUs by the hour has been possible on AWS since its GPU cluster instances in 2010, and large-
+    scale training moved from CPU clusters such as DistBelief (2012) to GPU and TPU pods. Hoffmann et al.'s
+    Chinchilla (2022) showed how to spend a fixed compute budget well. At the other end, Karpathy's nanochat
+    (2025) trains a small chat model end to end for about a hundred dollars of rented time, the blueprint
+    for this capstone.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · What the simulation couldn't show
 

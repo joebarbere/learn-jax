@@ -43,6 +43,23 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    NVIDIA's CUDA (2007) let programmers write GPU kernels in a C-like language. AMD's HIP, part of ROCm
+    (2016), mirrors CUDA so kernels can move between vendors. Triton (Tillet, Kung & Cox, 2019) raised
+    kernel writing from threads to tiles, and FlashAttention (Dao et al., 2022; FlashAttention-2, 2023)
+    showed a hand-written kernel can beat a compiler by managing memory carefully. Pallas (2023) brought
+    that style of kernel writing to JAX.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(mo, subprocess):
     _out = subprocess.run(["rocminfo"], capture_output=True, text=True, check=False).stdout
     _gpu = _out[_out.find("AMD Radeon"):] if "AMD Radeon" in _out else ""

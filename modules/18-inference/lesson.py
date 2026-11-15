@@ -56,6 +56,23 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Caching keys and values is as old as autoregressive Transformers. Holtzman et al. (2019) showed why
+    greedy decoding repeats itself and proposed nucleus sampling. Speculative decoding (Leviathan, Kalman &
+    Matias, 2022) uses a small draft model to speed up a big one. Quantization went from 8-bit inference
+    (LLM.int8(), Dettmers et al., 2022) to 4-bit weights (GPTQ, Frantar et al., 2022), which made large
+    models fit on ordinary GPUs.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
 def _(I, llama, mo):
     t360, c360, tok = llama.load(llama.SMOLLM_360M)
     t135, c135, _tok135 = llama.load(llama.SMOLLM_135M)

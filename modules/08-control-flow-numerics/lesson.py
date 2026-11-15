@@ -41,6 +41,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # history box
+    mo.callout(mo.md(r"""
+    **Where this came from**
+
+    Floating-point arithmetic was standardized as IEEE 754 in 1985, largely through William Kahan's work.
+    Deep learning found that it needed less precision than science did: mixed-precision training
+    (Micikevicius et al., 2017) kept fp32 master weights while computing in fp16, and Google Brain's
+    bfloat16 kept fp32's range with fewer mantissa bits, studied by Kalamkar et al. (2019). Structured loops
+    such as `lax.scan` exist because compilers like XLA need control flow they can see whole.
+
+    *Timeline: Module 00b.*
+    """), kind="info")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md(r"""
     ## 1 · Why Python `if` breaks under `jit`
 

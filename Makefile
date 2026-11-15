@@ -37,6 +37,33 @@ torch-lesson: ## Open a PyTorch side-by-side notebook: make torch-lesson N=10
 	IMAGE=localhost/learn-jax-torch DETACH=1 NAME=learn-jax PORT=$(PORT) $(RUN) marimo edit $(MOD)/torch_compare.py --headless --host 0.0.0.0 --port $(PORT)
 	@sleep 3; $(MAKE) --no-print-directory url
 
+read: ## Read one lesson as a read-only app (code hidden, sliders live): make read N=16
+	-@podman rm -f learn-jax >/dev/null 2>&1
+	DETACH=1 NAME=learn-jax PORT=$(PORT) $(RUN) marimo run $(MOD)/lesson.py --headless --host 0.0.0.0 --port $(PORT)
+	@sleep 3; $(MAKE) --no-print-directory url
+
+BOOK := podman run --rm --security-opt label=disable -v $(CURDIR):/course -w /course -e PYTHONPATH=/course localhost/learn-jax-book
+book-image: ## Build the book image (Chromium + Paged.js + KaTeX + fonts; no GPU)
+	podman build -t learn-jax-book -f containers/Containerfile.book containers
+
+render: ## Render every lesson (light + dark plots) for the site and book; GPU, ~1–2 h, skips up-to-date lessons
+	tools/book/render.sh light
+	tools/book/render.sh dark
+
+site: ## Static HTML of every lesson (light + dark) into site/ (after make render); open site/light/index.html
+	$(BOOK) python tools/book/build.py
+
+pdf: ## The book, "Arrays to Agents": site/arrays-to-agents.pdf and -dark.pdf (after make render)
+	$(BOOK) python tools/book/build.py --pdf
+
+glossary: ## Regenerate docs/GLOSSARY.md from learnjax/glossary.py
+	python3 tools/gen_glossary.py
+
+md: ## Export every lesson to Markdown (prose + code, no outputs) into markdown/
+	@mkdir -p markdown
+	@for d in modules/*/; do n=$$(basename $$d); [ -f $$d/lesson.py ] || continue; \
+	  $(RUN) marimo export md $$d/lesson.py -o /course/markdown/$$n.md >/dev/null 2>&1 && echo "markdown/$$n.md" || echo "FAILED $$n"; done
+
 test: ## Grade your exercises for one module: make test N=03
 	$(RUN) python -m pytest $(MOD)
 
@@ -98,6 +125,16 @@ aws-howto: ## Print the owner-run commands for a paid AWS session (apply / run /
 bench: ## Single-device benchmark on this machine (module 25 local column), writes runs/25-aws/
 	$(RUN) python modules/25-aws/bench_single.py
 
+AWS_AI_CORPUS ?= $(HOME)/dev/github/joebarbere/aws-ai/local-kb/.state/corpus
+rag-data: ## Module 38 corpus: copy aws-ai's radio abstracts into the cache, else fetch them from arXiv (~15 min)
+	@if [ -f "$(AWS_AI_CORPUS)/radio-abstracts.jsonl" ]; then \
+	  echo "copying from $(AWS_AI_CORPUS)"; \
+	  podman run --rm --security-opt label=disable -v learn-jax-cache:/cache -v "$(AWS_AI_CORPUS)":/src:ro \
+	    localhost/learn-jax sh -c 'mkdir -p /cache/learnjax/radio && cp /src/radio-abstracts.jsonl /cache/learnjax/radio/ && wc -l /cache/learnjax/radio/radio-abstracts.jsonl'; \
+	else \
+	  $(RUN) python tools/fetch_radio.py; \
+	fi
+
 papers: ## Check every paper link and regenerate docs/PAPERS.md
 	$(RUN) python tools/check_papers.py
 	$(RUN) python tools/gen_papers.py
@@ -109,4 +146,4 @@ links: ## Link the first JAX API mentions to the docs, then check every external
 lint: ## Ruff
 	$(RUN) ruff check learnjax modules
 
-.PHONY: help build build-torch up url down lesson torch-lesson test progress check shell papers links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench
+.PHONY: help build build-torch up url down lesson torch-lesson read md test progress check shell papers links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary
