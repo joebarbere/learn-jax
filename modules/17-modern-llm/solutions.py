@@ -29,6 +29,13 @@ def rope_rotate_half(x, positions, theta: float = 10000.0):
     return jnp.concatenate([x1 * cos - x2 * sin, x1 * sin + x2 * cos], axis=-1)
 
 
+def rope_partial(x, positions, rotary_dim: int, theta: float = 10000.0):
+    if rotary_dim == 0:
+        return x
+    rot = rope_rotate_half(x[..., :rotary_dim], positions, theta)
+    return jnp.concatenate([rot, x[..., rotary_dim:]], axis=-1)
+
+
 def swiglu(params, x):
     return (jax.nn.silu(x @ params["w1"]) * (x @ params["w3"])) @ params["w2"]
 

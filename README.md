@@ -144,7 +144,8 @@ creators for videos, posts and docs. Most of all:
   Frostig, Anselm Levskaya et al.** (Google DeepMind); Hugging Face's
   [Ultra-Scale Playbook](https://huggingface.co/spaces/nanotron/ultrascale-playbook); and **Andrej Karpathy**'s
   [nanochat](https://github.com/karpathy/nanochat) (MIT), the blueprint for Module 25's capstone. Module 05's Muon
-  sidebar follows **Keller Jordan**'s [post](https://kellerjordan.github.io/posts/muon/).
+  sidebar follows **Keller Jordan**'s [post](https://kellerjordan.github.io/posts/muon/). Module 17's "Beyond RoPE" section and
+  stretch experiment follow **Sebastian Raschka**'s [Understanding Positional Embeddings in Modern LLMs](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings).
 - **Saurabh Alone**, ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax).
   Its RoPE explanation and two real KV-cache bugs became Module 17's exercises.
 - **Models:** [SmolLM2](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) by Hugging Face (Apache-2.0)

@@ -59,6 +59,41 @@ def llama_forward(parts, params, tokens, cfg):
     return parts.rms_norm(x, params["norm_f"]) @ params["head"], None
 
 
+def pos_attention(parts, p, x, positions, cfg, rotary_dim):
+    """gqa_attention without the cache, with a choice of how much RoPE: `rotary_dim` features of each head
+    rotated by your rope_partial (head_dim = full RoPE, 0 = NoPE). Used by the "how much RoPE?" stretch."""
+    B, T, _ = x.shape
+    H, Hkv, D = cfg["n_heads"], cfg["n_kv_heads"], cfg["head_dim"]
+    q = parts.rope_partial((x @ p["wq"]).reshape(B, T, H, D), positions, rotary_dim, cfg["rope_theta"])
+    k = parts.rope_partial((x @ p["wk"]).reshape(B, T, Hkv, D), positions, rotary_dim, cfg["rope_theta"])
+    v = (x @ p["wv"]).reshape(B, T, Hkv, D)
+    k, v = parts.repeat_kv(k, H // Hkv), parts.repeat_kv(v, H // Hkv)
+    scores = jnp.einsum("bthd,bshd->bhts", q, k).astype(jnp.float32) / jnp.sqrt(D)
+    causal = jnp.tril(jnp.ones((T, T), bool))
+    attn = jax.nn.softmax(jnp.where(causal, scores, -jnp.inf), -1).astype(x.dtype)
+    return jnp.einsum("bhts,bshd->bthd", attn, v).reshape(B, T, H * D) @ p["wo"]
+
+
+def llama_pos_forward(parts, params, tokens, cfg, rotary_dims):
+    """The tiny Llama with a per-layer RoPE width: rotary_dims[i] for layer i (see pos_attention)."""
+    positions = jnp.arange(tokens.shape[1])
+    x = params["embed"][tokens]
+    for p, rd in zip(params["layers"], rotary_dims, strict=True):
+        x = x + pos_attention(parts, p["attn"], parts.rms_norm(x, p["attn_norm"]), positions, cfg, rd)
+        x = x + parts.swiglu(p["ffn"], parts.rms_norm(x, p["ffn_norm"]))
+    return parts.rms_norm(x, params["norm_f"]) @ params["head"], None
+
+
+def loss_by_position(forward, params, data, key, seq_len, batch=16, n_batches=8):
+    """Mean next-token loss at each position 0 … seq_len-1, averaged over n_batches random windows.
+    Evaluating past the training length shows how a positional scheme extrapolates."""
+    def one(k):
+        x, y = get_batch(k, data, batch, seq_len)
+        logp = jax.nn.log_softmax(forward(params, x)[0].astype(jnp.float32), -1)
+        return -jnp.take_along_axis(logp, y[..., None], -1)[..., 0].mean(0)       # (seq_len,)
+    return jax.lax.map(one, jax.random.split(key, n_batches)).mean(0)
+
+
 # ---------------------------------------------------------------------------------------- DeepSeek
 def init_deepseek(key, vocab, cfg):
     d, H = cfg["d_model"], cfg["n_heads"]

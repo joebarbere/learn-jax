@@ -165,8 +165,12 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model](https://arxiv.org/abs/2405.04434)** — DeepSeek-AI, 2024. Multi-head latent attention (MLA): a compressed KV cache.
 - **[Auxiliary-Loss-Free Load Balancing Strategy for Mixture-of-Experts](https://arxiv.org/abs/2408.15664)** — Wang et al., 2024. Balance experts with a bias term instead of an extra loss.
 - **[Better & Faster Large Language Models via Multi-token Prediction](https://arxiv.org/abs/2404.19737)** — Gloeckle et al., 2024. Predict several future tokens per position.
+- **[Transformer Language Models without Positional Encodings Still Learn Positional Information](https://arxiv.org/abs/2203.16634)** — Haviv et al., 2022. NoPE: the causal mask alone leaks position.
+- **[The Impact of Positional Encoding on Length Generalization in Transformers](https://arxiv.org/abs/2305.19466)** — Kazemnejad et al., 2023. NoPE vs RoPE, ALiBi and T5's bias on lengths longer than training.
+- **[Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation](https://arxiv.org/abs/2108.12409)** — Press, Smith, Lewis, 2021. ALiBi: a distance penalty on scores instead of rotation.
 - **[DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)** — DeepSeek-AI, 2024. MLA + DeepSeekMoE + aux-loss-free balancing + MTP: the model you replicated in miniature.
 - *Companion ([Grant Sanderson, 3Blue1Brown](https://www.3blue1brown.com/?topic=neural-networks)):* [How might LLMs store facts (Deep learning ch. 7)](https://www.youtube.com/watch?v=9-Jl0dxWQs8). What the MLP / feed-forward blocks (SwiGLU, experts) may be doing.
+- *Companion ([Sebastian Raschka, *Ahead of AI*](https://magazine.sebastianraschka.com/)):* [Understanding Positional Embeddings in Modern LLMs](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings). Learned, sinusoidal, RoPE, partial RoPE, NoPE and hybrids, with a 2026 open-weight model survey.
 - *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 2: How to write the base model](https://jaxformer.com/base_model/). RMSNorm, RoPE and multi-latent attention in JAX.
 - *Companion ([Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer*](https://jaxformer.com/)):* [Part 6: Implementing mixture-of-experts layers](https://jaxformer.com/moe/). Sigmoid top-k routing, shared experts, load balancing.
 

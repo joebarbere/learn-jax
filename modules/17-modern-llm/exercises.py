@@ -47,6 +47,17 @@ def rope_rotate_half(x, positions, theta: float = 10000.0):
     raise NotImplementedError
 
 
+def rope_partial(x, positions, rotary_dim: int, theta: float = 10000.0):
+    """Stretch — *partial* RoPE (GPT-NeoX, Phi, GLM, Qwen3-Next): rotate only some of each head's features.
+
+    Rotate the first `rotary_dim` features of the last axis with rope_rotate_half (frequencies computed as if
+    the head were `rotary_dim` wide), and pass the remaining D − rotary_dim features through unchanged.
+    rotary_dim is even, 0 <= rotary_dim <= D. rotary_dim == D is ordinary RoPE; rotary_dim == 0 returns x
+    unchanged (no position signal at all: "NoPE"). Same shape and dtype as x.
+    """
+    raise NotImplementedError
+
+
 # ---------------------------------------------------------------- feed-forward
 def swiglu(params, x):
     """The gated feed-forward block of Llama and DeepSeek: w2( silu(x @ w1) * (x @ w3) ).

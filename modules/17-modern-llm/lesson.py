@@ -46,7 +46,8 @@ def _(mo):
     deepseek-v3-jax code uses) and prove they're the same thing · SwiGLU · GQA with a KV cache, and test
     cached decoding against the full forward pass · fix two real KV-cache bugs from a published tutorial ·
     derive why MLA caches 144 numbers per token instead of 480 · route tokens to experts and balance them
-    with DeepSeek's bias trick · then assemble a tiny Llama and a tiny DeepSeek from your parts and train both.
+    with DeepSeek's bias trick · then assemble a tiny Llama and a tiny DeepSeek from your parts and train both ·
+    (stretch) test how much RoPE a model needs: partial, hybrid and none.
 
     Module 15 built attention and Module 16 a GPT. Everything here is a refinement of that GPT block —
     each one solving a specific problem that showed up at scale. Code excerpts quoted below are from
@@ -239,6 +240,54 @@ def _(mo):
     close to 128K. Raising the base slows every pair down, so more of them stay unambiguous over long
     distances — that (plus training on long documents) is how Llama 3 stretched to 128K tokens.
     Your 256-token deepseek-v3-jax model never needed it.
+
+    ### Beyond RoPE: all of it, some of it, or none
+
+    RoPE in every layer is still the most common choice, but it isn't the only one, and newer models
+    increasingly use less of it. Here is every scheme in one place, including the two you already built:
+
+    | scheme | how position gets in | who uses it |
+    |---|---|---|
+    | learned absolute | a trained vector per position, added to the token embedding; the table caps the context | GPT-2 (Module 16), BERT (Module 32) |
+    | sinusoidal | fixed sin/cos vectors, added to the token embedding | the original Transformer (Module 15) |
+    | relative bias | a learned number per head and distance bucket, added to the attention scores | T5 |
+    | ALiBi | a fixed penalty proportional to distance, added to the attention scores | BLOOM, MPT |
+    | RoPE in every layer | rotate $q$ and $k$ (this section) | Llama 2 and 3, Qwen2.5, Mistral |
+    | partial RoPE | rotate only a slice of each head; the rest carries no position | GPT-NeoX/Pythia (25%), Phi-2 (40%), DeepSeek-V3's MLA (64 of 192 q/k features, section 7) |
+    | hybrid | RoPE in some layers, nothing in others | SmolLM3 and Llama 4 (no RoPE in every 4th layer), Cohere Command A (no positions in its global-attention layers) |
+    | NoPE | nothing at all: only the causal mask | research models; the attention layers of some recurrent hybrids |
+
+    **How can NoPE work at all?** The causal mask leaks position. A query at position $p$ averages over
+    exactly $p + 1$ values, so if it attends evenly to everything, a feature that is 1 only on the first
+    token comes out as $1/(p+1)$, and the model has found its own position (Haviv et al., 2022). What the
+    mask can't do directly is tell a key 1 token back from one 10 tokens back. Something has to learn that.
+
+    **Why use less RoPE?**
+
+    * **Learned tables don't scale.** In GPT-2 Medium (width 1,024) the position table is 0.30% of the
+      weights at 1,024 positions. At a 100K-token context it would be over 22%, as Sebastian Raschka works out
+      in [Understanding Positional Embeddings in Modern LLMs](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings) (2026).
+    * **Partial RoPE** leaves some features free to match on *content*, whatever the distance. Raschka cites
+      a 2026 study in which rotating about 10% of each head often matched full RoPE at 1–8B parameters,
+      though full RoPE won some evaluations. In his view, partial RoPE is "hardly worth it". In his survey of
+      open-weight models, partial RoPE nonetheless went from a minority of RoPE models in 2025 to a majority
+      in 2026.
+    * **Hybrids** give some layers free rein over long distances. Hugging Face reports that SmolLM3's
+      3-in-4 pattern improved long-context performance. SmolLM3 is the bigger sibling of the SmolLM2 models
+      you'll run in Modules 18–21.
+
+    You'll test partial, hybrid and NoPE yourself at the end of section 10 (stretch exercise
+    `rope_partial`).
+
+    **Aside: why rotations, of all things?** We want each position $p$ to transform vectors by some
+    $R(p)$ so that $\langle R(m)q,\, R(n)k\rangle$ depends only on $n - m$. That holds when the $R(p)$ are
+    orthogonal and compose like positions add, $R(a + b) = R(a)\,R(b)$, because then
+    $q^\top R(m)^\top R(n)\,k = q^\top R(n - m)\,k$. In group-theory terms, that's an orthogonal
+    representation of the translation group. Every such continuous family splits into independent 2-D
+    rotation blocks, each spinning at its own frequency, plus coordinates that never move. So RoPE's
+    "clock hands" aren't one design among many. They're essentially the *only* way to get relative position
+    out of a dot product, and the coordinates that never move are partial RoPE. (This view came up in the
+    [Hacker News discussion](https://news.ycombinator.com/item?id=50506376) of Raschka's article.)
 
     ## 3 · SwiGLU: a feed-forward block with a gate
 
@@ -792,6 +841,115 @@ def _(chars, ds_forward, jax, jnp, llama_forward, mo, race, val_ids):
 
 @app.cell
 def _(mo):
+    mo.md(r"""
+    ### Stretch: how much RoPE does a model need?
+
+    Section 2 listed four ways to place position: RoPE in every layer, **partial** RoPE, a **hybrid**
+    with no RoPE in some layers, and **NoPE**. Here are all four on the tiny Llama, with the same
+    initialization, data, seed and 600 steps. Each trains on 128-character windows and is then
+    evaluated on **512**-character windows. The loss at each position shows how the model copes in the
+    range it trained on (0–127) and past it, at positions it never saw.
+
+    * RoPE every layer: the race's Llama, reused.
+    * Partial: 8 of each head's 32 features rotated (25%, GPT-NeoX's choice).
+    * Hybrid 3:1: full RoPE in layers 1–3 and none in layer 4 (SmolLM3's and Llama 4's pattern).
+    * NoPE: no rotation anywhere.
+
+    `models.py` has the variant attention (`pos_attention`) and `loss_by_position`. It needs your
+    **`rope_partial`** exercise.
+    """)
+    return
+
+
+@app.cell
+def _(M, ex, jax, jnp, lj, llama_params, mo, race, train, val_ids):
+    _a = lj.attempt(ex.rope_partial, jnp.ones((1, 4, 2, 8)), jnp.arange(4), 4)
+    _items = [mo.md("### Your turn (stretch): `rope_partial`"), _a.view(mo, show_value=False)]
+    pos_runs = None
+    if _a.ok and race is not None:
+        _D = M.LLAMA["head_dim"]
+        _cfgs = {"RoPE every layer": None, "partial (8 of 32)": (8,) * 4,
+                 "hybrid 3:1": (_D, _D, _D, 0), "NoPE": (0,) * 4}
+        pos_runs = {}
+        for _name, _rd in _cfgs.items():
+            if _rd is None:
+                _params, _secs = race["llama"]["params"], race["llama"]["seconds"]
+                _fwd = lambda p, x: M.llama_forward(ex, p, x, M.LLAMA)  # noqa: E731
+            else:
+                _fwd = lambda p, x, rd=_rd: M.llama_pos_forward(ex, p, x, M.LLAMA, rd)  # noqa: E731
+                _r = train(llama_params, lambda p, x, b, f=_fwd: f(p, x), jnp.zeros(()), 0.0)
+                _params, _secs = _r["params"], _r["seconds"]
+            _lp = jax.jit(lambda p, k, f=_fwd: M.loss_by_position(f, p, val_ids, k, 512))(_params, jax.random.key(9))
+            pos_runs[_name] = {"loss": _lp, "seconds": _secs}
+    elif _a.ok:
+        _items.append(mo.md("*(The comparison runs once the race above has run.)*"))
+    mo.vstack(_items)
+    return (pos_runs,)
+
+
+@app.cell
+def _(mo, np, plt, pos_runs):
+    _out = None
+    if pos_runs is not None:
+        _fig, _ax = plt.subplots(figsize=(6.4, 3.2))
+        _k = np.ones(16) / 16
+        for _name, _r in pos_runs.items():
+            _l = np.asarray(_r["loss"])
+            _ax.plot(np.arange(len(_l) - 15) + 8, np.convolve(_l, _k, "valid"), lw=1, label=_name)
+        _ax.axvline(128, color="gray", ls="--", lw=1)
+        _ax.text(132, 1.25, "training length", fontsize=8, color="gray")
+        _ax.set(xlabel="position in the 512-character window", ylabel="loss (nats/char)",
+                title="Loss by position, 16-position average", ylim=(1.2, None))
+        _ax.legend(fontsize=8)
+        _fig.tight_layout()
+        _rows = "\n".join(
+            f"| {_n} | {float(_r['loss'][:128].mean()):.3f} | {float(_r['loss'][128:256].mean()):.3f} | "
+            f"{float(_r['loss'][256:].mean()):.3f} |" for _n, _r in pos_runs.items())
+        _out = mo.vstack([_fig, mo.md(f"""
+| positions | 0–127 (trained) | 128–255 (2×) | 256–511 (4×) |
+|---|---|---|---|
+{_rows}
+""")])
+    _out
+    return
+
+
+@app.cell
+def _(mo, pos_runs):
+    _out = None
+    if pos_runs is not None:
+        _m = {n: (float(r["loss"][:128].mean()), float(r["loss"][128:256].mean()), float(r["loss"][256:].mean()))
+              for n, r in pos_runs.items()}
+        _full, _part, _hyb, _nope = (_m[n] for n in ("RoPE every layer", "partial (8 of 32)", "hybrid 3:1", "NoPE"))
+        _out = mo.md(f"""
+    **Inside the training length**, full, partial and hybrid RoPE tie ({_full[0]:.2f}, {_part[0]:.2f},
+    {_hyb[0]:.2f}). Rotating only a quarter of each head, or dropping RoPE from one layer in four, costs
+    nothing. **NoPE** lags far behind ({_nope[0]:.2f}). A 4-layer model given 600 steps hasn't learned to
+    pull distances out of the causal mask, and for characters, knowing the previous few positions exactly
+    is most of the job.
+
+    **Past the training length**, everything gets worse, and the schemes fail differently:
+
+    * Full RoPE breaks right away ({_full[1]:.2f} at 2×). Its fast pairs have turned full circle many
+      times in training, but its slow pairs now reach angles they never reached in 128 positions.
+    * Partial RoPE holds up best at 2× ({_part[1]:.2f}). Its 4 pairs run at wavelengths of about 6, 63, 630
+      and 6,300 characters, and the 24 unrotated features don't care where they are. By 4× it falls apart
+      too ({_part[2]:.2f}).
+    * The hybrid edges out full RoPE at 4× ({_hyb[2]:.2f} vs {_full[2]:.2f}). Its RoPE-free layer gives a
+      small amount of slack.
+    * NoPE degrades least ({_nope[2]:.2f} at 4×) only because it never used precise positions to begin with.
+
+    Two seeds gave the same ordering when this lesson was written. None of these tricks makes a model work
+    at 4× its training length on its own. Real long-context models also *train* on long documents and raise
+    the RoPE base (section 2). The small-model penalty for NoPE is one reason production models mix it with
+    RoPE rather than going without.
+    """)
+    _out
+    return
+
+
+@app.cell
+def _(mo):
     quiz = mo.ui.radio(
         options={
             "It caches a small compressed latent per token instead of per-head keys and values": "a",
@@ -833,6 +991,8 @@ def _(mo):
     ## Further reading
     * Su et al., [RoFormer: Rotary Position Embedding](https://arxiv.org/abs/2104.09864) (2021), and
       Christopher Fleetwood's [You could have designed state of the art positional encoding](https://huggingface.co/blog/designing-positional-encoding)
+    * Sebastian Raschka, [Understanding Positional Embeddings in Modern LLMs](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings)
+      (2026) — learned → sinusoidal → RoPE → partial, NoPE and hybrids, with a survey of 2026 open-weight models
     * Ainslie et al., [GQA: Training Generalized Multi-Query Transformer Models](https://arxiv.org/abs/2305.13245) (2023);
       Shazeer, [GLU Variants Improve Transformer](https://arxiv.org/abs/2002.05202) (2020)
     * Meta, [The Llama 3 Herd of Models](https://arxiv.org/abs/2407.21783) (2024) — Section 3 is the architecture

@@ -62,6 +62,24 @@ def test_rope_relative_position(impl):
     assert score(10, 7) == pytest.approx(score(103, 100), rel=1e-4, abs=1e-4)  # same offset, same score
 
 
+def test_rope_partial(impl):
+    x = _rand(20, (2, 5, 3, 16))
+    pos = jnp.arange(5) + 2
+    out = impl.rope_partial(x, pos, 4)
+    assert out.shape == x.shape and out.dtype == x.dtype
+    np.testing.assert_array_equal(out[..., 4:], x[..., 4:])                  # the rest passes through
+    np.testing.assert_allclose(out[..., :4], impl.rope_rotate_half(x[..., :4], pos), atol=1e-6)
+    np.testing.assert_allclose(impl.rope_partial(x, pos, 16), impl.rope_rotate_half(x, pos), atol=1e-6)
+    np.testing.assert_array_equal(impl.rope_partial(x, pos, 0), x)          # edge case: NoPE
+    # relative position still holds on the rotated slice
+    q, k = _rand(21, (1, 1, 1, 16)), _rand(22, (1, 1, 1, 16))
+
+    def score(m, n):
+        return float(jnp.sum(impl.rope_partial(q, jnp.array([m]), 8) * impl.rope_partial(k, jnp.array([n]), 8)))
+
+    assert score(9, 4) == pytest.approx(score(60, 55), rel=1e-4, abs=1e-4)
+
+
 def test_swiglu(impl):
     d, h = 8, 12
     p = {"w1": _rand(6, (d, h)), "w3": _rand(7, (d, h)), "w2": _rand(8, (h, d))}

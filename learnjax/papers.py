@@ -162,6 +162,12 @@ PAPERS: dict[int, list[Paper]] = {
                arxiv("2408.15664"), "Balance experts with a bias term instead of an extra loss."),
          Paper("Better & Faster Large Language Models via Multi-token Prediction", "Gloeckle et al.", 2024,
                arxiv("2404.19737"), "Predict several future tokens per position."),
+         Paper("Transformer Language Models without Positional Encodings Still Learn Positional Information",
+               "Haviv et al.", 2022, arxiv("2203.16634"), "NoPE: the causal mask alone leaks position."),
+         Paper("The Impact of Positional Encoding on Length Generalization in Transformers", "Kazemnejad et al.", 2023,
+               arxiv("2305.19466"), "NoPE vs RoPE, ALiBi and T5's bias on lengths longer than training."),
+         Paper("Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation",
+               "Press, Smith, Lewis", 2021, arxiv("2108.12409"), "ALiBi: a distance penalty on scores instead of rotation."),
          DEEPSEEK_V3],
     18: [Paper("The Curious Case of Neural Text Degeneration", "Holtzman et al.", 2019, arxiv("1904.09751"),
                "Why greedy decoding repeats itself; nucleus (top-p) sampling."),
@@ -434,6 +440,7 @@ JAXFORMER = "Aditya Makkar, Divya Makkar & Chinmay Jindal, *Jaxformer* (written 
 SCALING = "Austin, Douglas, Frostig, Levskaya et al. (Google DeepMind), *How To Scale Your Model* (written guide, JAX)"
 ULTRA = "Hugging Face nanotron team, *The Ultra-Scale Playbook* (written guide, PyTorch)"
 NANOCHAT = "Andrej Karpathy, *nanochat* (MIT-licensed repo, a full ChatGPT-style pipeline in PyTorch)"
+AHEAD = "Sebastian Raschka, *Ahead of AI* (newsletter, PyTorch)"
 KISS = "Csongor Kiss, *Write your own kernel optimiser* (blog post, 2026)"
 SERIES = {ZTH: "https://karpathy.ai/zero-to-hero.html",
           JAXFORMER: "https://jaxformer.com/",
@@ -442,7 +449,8 @@ SERIES = {ZTH: "https://karpathy.ai/zero-to-hero.html",
           NANOCHAT: "https://github.com/karpathy/nanochat",
           KISS: "https://blog.csongor.co.uk/cachet-grids-and-tiles/",
           B3: "https://www.3blue1brown.com/?topic=neural-networks",
-          RASCHKA: "https://magazine.sebastianraschka.com/p/building-reasoning-models"}
+          RASCHKA: "https://magazine.sebastianraschka.com/p/building-reasoning-models",
+          AHEAD: "https://magazine.sebastianraschka.com/"}
 
 
 def _r(url: str, title: str, why: str) -> Lecture:
@@ -455,7 +463,10 @@ NC = "https://github.com/karpathy/nanochat"
 EXTRA: dict[int, dict[str, list[Lecture]]] = {
     13: {JAXFORMER: [_r(JF + "tokenization/", "Part 1: Tokenization at scale", "Tokenizing FineWeb-EDU with multiprocessing and Ray.")]},
     16: {NANOCHAT: [_r(NC, "nanochat", "nanoGPT's successor: the same GPT, plus tokenizer, SFT, RL, eval and a chat engine.")]},
-    17: {JAXFORMER: [_r(JF + "base_model/", "Part 2: How to write the base model", "RMSNorm, RoPE and multi-latent attention in JAX."),
+    17: {AHEAD: [_r("https://magazine.sebastianraschka.com/p/understanding-positional-embeddings",
+                    "Understanding Positional Embeddings in Modern LLMs",
+                    "Learned, sinusoidal, RoPE, partial RoPE, NoPE and hybrids, with a 2026 open-weight model survey.")],
+         JAXFORMER: [_r(JF + "base_model/", "Part 2: How to write the base model", "RMSNorm, RoPE and multi-latent attention in JAX."),
                      _r(JF + "moe/", "Part 6: Implementing mixture-of-experts layers", "Sigmoid top-k routing, shared experts, load balancing.")]},
     18: {SCALING: [_r(SB + "inference", "All about Transformer inference", "Prefill vs decode, KV-cache costs, batching, latency."),
                    _r(SB + "applied-inference", "Serving LLaMA 3-70B", "The inference math applied to a real model.")]},
