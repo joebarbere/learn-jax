@@ -103,7 +103,7 @@ module 00b).
 |---|---|---|
 | **Part 0 — Setup** | | |
 | 00 | Your GPU, the container, and the three ROCm settings | ✅ |
-| 00b | A short history of AI, and where each idea lives in this course | |
+| 00b | A short history of AI, and where each idea lives in this course | ✅ |
 | **Part 1 — Math in code** | | |
 | 01 | Arrays: NumPy → jax.numpy, shapes, broadcasting, dtypes | ✅ |
 | 02 | Linear algebra as geometry | ✅ |
@@ -141,15 +141,18 @@ module 00b).
 | **Part 9 — Using your models** | | |
 | 27 | Your models in LM Studio: export what you built and trained, convert to GGUF, serve and use | ✅ |
 | **Part 10 — Milestones, rebuilt in JAX** | | |
-| 29 | Perceptron to Hopfield networks (1958–1982) | |
-| 30 | Word embeddings: word2vec (2013) | |
-| 31 | RNNs, LSTMs and seq2seq with attention (1986–2014) | |
-| 32 | BERT vs GPT: encoders and decoders (2018) | |
-| 33 | GANs, VAEs, diffusion and CLIP (2014–2022) | |
-| 34 | Deep RL: DQN to AlphaZero (2013–2019) | |
-| 35 | Learning from preferences: RLHF and DPO (2017–2023) | |
-| 36 | State-space models and Mamba (2021–2023) | |
-| 37 | Interpretability: induction heads and world models (2020–2023) | |
+| 29 | Perceptron to Hopfield networks (1958–1982) | ✅ |
+| 30 | Word embeddings: word2vec (2013) | ✅ |
+| 31 | RNNs, LSTMs and seq2seq with attention (1986–2014) | ✅ |
+| 32 | BERT vs GPT: encoders and decoders (2018) | ✅ |
+| 33 | GANs, VAEs, diffusion and CLIP (2014–2022) | ✅ |
+| 34 | Deep RL: DQN to AlphaZero (2013–2019) | ✅ |
+| 35 | Learning from preferences: RLHF and DPO (2017–2023) | ✅ |
+| 36 | State-space models and Mamba (2021–2023) | ✅ |
+| 37 | Interpretability: induction heads and world models (2020–2023) | ✅ |
+| **Part 11 — Systems around the model: retrieval and agents** | | |
+| 38 | Retrieval-augmented generation, from BM25 to rerankers (1994–2024) | ✅ |
+| 39 | Agents: tools, memory, workflows and multi-agent systems (2022–) | ✅ |
 
 ✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 
