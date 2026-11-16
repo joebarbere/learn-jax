@@ -3,6 +3,8 @@ name = "learnjax"
 version = "0.1.0"
 description = "A hands-on course in deep learning, JAX, LLMs and ROCm, run in a container on an AMD GPU."
 requires-python = ">=3.12"
+license = "MIT AND CC-BY-4.0"
+license-files = ["LICENSE", "LICENSE-CONTENT"]
 # No runtime dependencies on the host: JAX, ROCm and everything ML run in the containers
 # (containers/requirements*.txt, locked by `make lock`). The dev group is for host-side editing only:
 #   uv sync            # .venv with ruff, for your editor

@@ -355,7 +355,10 @@ def build_theme(theme: str):
                 '<p>Every number was measured on one AMD Radeon RX 7600 XT (16 GB, gfx1102) with JAX on ROCm, in '
                 'podman containers, in November 2026. Timings vary with load; the lessons say when.</p>'
                 '<p>Seminal papers are credited in each module and collected in Appendix B; companion lectures and '
-                'courses are credited where they are used.</p></section>')
+                'courses are credited where they are used.</p>'
+                '<p>© 2026 Joe Barbere. The text and figures are licensed under Creative Commons Attribution 4.0 '
+                '(CC BY 4.0); the code is MIT-licensed. Third-party material keeps its own license. Source: '
+                'github.com/joebarbere/learn-jax.</p></section>')
     contents = f'<section class="toc"><h1 class="toc-title">Contents</h1><ol>{"".join(toc)}</ol></section>'
     doc = page(theme, TITLE, cover + colophon + contents + "\n".join(body), paged=True)
     out = SITE / "book"

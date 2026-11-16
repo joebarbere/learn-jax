@@ -189,8 +189,18 @@ creators for videos, posts and docs. Most of all:
 - **Data:** [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) by Zalando Research (MIT);
   [tiny Shakespeare](https://github.com/karpathy/char-rnn) from Andrej Karpathy's char-rnn; public-domain
   detective novels from Standard Ebooks and Project Gutenberg, via deepseek-v3-jax;
-  [ARC](https://allenai.org/data/arc) by the Allen Institute for AI (CC BY-SA 4.0).
+  [ARC](https://allenai.org/data/arc) by the Allen Institute for AI (CC BY-SA 4.0); 49,950 arXiv abstracts
+  from the [aws-ai](https://github.com/joebarbere/aws-ai) `local-kb` benchmark (Module 38).
 - **Papers:** the 90-plus seminal papers are credited to their authors in every lesson and in docs/PAPERS.md.
+
+## License
+
+- **Code** (Python, notebook code cells, the Makefile, containers, tools, infra): [MIT](LICENSE).
+- **Prose** (the lessons' explanatory text, docs/, diagrams, and the book *Arrays to Agents*):
+  [CC BY 4.0](LICENSE-CONTENT). Share and adapt it freely; credit "Joe Barbere, learn-jax" and link the repo.
+
+Third-party material keeps its own license: code quoted from deepseek-v3-jax (MIT, Vaibhaav Tiwari), and the
+models, datasets and tools listed under Credits.
 
 ## Layout
 

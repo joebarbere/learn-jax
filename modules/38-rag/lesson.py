@@ -35,7 +35,7 @@ def _(mo):
     *Part 11 — Systems around the model. Take Modules 21 (evaluation), 27 (LM Studio) and 33 (CLIP) first.*
 
     **Goal:** build every stage of a retrieval stack in JAX on your card, measure each one honestly, and see
-    where a production knowledge base (your aws-ai `local-kb`) makes different choices.
+    where a production knowledge base (your [aws-ai](https://github.com/joebarbere/aws-ai) `local-kb`) makes different choices.
 
     **You will:** turn 49,950 radio-astronomy abstracts into a benchmark · score them with BM25 as one sparse
     matrix product · train a bi-encoder with InfoNCE · fuse the two (RRF and min-max) · compare exact search
@@ -681,7 +681,7 @@ def _(mo):
     mo.md(r"""
     ## 10 · From this notebook to a knowledge base
 
-    Your aws-ai `local-kb` is the same pipeline built for production, as a local copy of Amazon Bedrock
+    Your [aws-ai](https://github.com/joebarbere/aws-ai) [`local-kb`](https://github.com/joebarbere/aws-ai/tree/main/local-kb) is the same pipeline built for production, as a local copy of Amazon Bedrock
     Knowledge Bases (same API shapes, prompts and citations, so stock `boto3` code runs against it):
 
     | stage | this module | `local-kb` |
@@ -749,7 +749,7 @@ def _(mo):
     * Nils Reimers, [Sentence-Transformers documentation](https://www.sbert.net/) — bi-encoders, cross-encoders and how they're trained.
     * Anthropic, [Introducing Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) (2024) —
       prepend chunk-specific context before embedding; BM25 + embeddings + reranking, measured.
-    * Your aws-ai repo: `local-kb/README.md` and `local-kb/bench/` — the production-shaped version and its benchmark.
+    * Your [aws-ai](https://github.com/joebarbere/aws-ai) repo: [`local-kb/README.md`](https://github.com/joebarbere/aws-ai/blob/main/local-kb/README.md) and [`local-kb/bench/`](https://github.com/joebarbere/aws-ai/tree/main/local-kb/bench) — the production-shaped version and its benchmark.
 
     **Next:** Module 39 — Agents: tools, memory, workflows and multi-agent systems.
     """)
