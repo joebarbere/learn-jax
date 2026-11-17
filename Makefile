@@ -62,6 +62,14 @@ pdf: ## The book, "Arrays to Agents": site/arrays-to-agents.pdf and -dark.pdf (a
 glossary: ## Regenerate docs/GLOSSARY.md from learnjax/glossary.py (on the host, with uv)
 	uv run --no-dev python tools/gen_glossary.py
 
+rosetta: ## Regenerate docs/ROSETTA.md (math ↔ Python ↔ NumPy ↔ JAX ↔ PyTorch) from learnjax/rosetta/
+	$(RUN) python tools/gen_rosetta.py
+
+rosetta-browse: ## Browse the math ↔ code tabs for every operation in marimo
+	-@podman rm -f learn-jax >/dev/null 2>&1
+	DETACH=1 NAME=learn-jax PORT=$(PORT) $(RUN) marimo run tools/rosetta_browse.py --headless --host 0.0.0.0 --port $(PORT)
+	@sleep 3; $(MAKE) --no-print-directory url
+
 md: ## Export every lesson to Markdown (prose + code, no outputs) into markdown/
 	@mkdir -p markdown
 	@for d in modules/*/; do n=$$(basename $$d); [ -f $$d/lesson.py ] || continue; \
@@ -154,6 +162,6 @@ links: ## Link the first JAX API mentions to the docs, then check every external
 	$(RUN) python tools/check_links.py
 
 lint: ## Ruff
-	$(RUN) ruff check learnjax modules tools
+	$(RUN) ruff check learnjax modules tools tests
 
-.PHONY: help build lock build-torch up url down lesson torch-lesson read md test progress check shell papers lineage links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary
+.PHONY: rosetta rosetta-browse help build lock build-torch up url down lesson torch-lesson read md test progress check shell papers lineage links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary

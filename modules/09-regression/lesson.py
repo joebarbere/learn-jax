@@ -16,10 +16,11 @@ def _():
     from jax import lax
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import FASHION_CLASSES, fashion_mnist
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return FASHION_CLASSES, ex, fashion_mnist, jax, jnp, lax, lj, mo, np, optax, plt, time
+    return FASHION_CLASSES, ex, fashion_mnist, jax, jnp, lax, lj, mo, np, optax, plt, rosetta, time
 
 
 @app.cell
@@ -105,6 +106,12 @@ def _(jax, jnp, mo, np, optax, plt):
     mo.vstack([_fig, mo.md(f"Least squares: w = {float(_w_exact[0]):.3f}, b = {float(_w_exact[1]):.3f}. "
                            f"Gradient descent after 200 steps: w = {float(_w[0]):.3f}, b = {float(_w[1]):.3f}. "
                            "Same answer; the noise is why neither is exactly (2, 1).")])
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "least squares")
     return
 
 
@@ -276,6 +283,15 @@ def _(jax, jnp, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "sigmoid, log-sigmoid and softplus"),
+        rosetta.tabs(mo, "log1p and expm1 (accurate near zero)"),
+    ])
+    return
+
+
+@app.cell
 def _(jax, jnp, np, plt):
     _ka, _kb = jax.random.split(jax.random.key(5))
     blob_X = jnp.concatenate([jax.random.normal(_ka, (150, 2)) * 0.9 + jnp.array([1.2, 1.0]),
@@ -399,6 +415,12 @@ def _(fmnist, jax, jnp, lax, mo, optax, time):
         "too simple to overfit 55,000 images. This is the **baseline Module 10's neural network has to beat.**"
     )
     return fm_Xte, fm_logits, fm_params, fm_test_acc, fm_yte
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "shuffle (random permutation)")
+    return
 
 
 @app.cell
@@ -556,6 +578,12 @@ def _(blob_X, blob_y, ex, jnp, lj, mo):
     else:
         _items.append(_fit.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "binary cross-entropy from logits", solves="bce_with_logits")
     return
 
 

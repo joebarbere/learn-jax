@@ -19,12 +19,13 @@ def _():
     from flax import nnx
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import fashion_mnist
 
     ex = lj.load_exercises(mo.notebook_dir())
     runs_dir = mo.notebook_dir().parent.parent / "runs" / "11-training-craft"
     runs_dir.mkdir(parents=True, exist_ok=True)
-    return ex, fashion_mnist, jax, jnp, lj, mo, nnx, np, ocp, optax, plt, runs_dir, shutil, time
+    return ex, fashion_mnist, jax, jnp, lj, mo, nnx, np, ocp, optax, plt, rosetta, runs_dir, shutil, time
 
 
 @app.cell
@@ -218,6 +219,15 @@ def _(ex, jax, jnp, lj, mo, nnx):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "LayerNorm", solves="layer_norm"),
+        rosetta.tabs(mo, "RMSNorm", solves="rms_norm"),
+    ])
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ### 2b · BatchNorm: normalizing over the *batch* instead
@@ -335,6 +345,12 @@ def _(ex, jax, jnp, lj, mo, nnx):
     else:
         _items.append(_a.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "BatchNorm (training mode)", solves="batch_norm")
     return
 
 
@@ -569,6 +585,15 @@ def _(ex, jax, jnp, lj, mo):
     else:
         _items.append((_a if not _a.ok else _b).view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "dropout (inverted)", solves="dropout"),
+        rosetta.tabs(mo, "Bernoulli samples", solves="dropout"),
+    ])
     return
 
 

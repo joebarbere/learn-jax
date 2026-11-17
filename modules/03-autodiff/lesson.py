@@ -13,9 +13,10 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, mo, np, plt
+    return ex, jax, jnp, lj, mo, np, plt, rosetta
 
 
 @app.cell
@@ -192,6 +193,12 @@ def _(jax, jnp, np, plt):
     _ax.set_title("contours of f and its gradient (arrows)", fontsize=9)
     _fig.tight_layout()
     _fig
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "gradient")
     return
 
 
@@ -490,6 +497,12 @@ def _(jax, jnp, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "value and gradient together")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 8 · `jvp`, `vjp`, `jacobian`, `hessian`
@@ -534,6 +547,17 @@ def _(jax, jnp, mo):
     | `jax.hessian` of $\\sum x_i^2 + x_0x_1$ | {_fmt(_H)} |
     """)
     return (g,)
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "Jacobian-vector product (forward mode)"),
+        rosetta.tabs(mo, "vector-Jacobian product (reverse mode)"),
+        rosetta.tabs(mo, "Jacobian"),
+        rosetta.tabs(mo, "Hessian"),
+    ])
+    return
 
 
 @app.cell

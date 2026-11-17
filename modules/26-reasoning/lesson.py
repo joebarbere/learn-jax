@@ -20,6 +20,7 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax import llama
 
     jax.config.update("jax_compilation_cache_dir", "/cache/jaxcache")   # recompiles hit the disk cache
@@ -39,7 +40,7 @@ def _():
         """Inline code that survives markdown: marimo treats <answer> as an HTML tag even in backticks."""
         return f"<code>{html.escape(str(text))}</code>"
 
-    return R, RUNS, code, ex, jax, jnp, json, lj, llama, mo, np, plt, time
+    return R, RUNS, code, ex, jax, jnp, json, lj, llama, mo, np, plt, rosetta, time
 
 
 @app.cell
@@ -422,6 +423,12 @@ def _(ex, jnp, lj, mo, np):
     grpo_ok = all(a.ok for a in (_adv, _pg_same, _pg_up, _kl, _rw))
     mo.vstack(_items)
     return (grpo_ok,)
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "GRPO group-relative advantage", solves="group_advantages")
+    return
 
 
 @app.cell

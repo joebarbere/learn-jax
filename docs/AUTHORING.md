@@ -138,6 +138,20 @@ matters *for this module*). Prefer arXiv abs links or DOIs. The lesson renders t
   off: `jax.jit(f).lower(x).compile(compiler_options={"xla_gpu_autotune_level": 0})` (autotuning
   materializes buffers and can OOM).
 
+## Math ↔ code (every module that introduces math)
+
+Every math operation a lesson introduces gets an entry in `learnjax/rosetta/` (the area file that fits): the
+formula, how papers write it, shapes, plain-Python loops, NumPy, JAX and PyTorch, plus notes where the libraries
+differ. `tests/test_rosetta.py` runs every version on the same inputs and checks they agree, and fails if a lesson
+uses a JAX/optax/Flax math name that no entry claims in `apis` (plumbing goes in `coverage.NON_MATH` instead).
+
+Show the entry where the operation is first taught: `from learnjax import rosetta` in the imports cell, then a cell
+`rosetta.tabs(mo, "entry name")`. If the entry's code would answer one of the lesson's exercises, put it after the
+cell that tries that exercise and pass `solves="fn"`: it then starts collapsed, labelled as a solution. The test
+checks that every entry is placed and that `solves=` tabs come after `ex.fn`. Then `make rosetta` regenerates
+docs/ROSETTA.md (the book's Appendix E). Check PyTorch versions with `tools/check_rosetta.py PART --torch` where
+torch is installed.
+
 ## Links: attribution and JAX docs (every module)
 - **Attribute every external link** to who made it: authors for papers ("Kingma & Ba, [Adam](…)"), the person or
   organization for posts, talks, videos, docs, repos, models and datasets ("JAX docs: […](…)", "Horace He, […](…)",

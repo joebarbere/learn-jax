@@ -15,9 +15,10 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, mo, np, plt, time
+    return ex, jax, jnp, lj, mo, np, plt, rosetta, time
 
 
 @app.cell
@@ -193,6 +194,12 @@ def _(ex, lj, mo, sep_X, sep_y):
     else:
         _items.append(_tr.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "perceptron update", solves=("perceptron_update", "train_perceptron"))
     return
 
 
@@ -381,6 +388,12 @@ def _(ex, glyph_names, glyphs, jax, jnp, lj, mo, noise, np, plt):
             _view = mo.callout(mo.md("**Your turn:** implement `hopfield_energy` and `hopfield_recall` in "
                                      "`exercises.py` to run the recall demo."), kind="info")
     _view
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "Hopfield network: energy and update", solves=("hebbian_weights", "hopfield_energy", "hopfield_recall"))
     return
 
 

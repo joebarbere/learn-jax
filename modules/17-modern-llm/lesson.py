@@ -17,13 +17,14 @@ def _():
     import optax
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import tiny_shakespeare
 
     ex = lj.load_exercises(mo.notebook_dir())
     _spec = importlib.util.spec_from_file_location("m17_models", mo.notebook_dir() / "models.py")
     M = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(M)
-    return M, ex, jax, jnp, lj, mo, np, optax, plt, time, tiny_shakespeare
+    return M, ex, jax, jnp, lj, mo, np, optax, plt, rosetta, time, tiny_shakespeare
 
 
 @app.cell
@@ -198,6 +199,12 @@ def _(ex, jax, jnp, plt, rope_h):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "rotary position embedding (RoPE)", solves=("rope_complex", "rope_rotate_half"))
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     The **same** query and key vectors, placed at every pair of positions. Every diagonal (constant
@@ -314,6 +321,12 @@ def _(mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "SiLU (swish)")
+    return
+
+
+@app.cell
 def _(ex, jax, lj, mo):
     _d, _h = 128, 352
     _k = jax.random.split(jax.random.key(4), 4)
@@ -326,6 +339,12 @@ def _(ex, jax, lj, mo):
             f"Output shape {tuple(_sw.value.shape)}. With $d$ = {_d}, a 4d ReLU FFN has "
             f"{2 * _d * 4 * _d:,} weights; SwiGLU with $h$ = {_h} has {3 * _d * _h:,} — matched to within 3%."))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "SwiGLU feed-forward", solves="swiglu")
     return
 
 
@@ -371,6 +390,15 @@ def _(ex, jax, jnp, lj, mo):
                             f"holds **2** heads, not 4."))
     mo.vstack(_items)
     return gqa_cfg, gqa_full, gqa_params, gqa_x
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "repeat, tile and broadcast_to", solves="repeat_kv"),
+        rosetta.tabs(mo, "grouped-query attention", solves=("repeat_kv", "gqa_attention")),
+    ])
+    return
 
 
 @app.cell
@@ -594,6 +622,12 @@ def _(mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "stop-gradient")
+    return
+
+
+@app.cell
 def _(ex, jnp, lj, mo):
     _scores = jnp.array([[0.91, 0.12, 0.85, 0.30], [0.40, 0.65, 0.55, 0.20]])
     _r0 = lj.attempt(ex.moe_route, _scores, jnp.zeros(4), 2)
@@ -620,6 +654,12 @@ With the bias, token 0 now picks expert 1 — yet its gate is still its raw scor
     else:
         _items.append(_ub.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "mixture-of-experts routing (top-k with grouped matmul)", solves="moe_route")
     return
 
 

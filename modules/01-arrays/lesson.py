@@ -13,9 +13,10 @@ def _():
     import matplotlib.pyplot as plt
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, mo, np, plt
+    return ex, jax, jnp, lj, mo, np, plt, rosetta
 
 
 @app.cell
@@ -114,6 +115,15 @@ def _(jnp, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "ranges and grids"),
+        rosetta.tabs(mo, "boolean masks: where, any and all"),
+    ])
+    return
+
+
+@app.cell
 def _(jnp, mo):
     _imgs = jnp.zeros((32, 28, 28, 3))
     mo.md(f"""
@@ -131,6 +141,15 @@ def _(jnp, mo):
     | `x[..., 0]` — `...` means "all the leading axes" | `{_imgs[..., 0].shape}` |
     | `x.reshape(4, 8, 28, 28, 3)` — split the batch into 4 groups of 8 | `{_imgs.reshape(4, 8, 28, 28, 3).shape}` |
     """)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "moving axes: transpose, moveaxis and swapaxes"),
+        rosetta.tabs(mo, "stack, concatenate and split"),
+    ])
     return
 
 
@@ -180,6 +199,15 @@ def _(axis_pick, grid, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "sum along an axis"),
+        rosetta.tabs(mo, "mean, standard deviation and median"),
+    ])
+    return
+
+
+@app.cell
 def _(jnp, mo):
     _a = jnp.ones((8, 1, 3))
     _b = jnp.ones((5, 1))
@@ -225,6 +253,15 @@ def _(mo, shape_quiz):
     _no = mo.callout(mo.md("Not quite. Right-align: `(4, 1)` over `(1, 3)` (padded). Axis by axis, a 1 "
                            "stretches to match the other size."), kind="warn")
     {None: mo.md("")}.get(shape_quiz.value, _ok if shape_quiz.value == "(4, 3)" else _no)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "broadcasting (outer sum)"),
+        rosetta.tabs(mo, "trig and sign functions"),
+    ])
     return
 
 
@@ -283,6 +320,12 @@ def _(jnp, mo):
     that don't mutate their inputs. Inside `jit`, XLA turns `.at[].set` into an in-place update when it
     can, so you don't pay for the copy.
     """)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "scatter-add (update at indices)")
     return
 
 
@@ -416,6 +459,12 @@ def _(ex, jnp, lj, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "one-hot encoding", solves="one_hot")
+    return
+
+
+@app.cell
 def _(ex, jax, jnp, lj, mo):
     _k1, _k2 = jax.random.split(jax.random.key(1))
     _a = jax.random.normal(_k1, (6, 2, 3))
@@ -430,6 +479,15 @@ def _(ex, jax, jnp, lj, mo):
     _items += [mo.md("**`pairwise_sq_dists`** of 5 points with themselves (the diagonal should be 0):"),
                _pd.view(mo)]
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "batched matrix multiply (einsum)", solves="batched_matmul"),
+        rosetta.tabs(mo, "cumulative sum"),
+    ])
     return
 
 

@@ -17,6 +17,7 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
     _spec = importlib.util.spec_from_file_location("rag38", mo.notebook_dir() / "rag.py")
@@ -24,7 +25,7 @@ def _():
     sys.modules["rag38"] = rag
     _spec.loader.exec_module(rag)
     RUNS = rag.RUNS
-    return RUNS, ex, jax, jnp, json, lj, mo, np, plt, rag, time
+    return RUNS, ex, jax, jnp, json, lj, mo, np, plt, rag, rosetta, time
 
 
 @app.cell
@@ -162,6 +163,12 @@ worth almost nothing, and the same word counts less in a long document."""))
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "MRR and nDCG@k", solves=("mrr_at_k", "ndcg_at_k"))
+    return
+
+
+@app.cell
 def _(ex, metrics_ready, mo, np, papers, rag, test_ids, time):
     if papers is None or not metrics_ready:
         bm25 = bm25_top = bm25_scores = None
@@ -211,6 +218,12 @@ Query: *"{_q}"* — BM25's top 3:
 """)
     _out
     return bm25, bm25_scores, bm25_top
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "BM25 scoring as a sparse matrix product", solves="bm25_weights")
+    return
 
 
 @app.cell
@@ -444,6 +457,12 @@ From here on the first stage is the best of these: **{first_stage}**.
     return first_stage, results, retrieve
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "reciprocal rank fusion", solves="rrf_fuse")
+    return
+
+
+@app.cell
 def _(dense_docs, dense_queries, ex, mo, np, plt, rag, test_ids, time):
     if dense_docs is None:
         ivf_rows = None
@@ -505,6 +524,12 @@ trade every vector database tunes: the fewer lists you scan, the more true neigh
 """)])
     _out
     return (ivf_rows,)
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "segment sum (group-by add)")
+    return
 
 
 @app.cell

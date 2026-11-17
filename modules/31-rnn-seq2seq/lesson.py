@@ -15,13 +15,14 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import tiny_shakespeare
 
     ex = lj.load_exercises(mo.notebook_dir())
     _spec = importlib.util.spec_from_file_location("m31_models", mo.notebook_dir() / "models.py")
     M = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(M)
-    return M, ex, jax, jnp, lj, mo, np, plt, time, tiny_shakespeare
+    return M, ex, jax, jnp, lj, mo, np, plt, rosetta, time, tiny_shakespeare
 
 
 @app.cell
@@ -184,6 +185,12 @@ def _(M, ex, jax, jnp, lj, mo):
               "smallest hidden state."),
     ])
     return budget, gru_try, lstm_try
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "LSTM cell", solves="lstm_cell")
+    return
 
 
 @app.cell

@@ -16,10 +16,11 @@ def _():
     import optax
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import tiny_shakespeare
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, math, mo, np, optax, plt, time, tiny_shakespeare
+    return ex, jax, jnp, lj, math, mo, np, optax, plt, rosetta, time, tiny_shakespeare
 
 
 @app.cell
@@ -257,6 +258,12 @@ def _(bigram_W, bigram_nn_fig, chars, counts, ex, jax, jnp, lj, mo, val_ids):
     else:
         _items.append(mo.md(f"Validation loss of the neural bigram: **{_nn_val:.3f}** nats."))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "embedding lookup")
     return
 
 

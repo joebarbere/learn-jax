@@ -15,9 +15,10 @@ def _():
     from jax import lax
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lax, lj, mo, np, plt, time
+    return ex, jax, jnp, lax, lj, mo, np, plt, rosetta, time
 
 
 @app.cell
@@ -543,6 +544,15 @@ def _(ex, jnp, lj, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "branches: lax.cond and lax.switch", solves="piecewise"),
+        rosetta.tabs(mo, "fixed and open-ended loops: fori_loop and while_loop", solves="newton_sqrt"),
+    ])
+    return
+
+
+@app.cell
 def _(ex, jax, jnp, lj, mo, np, plt):
     _t = np.arange(300)
     _noisy = jnp.sin(_t / 25.0) + 0.4 * jax.random.normal(jax.random.key(3), (300,))
@@ -564,6 +574,12 @@ def _(ex, jax, jnp, lj, mo, np, plt):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "loop with carried state: lax.scan", solves=("cumulative_sum", "ema"))
+    return
+
+
+@app.cell
 def _(ex, jnp, lj, mo, np, plt):
     _xs = jnp.logspace(-3, 3, 2000, dtype=jnp.float32)
     _err = lj.attempt(ex.bf16_relative_error, _xs)
@@ -580,6 +596,12 @@ def _(ex, jnp, lj, mo, np, plt):
     else:
         _out, _note = _err.view(mo), mo.md("")
     mo.vstack([_out, _note])
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "round to bfloat16", solves="bf16_relative_error")
     return
 
 

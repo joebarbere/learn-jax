@@ -17,10 +17,11 @@ def _():
     from flax import nnx
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import FASHION_CLASSES, fashion_mnist
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return FASHION_CLASSES, ex, fashion_mnist, jax, jnp, lj, mo, nnx, np, optax, plt, time
+    return FASHION_CLASSES, ex, fashion_mnist, jax, jnp, lj, mo, nnx, np, optax, plt, rosetta, time
 
 
 @app.cell
@@ -168,7 +169,22 @@ def _(mo):
       deepseek-v3-jax model uses `silu` inside SwiGLU.
     * **tanh / sigmoid**: the classics. Look at their derivatives: they're tiny away from 0, so gradients
       **vanish** when you stack many layers. Module 11 measures this.
+    """)
+    return
 
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "ReLU and leaky ReLU"),
+        rosetta.tabs(mo, "GELU"),
+    ])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
     ## 3 · How expressive is one hidden layer?
 
     A ReLU network computes a **piecewise linear** function: each hidden unit adds one "kink". Give it
@@ -276,6 +292,12 @@ def _(ex, jax, lj, mo, np):
         _items.append(mo.md(f"shape `{tuple(_w.value.shape)}`, dtype `{_w.value.dtype}`, std "
                             f"**{float(_w.value.std()):.4f}** (target √(2/784) = {np.sqrt(2 / 784):.4f})"))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "He (Kaiming) normal initialization", solves="he_init")
     return
 
 

@@ -13,9 +13,10 @@ def _():
     import matplotlib.pyplot as plt
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, mo, np, plt
+    return ex, jax, jnp, lj, mo, np, plt, rosetta
 
 
 @app.cell
@@ -137,6 +138,15 @@ def _(jnp, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "dot product"),
+        rosetta.tabs(mo, "L2 norm"),
+    ])
+    return
+
+
+@app.cell
 def _(ex, jnp, lj, mo, plt):
     _words = ["king", "queen", "apple", "banana", "truck"]
     # Hand-made 4-d "embeddings": axes are (royalty, person, fruit, vehicle).
@@ -162,6 +172,12 @@ def _(ex, jnp, lj, mo, plt):
     mo.vstack([mo.md("**Your turn — `cosine_similarity`:** five hand-made embeddings whose axes mean "
                      "(royalty, person, fruit, vehicle). Broadcasting `(5, 1, 4)` against `(1, 5, 4)` "
                      "gives all 25 pairs at once."), _view])
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "cosine similarity", solves="cosine_similarity")
     return
 
 
@@ -218,6 +234,15 @@ def _(M, draw_transform, jnp, mo, np, small_fig):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "identity, diagonal and triangular matrices"),
+        rosetta.tabs(mo, "determinant"),
+    ])
+    return
+
+
+@app.cell
 def _(R, S, draw_transform, jnp, mo, small_fig):
     _fig, _axes = small_fig(ncols=2, w=3.2, h=3.2)
     draw_transform(_axes[0], R @ S, "R @ S: scale first, then rotate")
@@ -232,6 +257,12 @@ def _(R, S, draw_transform, jnp, mo, small_fig):
     a single matrix). Matrix products read **right to left**, and in general $RS \neq SR$ — with your
     current sliders they are {"equal (try unequal scales)" if _same else "different"}:
     """), _fig])
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "linear layer")
     return
 
 
@@ -263,6 +294,12 @@ def _(jax, jnp, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "solve a linear system")
+    return
+
+
+@app.cell
 def _(draw_transform, jnp, mo, np, small_fig):
     _Msym = jnp.array([[2.0, 0.8], [0.8, 1.0]])
     _vals, _vecs = jnp.linalg.eigh(_Msym)
@@ -289,6 +326,12 @@ def _(draw_transform, jnp, mo, np, small_fig):
     and real eigenvalues. Eigenvalues also decide whether repeated multiplication explodes ($|\lambda|>1$)
     or dies out ($|\lambda|<1$) — the root of exploding/vanishing gradients in deep networks.
     """)], widths=[2, 3])
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "eigenvalues of a symmetric matrix")
     return
 
 
@@ -398,6 +441,12 @@ def _(jax, jnp, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "clip, maximum and minimum (elementwise)")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 10 · Your turn
@@ -459,6 +508,12 @@ def _(ex, jax, jnp, lj, mo, np, photo):
     _items.append(mo.md("**`gram_schmidt`** on a random 6×4 matrix — $Q^\\top Q$ should be the identity:"))
     _items.append(mo.md(f"```\n{np.round(np.asarray(_q.value.T @ _q.value), 4)}\n```") if _q.ok else _q.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "low-rank approximation (SVD)", solves="low_rank_approx")
     return
 
 

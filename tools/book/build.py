@@ -337,6 +337,7 @@ def build_theme(theme: str):
             ("papers", "Appendix B · Papers and books", md_to_html((ROOT / "docs/PAPERS.md").read_text(), toc=True)),
             ("glossary", "Appendix C · Glossary", glossary_html()),
             ("lineage", "Appendix D · The family tree", md_to_html((ROOT / "docs/LINEAGE.md").read_text(), toc=True)),
+            ("rosetta", "Appendix E · Math ↔ code", md_to_html((ROOT / "docs/ROSETTA.md").read_text(), toc=True)),
             ("index", "Index", index_html(hits))]
     for key, title, content in apps:
         toc.append(f'<li class="toc-app"><a data-page="000" href="#app-{key}">{html.escape(title)}</a></li>')

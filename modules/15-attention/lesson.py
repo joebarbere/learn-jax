@@ -17,9 +17,10 @@ def _():
     import optax
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return Path, ex, jax, jnp, lj, mo, np, optax, plt, time
+    return Path, ex, jax, jnp, lj, mo, np, optax, plt, rosetta, time
 
 
 @app.cell
@@ -287,6 +288,12 @@ def _(ex, lj, mo, np, plt, sent_words, sent_x):
         else:
             _items.append(_sd.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "scaled dot-product attention (causal)", solves=("causal_mask", "scaled_dot_product"))
     return
 
 

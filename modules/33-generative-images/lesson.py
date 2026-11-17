@@ -16,6 +16,7 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     jax.config.update("jax_compilation_cache_dir", "/cache/jaxcache")  # warm reruns skip compilation
     ex = lj.load_exercises(mo.notebook_dir())
@@ -23,7 +24,7 @@ def _():
     _spec = importlib.util.spec_from_file_location("gen33", mo.notebook_dir() / "gen.py")
     gen = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(gen)
-    return ex, gen, jax, jnp, lj, mo, np, plt, ref, time
+    return ex, gen, jax, jnp, lj, mo, np, plt, ref, rosetta, time
 
 
 @app.cell
@@ -169,6 +170,15 @@ def _(mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "transposed convolution"),
+        rosetta.tabs(mo, "GroupNorm"),
+    ])
+    return
+
+
+@app.cell
 def _(F, gen, tx):
     G, _D, gan_hist, gan_secs = gen.train_gan(tx, F["gan_losses"], steps=2000)
     return G, gan_hist, gan_secs
@@ -224,6 +234,12 @@ def _(mo):
     a lower bound on $\log p(x)$. We use a **2-D latent** on purpose: too small for sharp images, but you
     can *see* the whole space.
     """)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "VAE reparameterization and Gaussian KL", solves=("reparameterize", "elbo"))
     return
 
 
@@ -296,6 +312,12 @@ def _(mo):
     a plain mean-squared error (your `ddpm_loss`). To generate, start from pure noise and remove a bit of
     predicted noise at a time. Move the slider:
     """)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "diffusion forward noising", solves=("ddpm_schedule", "q_sample"))
     return
 
 
@@ -456,6 +478,12 @@ def _(mo):
     open-ended zero-shot ability comes from; ours only ever sees ten garment names, so think of it as the
     *mechanism*, not the magic.
     """)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "contrastive (CLIP / InfoNCE) loss", solves="clip_loss")
     return
 
 

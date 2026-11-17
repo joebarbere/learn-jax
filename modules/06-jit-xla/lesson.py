@@ -15,9 +15,10 @@ def _():
     import matplotlib.pyplot as plt
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, mo, plt, re, time
+    return ex, jax, jnp, lj, mo, plt, re, rosetta, time
 
 
 @app.cell
@@ -482,6 +483,12 @@ def _(ex, jnp, lj, mo):
         _items.append(mo.md("**`masked_mean`** of it — expect 6.0, the mean of 1…11 (not of the padding):"))
         _items.append(_mean.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "pad and roll")
     return
 
 

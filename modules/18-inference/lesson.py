@@ -19,6 +19,7 @@ def _():
 
     import learnjax as lj
     from learnjax import llama
+    from learnjax import rosetta
 
     # Compiled programs are cached on disk (the /cache volume), so re-running this lesson skips most compiles.
     jax.config.update("jax_compilation_cache_dir", "/cache/jaxcache")
@@ -26,7 +27,7 @@ def _():
     _spec = importlib.util.spec_from_file_location("m18_infer", mo.notebook_dir() / "infer.py")
     I = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(I)
-    return I, SimpleNamespace, ex, html, jax, jnp, lj, llama, mo, np, plt, time
+    return I, SimpleNamespace, ex, html, jax, jnp, lj, llama, mo, np, plt, rosetta, time
 
 
 @app.cell
@@ -251,6 +252,12 @@ def _(I, c135, c360, code_ids, jax, jnp, mo, np, plt, py_tok_s, py_tokens, roof3
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "KV cache write")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 4 · Batching: same weights, more tokens
@@ -388,6 +395,16 @@ def _(ex, jax, jnp, lj, mo, np, plt, story_logits, story_prompt, temp, tok, topk
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "sort and argsort"),
+        rosetta.tabs(mo, "temperature and top-k filter", solves="top_k_filter"),
+        rosetta.tabs(mo, "top-p (nucleus) filter", solves="top_p_filter"),
+    ])
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ### Side by side
@@ -461,6 +478,12 @@ def _(ex, jax, lj, mo):
     accept_ok = _a.ok
     mo.vstack(_items)
     return (accept_ok,)
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "cumulative product")
+    return
 
 
 @app.cell
@@ -569,6 +592,12 @@ def _(ex, jnp, lj, mo, np, plt, t360):
         _out = mo.vstack([mo.md("**`quantize_int8` / `quantize_int4_grouped`:**"),
                           (_q8 if not _q8.ok else _q4).view(mo)])
     _out
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "int8 absmax quantization", solves=("quantize_int8", "dequantize_int8"))
     return
 
 

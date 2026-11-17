@@ -16,14 +16,14 @@ dev = ["ruff==0.17.5"]   # same version as the course image
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib -q"
-testpaths = ["modules"]
+testpaths = ["modules", "tests"]
 python_files = ["test_*.py"]
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.ruff]
 line-length = 110
 target-version = "py312"
-extend-exclude = ["modules/*/lesson.py", "modules/*/torch_compare.py"]  # marimo-generated cell structure
+extend-exclude = ["modules/*/lesson.py", "modules/*/torch_compare.py", "tools/rosetta_browse.py"]  # marimo-generated cell structure
 
 [tool.ruff.lint.isort]
 known-third-party = ["markdown"]  # the PyPI package, not the gitignored markdown/ output folder

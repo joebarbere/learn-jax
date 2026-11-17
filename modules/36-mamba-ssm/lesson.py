@@ -14,13 +14,14 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import tiny_shakespeare
 
     ex = lj.load_exercises(mo.notebook_dir())
     _spec = importlib.util.spec_from_file_location("m36_models", mo.notebook_dir() / "models.py")
     M = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(M)
-    return M, ex, jax, jnp, lj, mo, np, plt, tiny_shakespeare
+    return M, ex, jax, jnp, lj, mo, np, plt, rosetta, tiny_shakespeare
 
 
 @app.cell
@@ -201,6 +202,15 @@ def _(ex, jax, jnp, lj, mo):
         _out = three.view(mo)
     _out
     return (three,)
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "linear recurrence as a parallel scan", solves="linear_recurrence_assoc"),
+        rosetta.tabs(mo, "long convolution via FFT", solves="ssm_conv"),
+    ])
+    return
 
 
 @app.cell

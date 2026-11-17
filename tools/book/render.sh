@@ -11,7 +11,7 @@ for f in modules/$glob/lesson.py; do
   m=$(basename "$(dirname "$f")")
   [[ -s "$out/$m.ipynb" && "$out/$m.ipynb" -nt "$f" ]] && { echo "$m: up to date"; continue; }
   s=$(date +%s)
-  flock "$lock" env LEARNJAX_SOLUTIONS=1 MATPLOTLIBRC=/course/tools/book/$theme.matplotlibrc \
+  flock "$lock" env LEARNJAX_SOLUTIONS=1 LEARNJAX_BOOK=1 MATPLOTLIBRC=/course/tools/book/$theme.matplotlibrc \
     containers/run.sh marimo export ipynb "$f" -o "/course/$out/$m.ipynb" --include-outputs -f >/dev/null 2>"$out/$m.log"
   echo "$m: exit $? in $(( $(date +%s) - s )) s"
 done

@@ -16,7 +16,7 @@ You need Linux with the in-kernel `amdgpu` driver (any recent distro), podman, a
 other distros, add your user to the `render` and `video` groups.
 
 ```bash
-make build          # JAX image: rocm/jax (ROCm 10.1, JAX 0.11.1) + marimo, Flax, Optax (~19 GB)
+make build          # JAX image: rocm/jax (ROCm 10.1, JAX 0.11.1) + marimo, Flax, Optax (~9 GB download, ~19 GB on disk)
 make up             # marimo on http://127.0.0.1:2718 — `make url` prints the link with its token
 make progress       # the syllabus, with ✓ for modules whose exercises pass
 make help           # everything else
@@ -34,24 +34,43 @@ it's optional and large, see *Disk space* below.
 Module 27 runs your own exported models in LM Studio, headless in a container: `make lms-build lms-up`, then
 `make export-models`.
 
-Module 19 runs a local coding model with llama.cpp: `make llama-download` (~12 GB of GGUF models), then
-`make llama-up` serves an OpenAI-compatible API on http://127.0.0.1:8080 (Vulkan by default;
-`BACKEND=rocm` also works; its image is 23 GB and downloads on first use). Lessons reach it automatically once
-it's up.
+Module 19 runs a local coding model with llama.cpp: `make llama-download` (~12 GB of GGUF models, listed under
+*Disk space*), then `make llama-up` serves an OpenAI-compatible API on http://127.0.0.1:8080 (Vulkan by default;
+`BACKEND=rocm` also works; its image is a 7.7 GB download, 23 GB on disk, pulled on first use). Lessons reach it
+automatically once it's up.
 
 ### Disk space
+
+**What you're getting into.** The minimum is the JAX image: about **9 GB to download, 19 GB on disk**, plus a
+couple of GB of datasets and weights that lessons fetch into the `learn-jax-cache` volume as you go. Everything
+else is optional and per-module. Taking the whole course with every extra is roughly **50 GB to download and
+100 GB on disk**. Download sizes are compressed (what actually crosses the network), and disk sizes are after
+podman unpacks them.
 
 The course's container images are big, but every one can be removed and restored exactly: images are built
 from the lockfiles or pulled by pinned digest. Your data lives elsewhere (the `learn-jax-cache` volume and
 `runs/`), so removing an image loses nothing.
 
-| image | size | needed for | remove | restore |
-|---|---|---|---|---|
-| `localhost/learn-jax` | ~19 GB | everything | — | `make build` |
-| `localhost/learn-jax-torch` (+ its `rocm/pytorch` base) | ~26 GB | PyTorch side-by-side notebooks, `make export-models`' check | `podman rmi localhost/learn-jax-torch docker.io/rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.14.0` | `make build-torch` |
-| llama.cpp `server-rocm` | 23 GB | `BACKEND=rocm` in Module 19 | `podman rmi ghcr.io/ggml-org/llama.cpp:server-rocm-b12375` | automatic on next `BACKEND=rocm make llama-up` |
-| llama.cpp `server-vulkan`, `full-vulkan` | 0.9 + 2.7 GB | Module 19 (default), Module 27's GGUF conversion | — | automatic on next use |
-| `localhost/learn-jax-book` | ~1.4 GB | `make site`, `make pdf` | `podman rmi localhost/learn-jax-book` | `make book-image` |
+| image | download | on disk | needed for | remove | restore |
+|---|---|---|---|---|---|
+| `localhost/learn-jax` | ~9 GB (8.3 GB `rocm/jax` base + packages) | ~19 GB | everything | — | `make build` |
+| `localhost/learn-jax-torch` (+ its `rocm/pytorch` base) | ~12 GB (11.8 GB base + packages) | ~26 GB | PyTorch side-by-side notebooks, `make export-models`' check | `podman rmi localhost/learn-jax-torch docker.io/rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.14.0` | `make build-torch` |
+| llama.cpp `server-rocm` | 7.7 GB | 23 GB | `BACKEND=rocm` in Module 19 | `podman rmi ghcr.io/ggml-org/llama.cpp:server-rocm-b12375` | automatic on next `BACKEND=rocm make llama-up` |
+| llama.cpp `server-vulkan`, `full-vulkan` | 0.3 + 1.1 GB | 0.9 + 2.7 GB | Module 19 (default), Module 27's GGUF conversion | — | automatic on next use |
+| `localhost/learn-jax-lmstudio` | LM Studio's binaries, fetched at build | ~10 GB | Module 27 | `podman rmi localhost/learn-jax-lmstudio` | `make lms-build` |
+| `localhost/learn-jax-book` | under 1.4 GB (`python:3.12-slim` + Chromium, fonts, KaTeX) | ~1.4 GB | `make site`, `make pdf` | `podman rmi localhost/learn-jax-book` | `make book-image` |
+
+Models and data download into the `learn-jax-cache` volume, once, the first time something needs them (download
+and disk size are the same, since GGUF and weight files don't compress):
+
+| what | size | needed for | fetched by |
+|---|---|---|---|
+| Qwen2.5-Coder-14B-Instruct Q4_K_M (the default served model) | 9.0 GB | Module 19 | `make llama-download` |
+| Qwen2.5-Coder-1.5B-Instruct Q4_K_M and Q8_0 | 1.1 + 1.9 GB | Module 19 (small/fast and quantization comparisons) | `make llama-download` |
+| Qwen2.5-1.5B-Instruct Q4_K_M | 1.1 GB | Module 27 (tool calling: the Coder models don't emit the tags LM Studio parses) | `make export-models` |
+| Hugging Face weights and tokenizers (GPT-2, SmolLM2-360M, …) and datasets (Fashion-MNIST, Tiny Shakespeare, the detective corpus, …) | ~2 GB | the lessons that use them | automatic, on first use |
+
+All four GGUF models are Apache-2.0, from Qwen's official GGUF repos on Hugging Face.
 
 If an image is missing, `containers/run.sh` stops and prints the command that restores it, and `make check`
 skips the PyTorch notebooks instead of failing. Don't prune podman volumes: that would delete
@@ -95,7 +114,10 @@ solutions; the code and exercises stay in the notebooks. They're built in a sepa
 (`make book-image`: Chromium, Paged.js, KaTeX, fonts). Every term the course uses is defined in
 [docs/GLOSSARY.md](docs/GLOSSARY.md), with the module that teaches it. About fifty models, the building blocks
 each one uses and who introduced each block are in [docs/LINEAGE.md](docs/LINEAGE.md) (drawn as a graph in
-module 00b).
+module 00b). Every math operation the course introduces is written five ways (the formula as papers
+write it, plain Python loops, NumPy, JAX and PyTorch, all tested to agree) in [docs/ROSETTA.md](docs/ROSETTA.md),
+with a guide to reading paper notation and to translating NumPy into JAX. The lessons show each one as tabs where
+it's first taught; `make rosetta-browse` opens them all in one notebook, and the book has them as Appendix E.
 
 ## Syllabus
 
@@ -206,10 +228,11 @@ models, datasets and tools listed under Credits.
 
 ```
 containers/   Containerfile (JAX), Containerfile.torch, run.sh (GPU passthrough wrapper)
-learnjax/     small shared helpers: exercise loading, timing, GPU info, syllabus, progress
+learnjax/     small shared helpers: exercise loading, timing, GPU info, syllabus, progress; rosetta/ (math ↔ code)
 modules/      one directory per module
+tests/        test_rosetta.py: every math ↔ code entry agrees across versions and is placed in a lesson
 tools/        lesson_outputs.py: run a lesson and print what each cell shows
-docs/         AUTHORING.md (how modules are written and verified), PAPERS.md, LINEAGE.md, ROCM_GOTCHAS.md
+docs/         AUTHORING.md (how modules are written and verified), PAPERS.md, LINEAGE.md, ROSETTA.md, ROCM_GOTCHAS.md
 ```
 
 `make check` is the course's own test. Every lesson runs headless, and every test passes against the

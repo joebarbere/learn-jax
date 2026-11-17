@@ -21,6 +21,7 @@ def _():
 
     import learnjax as lj
     from learnjax import llama
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
 
@@ -34,7 +35,7 @@ def _():
     task = _load("task")
     LM = _load("lora_model")
     RUNS = Path("/course/runs/20-lora")
-    return LM, RUNS, ex, jax, jnp, json, lj, llama, mo, np, optax, plt, task, time
+    return LM, RUNS, ex, jax, jnp, json, lj, llama, mo, np, optax, plt, rosetta, task, time
 
 
 @app.cell
@@ -152,6 +153,12 @@ def _(ex, jax, jnp, lj, mo):
             _items.append(mo.md(f"max |lora_apply − x@W| = **{float(jnp.abs(_app.value - _x @ _W).max())}** "
                                 "— the adapter starts as a no-op."))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "LoRA forward", solves="lora_apply")
     return
 
 

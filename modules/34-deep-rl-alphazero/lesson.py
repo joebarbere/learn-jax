@@ -19,6 +19,7 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     jax.config.update("jax_compilation_cache_dir", "/cache/jaxcache")
     ex = lj.load_exercises(mo.notebook_dir())
@@ -32,7 +33,7 @@ def _():
 
     rl = _load("rl")
     RUNS = Path("/course/runs/34-deep-rl-alphazero")
-    return RUNS, ex, jax, jnp, json, lj, mo, np, plt, rl, time
+    return RUNS, ex, jax, jnp, json, lj, mo, np, plt, rl, rosetta, time
 
 
 @app.cell
@@ -265,6 +266,15 @@ def _(ex, jax, jnp, lj, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "DQN target and Huber loss", solves=("td_target", "dqn_loss")),
+        rosetta.tabs(mo, "sample without replacement"),
+    ])
+    return
+
+
+@app.cell
 def _():
     # The DQN settings used below: the best of a 12-setting x 3-seed sweep (see the text under the plot).
     DQN_KW = {"double": True, "clip": 10.0, "target_every": 1000, "lr": 1e-3}
@@ -396,6 +406,12 @@ The untried move with a strong prior is explored next, even though move b has th
     else:
         _out = _p.view(mo)
     _out
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "PUCT score (AlphaZero search)", solves="puct")
     return
 
 

@@ -17,10 +17,11 @@ def _():
     from flax import nnx
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax.data import FASHION_CLASSES, fashion_mnist
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return FASHION_CLASSES, ex, fashion_mnist, jax, jnp, lj, mo, nnx, np, optax, plt, time
+    return FASHION_CLASSES, ex, fashion_mnist, jax, jnp, lj, mo, nnx, np, optax, plt, rosetta, time
 
 
 @app.cell
@@ -199,6 +200,12 @@ def _(ex, hand_bank, hand_maps, jnp, lj, mo, sample):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "2-D convolution", solves="conv2d")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 3 · Padding, stride and output size
@@ -275,6 +282,12 @@ def _(ex, hand_maps, lj, mo, plt):
     else:
         _items.append(_a.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "max pooling", solves="max_pool2d")
     return
 
 
@@ -740,6 +753,12 @@ that depend on the content.
 ```
 """)])
     _out
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "dynamic slice (a window at a traced position)")
     return
 
 

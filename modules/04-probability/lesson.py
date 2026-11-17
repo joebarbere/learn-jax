@@ -15,9 +15,10 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, math, mo, np, plt
+    return ex, jax, jnp, lj, math, mo, np, plt, rosetta
 
 
 @app.cell
@@ -91,6 +92,12 @@ def _(jax, n_samples, np, plt):
     _ax.legend(fontsize=8)
     _fig.tight_layout()
     _fig
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "normal samples")
     return
 
 
@@ -264,6 +271,12 @@ def _(jnp, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "exp, log and powers")
+    return
+
+
+@app.cell
 def _(ex, jnp, lj, mo):
     _x = jnp.array([1000.0, 1001.0, 1002.0])
     _s = lj.attempt(ex.stable_softmax, _x)
@@ -274,6 +287,16 @@ def _(ex, jnp, lj, mo):
         _s.view(mo),
         mo.md("**`log_softmax([-200, 0, 200])`** (expect [−400, −200, 0] — finite, not −inf):"),
         _l.view(mo),
+    ])
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "softmax", solves="stable_softmax"),
+        rosetta.tabs(mo, "log-sum-exp", solves="log_softmax"),
+        rosetta.tabs(mo, "log-softmax", solves="log_softmax"),
     ])
     return
 
@@ -334,6 +357,12 @@ def _(drift, ex, jnp, lj, mo, np, plt):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "KL divergence", solves="kl_divergence")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 7 · Why training a language model *is* minimizing cross-entropy
@@ -381,6 +410,15 @@ def _(ex, jnp, lj, math, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "cross-entropy from logits", solves="cross_entropy"),
+        rosetta.tabs(mo, "perplexity", solves="perplexity"),
+    ])
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 8 · Sampling a token: the Gumbel-max trick
@@ -393,6 +431,15 @@ def _(mo):
     Your `sample_categorical` below draws 20,000 next words from the logits in section 4 (at $T = 1$); the
     bars should match the true probabilities.
     """)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "uniform samples"),
+        rosetta.tabs(mo, "max and argmax (reductions)"),
+    ])
     return
 
 
@@ -414,6 +461,12 @@ def _(ex, jax, lj, logits, mo, np, plt, words):
     else:
         _out = _a.view(mo)
     _out
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "categorical sampling", solves="sample_categorical")
     return
 
 

@@ -14,9 +14,10 @@ def _():
     import optax
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return ex, jax, jnp, lj, mo, np, optax, plt
+    return ex, jax, jnp, lj, mo, np, optax, plt, rosetta
 
 
 @app.cell
@@ -311,6 +312,12 @@ def _(mo, np, optax, plt, rosen, run_optax):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "RMSProp")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     Plain gradient descent creeps down the curved valley and is still far from $(1,1)$ after 1,000 steps;
@@ -356,6 +363,12 @@ def _(jax, jnp, np, plt):
     _ax.legend()
     _fig.tight_layout()
     _fig
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "random integers")
     return
 
 
@@ -410,6 +423,12 @@ def _(ex, lj, mo, np, optax, plt):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "learning-rate schedules (warmup, cosine, linear)", solves="warmup_cosine")
+    return
+
+
+@app.cell
 def _(mo):
     mo.md(r"""
     ## 7 · Gradient clipping
@@ -443,6 +462,12 @@ def _(ex, jax, jnp, lj, mo):
     else:
         _items.append(_c.view(mo))
     mo.vstack(_items)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "clip by global norm", solves="clip_by_global_norm")
     return
 
 
@@ -558,6 +583,16 @@ def _(ex, jax, jnp, lj, mo, optax):
         else:
             _rows.append(mo.vstack([mo.md(f"**{_name}**"), _a.view(mo)]))
     mo.vstack(_rows)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    mo.vstack([
+        rosetta.tabs(mo, "SGD with momentum", solves=("sgd_step", "momentum_step")),
+        rosetta.tabs(mo, "Adam update", solves="adam_step"),
+        rosetta.tabs(mo, "AdamW (decoupled weight decay)", solves="adam_step"),
+    ])
     return
 
 
@@ -740,6 +775,12 @@ def _(ex, jax, jnp, lj, mo, np, optax):
     _cmp = lj.attempt(_compare)
     (mo.md(f"Your `muon_step` vs `optax.contrib.muon` after 5 steps on a 48×96 matrix: max |Δ| = "
            f"**{_cmp.value:.1e}**") if _cmp.ok else _cmp.view(mo))
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "Muon: orthogonalized update (Newton–Schulz)", solves=("newton_schulz", "muon_step"))
     return
 
 

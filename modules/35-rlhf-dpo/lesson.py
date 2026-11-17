@@ -20,6 +20,7 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
     from learnjax import llama
 
     jax.config.update("jax_compilation_cache_dir", "/cache/jaxcache")   # recompiles hit the disk cache
@@ -39,7 +40,7 @@ def _():
         """Inline code that survives markdown (marimo treats <|im_end|> as HTML even in backticks)."""
         return f"<code>{html.escape(str(text))}</code>"
 
-    return P, RUNS, code, ex, jax, jnp, json, lj, llama, mo, np, plt, time
+    return P, RUNS, code, ex, jax, jnp, json, lj, llama, mo, np, plt, rosetta, time
 
 
 @app.cell
@@ -239,6 +240,12 @@ def _(ex, jnp, lj, mo):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "Bradley–Terry reward-model loss", solves="bradley_terry_loss")
+    return
+
+
+@app.cell
 def _(P, bt_ready, cfg_rm, ex, jax, mo, pairs, params_rm, time):
     rm, rm_losses = None, []
     if bt_ready:
@@ -338,6 +345,12 @@ def _(ex, jax, jnp, lj, mo):
         mo.md("**`dpo_loss`** when the policy *is* the reference (every margin 0) → log 2 ≈ 0.693:"), _dpo.view(mo),
     ])
     return (dpo_ready,)
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "DPO loss", solves=("dpo_loss", "implicit_reward"))
+    return
 
 
 @app.cell

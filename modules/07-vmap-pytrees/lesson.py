@@ -16,9 +16,10 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
-    return NamedTuple, dataclass, ex, jax, jnp, lj, mo, np, plt
+    return NamedTuple, dataclass, ex, jax, jnp, lj, mo, np, plt, rosetta
 
 
 @app.cell
@@ -96,6 +97,12 @@ def _(jax, jnp, mo):
     (default 0) where the batch axis goes in the result.
     """)
     return (predict,)
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "apply a function to every row: vmap and lax.map")
+    return
 
 
 @app.cell

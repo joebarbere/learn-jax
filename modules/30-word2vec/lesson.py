@@ -15,12 +15,13 @@ def _():
     import numpy as np
 
     import learnjax as lj
+    from learnjax import rosetta
 
     ex = lj.load_exercises(mo.notebook_dir())
     _spec = importlib.util.spec_from_file_location("w2v30", mo.notebook_dir() / "w2v.py")
     w2v = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(w2v)
-    return ex, jax, jnp, lj, mo, np, plt, time, w2v
+    return ex, jax, jnp, lj, mo, np, plt, rosetta, time, w2v
 
 
 @app.cell
@@ -195,6 +196,12 @@ def _(ex, jax, jnp, lj, mo):
                             f"**{_zl:.4f}** for K = 2 — a good sanity check."))
     mo.vstack(_items)
     return (loss_a,)
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "skip-gram negative-sampling loss", solves="sgns_loss")
+    return
 
 
 @app.cell
