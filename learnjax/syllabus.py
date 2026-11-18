@@ -13,6 +13,7 @@ PARTS = {
     9: "Using your models",
     10: "Milestones, rebuilt in JAX",
     11: "Systems around the model: retrieval and agents",
+    12: "Frontier architectures",
 }
 
 MODULES = [
@@ -56,6 +57,7 @@ MODULES = [
     (37, "37-interpretability", "Interpretability: induction heads and world models (2020–2023)", 10),
     (38, "38-rag", "Retrieval-augmented generation, from BM25 to rerankers (1994–2024)", 11),
     (39, "39-agents", "Agents: tools, memory, workflows and multi-agent systems (2022–)", 11),
+    (40, "40-latentmoe-engram", "Latent experts and conditional memory: LatentMoE and Engram (2025–2026)", 12),
 ]
 
 

@@ -1,6 +1,6 @@
 # Glossary
 
-553 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+561 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -33,7 +33,7 @@
 - **ALiBi** — Attention with Linear Biases: no position embeddings; each head subtracts a penalty proportional to the query-key distance from its attention scores. *(Module 17; also 00b.)* Origin: Press, Smith, Lewis, 2021.
 - **all-gather** — Every device contributes its shard and every device ends up with the full array. *(Module 24; also 25.)*
 - **all-reduce** — Every device contributes a value and every device gets the sum. Data parallelism uses it to average gradients. *(Module 24; also 25.)*
-- **all-to-all** — Every device sends a different piece to every other device; used to route tokens to experts in expert parallelism. *(Module 24.)*
+- **all-to-all** — Every device sends a different piece to every other device; used to route tokens to experts in expert parallelism. *(Module 24; also 40.)*
 - **AlphaGo** — DeepMind's Go program that beat Lee Sedol in 2016, combining neural networks with MCTS; AlphaGo Zero (2017) learned from self-play alone. *(Module 34; also 00b.)* Origin: Silver et al., 2016, 2017.
 - **AlphaZero** — One algorithm for Go, chess and shogi: a network with policy and value heads guides MCTS, and is trained on self-play to match MCTS's move choices and the game outcomes. *(Module 34; also 00b.)* Origin: Silver et al., 2017.
 - **Anthropic-compatible API** — A server endpoint speaking Anthropic's Messages API, so tools built for Claude (like Claude Code) can talk to a local model. *(Module 27.)*
@@ -43,7 +43,7 @@
 - **artificial neuron** — A unit that sums weighted inputs and fires if the total crosses a threshold; McCulloch and Pitts' 1943 model of a neuron. *(Module 29.)* Origin: McCulloch & Pitts, 1943.
 - **associative recall** — A synthetic task: given key–value pairs in context, return the value for a queried key. Attention solves it easily; it probes what sequence models can store and retrieve. *(Module 15; also 36.)*
 - **associative scan** — A parallel prefix scan for any associative combine; JAX's `lax.associative_scan` runs a linear recurrence in log depth on the GPU. *(Module 36.)* Origin: Blelloch, 1990.
-- **asynchronous dispatch** — JAX returns from a call as soon as the work is queued on the GPU, not when it finishes. Timing must call `block_until_ready()` or you measure only the launch. *(Module 06; also 10, 16, 18, 20, 33.)*
+- **asynchronous dispatch** — JAX returns from a call as soon as the work is queued on the GPU, not when it finishes. Timing must call `block_until_ready()` or you measure only the launch. *(Module 06; also 10, 16, 18, 20, 33, 40.)*
 - **attention** — A soft dictionary lookup: each position scores every position it may see, softmaxes the scores into weights, and takes the weighted average of their values. Lets any token read from any other. *(Module 15; also 17, 23, 31, 36, 37.)* Origin: Bahdanau et al., 2014; Vaswani et al., 2017.
 - **attention pattern** — The matrix of attention weights from each query to each key, the first thing to look at in a head. *(Module 37.)*
 - **autoencoder** — A network trained to reconstruct its input through a narrow bottleneck, so the bottleneck learns a compressed code. *(Module 33; also 37.)*
@@ -77,7 +77,7 @@
 - **Bradley–Terry model** — The probability that A beats B is σ(score_A − score_B). Training a reward model is maximizing this likelihood on preference pairs. *(Module 35.)* Origin: Bradley & Terry, 1952.
 - **broadcasting** — The rule that lets arrays of different shapes combine elementwise: shapes are right-aligned, and any axis of size 1 (or missing) is stretched to match. It replaces most Python loops. *(Module 01.)*
 - **bucketing** — Padding variable-length inputs up to one of a few fixed sizes so jit compiles only a few programs. *(Module 06.)*
-- **byte-level BPE** — BPE starting from the 256 byte values, so any text can be encoded with no unknown tokens. Used by GPT-2 and most modern LLMs. *(Module 13.)* Origin: Radford et al., 2019.
+- **byte-level BPE** — BPE starting from the 256 byte values, so any text can be encoded with no unknown tokens. Used by GPT-2 and most modern LLMs. *(Module 13; also 40.)* Origin: Radford et al., 2019.
 - **byte-pair encoding** — A tokenizer trained by repeatedly merging the most frequent adjacent pair of tokens into a new token, starting from bytes or characters. The merges are applied in order to tokenize. *(Module 13; also 27, 30.)* Origin: Gage, 1994; Sennrich et al., 2016.
 
 <a id="c"></a>
@@ -86,6 +86,7 @@
 
 - **[CLS] token** — A special token whose final vector serves as a summary of the whole input for classification. *(Module 32.)* Origin: Devlin et al., 2018.
 - **calibration** — Correcting a model's built-in lean toward some options regardless of the input, e.g. by subtracting each option's score on a content-free question, so the choice reflects what this question adds. *(Module 39; also 27.)* Origin: Zhao et al., 2021.
+- **capacity factor** — How many token slots an expert (or a device's experts) accepts per batch, as a multiple of the even share. Slots past capacity are dropped; 1.25 leaves room for uneven routing. *(Module 40; also 24.)* Origin: Lepikhin et al., 2020 (GShard).
 - **capstone** — The course's final project: specialize, evaluate and serve a model of your own, end to end, with optional cloud scale-up. *(Module 25.)*
 - **carry** — The state lax.scan passes from one step to the next (an RNN hidden state, a running sum, the train state). *(Module 08; also 05, 09, 10, 14, 24.)*
 - **causal mask** — Setting attention scores for future positions to −∞ before softmax, so each token sees only itself and the past. Required for next-token training. *(Module 15; also 32.)*
@@ -113,6 +114,7 @@
 - **compute unit** — AMD's basic GPU building block (like an NVIDIA SM): it runs workgroups and has its own LDS. The RX 7600 XT has 32. *(Module 23.)*
 - **compute-bound** — When the GPU's arithmetic units are the bottleneck: the work does many FLOPs per byte moved. Large matmuls are compute-bound. *(Module 10; also 19.)*
 - **condition number** — The ratio of the largest to smallest curvature of a loss (or singular values of a matrix). A large one means a long narrow valley where plain gradient descent zig-zags slowly. *(Module 05.)*
+- **conditional memory** — A lookup table read at a few layers, indexed by the last few tokens (hashed) and gated by the hidden state: knowledge fetched in O(1) instead of rebuilt by computation. DeepSeek's Engram. *(Module 40.)* Origin: Cheng et al. (DeepSeek-AI), 2026.
 - **confusion matrix** — A table counting, for each true class, how often the model predicted each class. Shows which classes get mixed up. *(Module 09.)*
 - **constrained decoding** — Masking the logits at each step so only tokens allowed by a grammar or JSON schema can be generated, guaranteeing well-formed output (e.g. tool calls) without retraining. *(Module 39.)*
 - **container** — A packaged Linux userland (here a Podman image) that holds ROCm, JAX and every library, so nothing GPU-related is installed on the host. `containers/run.sh` starts it with the GPU device files passed through. *(Module 00.)*
@@ -144,12 +146,12 @@
 - **deep learning** — Machine learning with neural networks of many layers, trained end to end by gradient descent on large data. It took off in 2012, when AlexNet won ImageNet on GPUs. *(Module 00b; also 06, 08, 12, 22.)*
 - **DeepSeek-V3** — DeepSeek's 2024 MoE LLM combining MLA, DeepSeekMoE, aux-loss-free balancing and MTP. The owner's deepseek-v3-jax replication is a recurring reference in this course. *(Module 17; also 05, 08, 11, 13, 16.)* Origin: DeepSeek-AI, 2024.
 - **dense retrieval** — Search by embedding query and documents as dense vectors and finding the nearest by cosine similarity, so matches need not share words. *(Module 38.)* Origin: Karpukhin et al., 2020 (DPR).
-- **depthwise convolution** — A convolution applied to each channel separately; Mamba blocks use a short causal one before the SSM. *(Module 36.)*
+- **depthwise convolution** — A convolution applied to each channel separately; Mamba blocks use a short causal one before the SSM. *(Module 36; also 40.)*
 - **derivative** — The slope of a function at a point: how much the output changes per unit change in the input. *(Module 03; also 10.)*
 - **determinant** — How much a matrix scales area (or volume); zero means it squashes space flat and cannot be undone, negative means it flips orientation. *(Module 02.)*
 - **device** — A piece of hardware JAX can place arrays on and run computation on, such as `rocm:0` or the CPU. `jax.device_put` moves data there. *(Module 01; also 00, 08, 22, 24, 25.)*
 - **diffusion model** — Learn to reverse a process that gradually adds noise to data: a network predicts the noise at each step, and generation starts from pure noise and denoises step by step. *(Module 33; also 00b.)* Origin: Sohl-Dickstein et al., 2015; Ho et al., 2020.
-- **dilated convolution** — A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with dilations 1-2-4-8. WaveNet stacks them causally. *(Module 12.)* Origin: van den Oord et al., 2016 (WaveNet).
+- **dilated convolution** — A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with dilations 1-2-4-8. WaveNet stacks them causally. *(Module 12; also 40.)* Origin: van den Oord et al., 2016 (WaveNet).
 - **discounted return** — The total (usually discounted) reward from a point onward; what an RL agent maximizes. *(Module 34.)*
 - **discretization** — Converting a continuous-time state-space model into a step-by-step update with a step size Δ; zero-order hold assumes the input is constant within each step. *(Module 36.)*
 - **distillation** — Training a smaller student model on a larger teacher's outputs (or reasoning traces) so it inherits the teacher's ability. *(Module 26; also 12, 31.)* Origin: Hinton, Vinyals, Dean, 2015.
@@ -184,7 +186,7 @@
 - **exact match** — Scoring a generated answer as right only if it equals the reference after normalization. *(Module 21; also 20.)*
 - **expectation** — The probability-weighted average of a random variable: its long-run mean. *(Module 04.)*
 - **experience replay** — Storing past transitions and training on random samples of them, which breaks correlations between consecutive steps and reuses data. *(Module 34.)* Origin: Lin, 1992; Mnih et al., 2015.
-- **expert parallelism** — Placing different MoE experts on different devices and using all-to-all to send each token to its experts' devices. *(Module 24.)*
+- **expert parallelism** — Placing different MoE experts on different devices and using all-to-all to send each token to its experts' devices. *(Module 24; also 40.)*
 - **expert system** — AI built from hand-written if-then rules elicited from human experts. Commercially popular in the 1980s, they were brittle outside their rules, which helped bring on the second AI winter. *(Module 00b.)*
 - **explicit sharding** — JAX mode in which an array's sharding is part of its type and visible at trace time, so ambiguous cases are errors rather than compiler guesses. *(Module 24.)*
 - **exponent bits** — The bits of a float that set its scale. bfloat16 keeps float32's 8, so it has the same range. *(Module 08.)*
@@ -247,6 +249,7 @@
 
 - **handoff** — A one-way transfer of a conversation from one agent to another, which then owns the reply. *(Module 39.)* Origin: OpenAI Agents SDK.
 - **hard negative** — A wrong document that looks right (e.g. one BM25 ranks highly); training against them makes a retriever sharper. *(Module 38.)* Origin: Karpukhin et al., 2020.
+- **hashing trick** — Map a huge or open-ended set of keys (words, n-grams) to rows of a fixed-size table with a hash function, accepting that some keys share a row. Several independent hashes make a shared row harmless. *(Module 40.)* Origin: Weinberger et al., 2009.
 - **He initialization** — Draw initial weights with variance 2/fan_in so activations keep their scale through ReLU layers. *(Module 10; also 11.)* Origin: He et al., 2015.
 - **Hebbian learning** — "Cells that fire together wire together": strengthen a weight when both units are active. The Hopfield network stores patterns this way. *(Module 29.)* Origin: Hebb, 1949.
 - **Hessian** — The matrix of second derivatives of a scalar function: how the gradient itself changes. It describes curvature. *(Module 03.)*
@@ -262,7 +265,7 @@
 - **HSA_OVERRIDE_GFX_VERSION** — An environment variable that makes the ROCm runtime report a different GPU architecture. Set to 11.0.0 here so the RX 7600 XT (gfx1102) is accepted as gfx1100; the instruction sets are close enough that the code runs. *(Module 00.)*
 - **Huber loss** — Squared error for small errors, absolute error for large ones, so outliers don't produce huge gradients. *(Module 34.)* Origin: Huber, 1964.
 - **Hugging Face** — The main hub for open models and datasets, and the `transformers` library that loads them. *(Module 27; also 13, 18, 26, 35.)*
-- **hybrid model** — An architecture interleaving attention layers with SSM (Mamba) layers to get most of attention's recall at a fraction of its cost; Jamba is one. *(Module 36.)* Origin: Lieber et al., 2024 (Jamba).
+- **hybrid model** — An architecture interleaving attention layers with SSM (Mamba) layers to get most of attention's recall at a fraction of its cost; Jamba is one. *(Module 36; also 40.)* Origin: Lieber et al., 2024 (Jamba).
 - **hybrid search** — Combining keyword (BM25) and dense retrieval results, which usually beats either alone. *(Module 38.)*
 - **hyperparameter** — A setting chosen by you rather than learned: learning rate, batch size, depth, weight decay. *(Module 09.)*
 
@@ -321,6 +324,7 @@
 - **latency** — Time from request to response (or to the first token). Batching improves throughput at some cost in latency. *(Module 18.)*
 - **latent diffusion** — Diffusion run in an autoencoder's compact latent space instead of on pixels, which made high-resolution text-to-image generation cheap (Stable Diffusion). *(Module 33.)* Origin: Rombach et al., 2021.
 - **latent space** — A lower-dimensional space of hidden codes from which a generator or decoder produces data. *(Module 33.)*
+- **LatentMoE** — A mixture-of-experts layer whose routed experts work in a narrower latent width ℓ = d/α: tokens are projected down before they're sent to experts and up after. The savings buy α× as many experts. *(Module 40.)* Origin: Elango et al. (NVIDIA), 2026.
 - **lax.cond** — Traced control flow: `lax.cond` picks one of two branches based on a traced boolean and compiles both; `lax.switch` picks from many by index; `jnp.where` selects elementwise. *(Module 08; also 06, 17, 29.)*
 - **lax.fori_loop** — A compiled loop whose body is traced once, so compile time doesn't grow with the iteration count. `while_loop` stops on a condition but can't be reverse-differentiated. *(Module 08; also 18, 23.)*
 - **lax.scan** — A compiled loop that threads a carry through steps and stacks each step's output. It is how JAX writes RNNs, training loops and decoding without unrolling. *(Module 08; also 05, 10, 14, 16, 36.)*
@@ -339,7 +343,7 @@
 - **llama.cpp** — A C/C++ LLM inference engine that runs GGUF models on CPUs and GPUs (via ROCm/HIP or Vulkan) and serves an OpenAI-compatible API. *(Module 19; also 18, 21, 27, 39.)*
 - **LLM-as-judge** — Using a language model to grade other models' outputs. Cheap and scalable, but biased (e.g. position bias) and must be checked. *(Module 21; also 38.)* Origin: Zheng et al., 2023.
 - **LM Studio** — A desktop app and server for running local LLMs (via llama.cpp engines), with OpenAI-, Anthropic-compatible and native APIs. *(Module 27; also 26, 38, 39.)*
-- **load balancing** — Keeping MoE experts evenly used. Classic MoE adds an auxiliary loss; DeepSeek-V3 instead nudges a per-expert bias in the router after each step (aux-loss-free). *(Module 17.)* Origin: DeepSeek-AI, 2024 (V3).
+- **load balancing** — Keeping MoE experts evenly used. Classic MoE adds an auxiliary loss; DeepSeek-V3 instead nudges a per-expert bias in the router after each step (aux-loss-free). *(Module 17; also 40.)* Origin: DeepSeek-AI, 2024 (V3).
 - **log-sum-exp** — log(Σ exp xᵢ), computed safely by subtracting the max first so nothing overflows. It is the normalizer inside log-softmax and cross-entropy. *(Module 04; also 08, 11, 39.)*
 - **logistic regression** — A linear model followed by a sigmoid, giving the probability of the positive class; trained with binary cross-entropy. *(Module 09.)*
 - **logit** — An unnormalized score, one per class or token, that softmax turns into probabilities. Logits are log-probabilities up to a shared constant. *(Module 04; also 09, 11, 14, 18, 27.)*
@@ -375,7 +379,7 @@
 - **minibatch** — A small random subset of the training data used for one gradient step. *(Module 05; also 11, 18.)*
 - **minimax** — Classic game search: assume both players play optimally, maximize your worst case; alpha-beta pruning skips branches that can't matter. Deep Blue's method. *(Module 34.)*
 - **mixed precision** — Doing the heavy matmuls in bfloat16 while keeping master weights, optimizer state and sensitive reductions in float32. Most of the speed, little of the risk. *(Module 08; also 16.)* Origin: Micikevicius et al., 2017.
-- **mixture of experts** — Replace one big MLP with many expert MLPs and a router that sends each token to a few of them. Parameters grow without per-token compute growing. *(Module 17; also 00b, 16, 19, 24.)* Origin: Shazeer et al., 2017.
+- **mixture of experts** — Replace one big MLP with many expert MLPs and a router that sends each token to a few of them. Parameters grow without per-token compute growing. *(Module 17; also 00b, 16, 19, 24, 40.)* Origin: Shazeer et al., 2017.
 - **mode collapse** — A GAN failure in which the generator produces only a few kinds of output, ignoring the variety of the data. *(Module 33.)*
 - **model FLOPs utilization** — Achieved training FLOP/s (≈ 6 × parameters × tokens per second) divided by the GPU's peak. A single number for how well you use the hardware. *(Module 16; also 22, 25.)* Origin: Chowdhery et al., 2022 (PaLM).
 - **modern Hopfield network** — Hopfield networks with sharper energy functions that store exponentially many patterns; their update rule is softmax attention. *(Module 29.)* Origin: Ramsauer et al., 2020.
@@ -398,7 +402,7 @@
 
 ## N
 
-- **n-gram** — A run of n consecutive tokens; an n-gram model predicts from the previous n − 1. Also used to measure text overlap in evaluation and contamination checks. *(Module 14; also 21.)* Origin: Shannon, 1948.
+- **n-gram** — A run of n consecutive tokens; an n-gram model predicts from the previous n − 1. Also used to measure text overlap in evaluation and contamination checks. *(Module 14; also 21, 40.)* Origin: Shannon, 1948.
 - **NaN** — Not-a-Number: the result of invalid float math like 0/0 or inf − inf. One NaN poisons everything it touches, so catching its source is a key debugging skill. *(Module 11; also 05, 09, 25, 35, 39.)*
 - **nats** — Units of information: a nat uses the natural log, a bit uses log base 2 (1 nat ≈ 1.44 bits). Losses in JAX are usually in nats. *(Module 04; also 14, 32, 33, 35, 37.)*
 - **nDCG** — Normalized discounted cumulative gain: rewards relevant results more the higher they rank (with a log discount), scaled so a perfect ranking scores 1. *(Module 38.)* Origin: Järvelin & Kekäläinen, 2002.
@@ -452,6 +456,7 @@
 - **Perceptrons (Minsky & Papert)** — Minsky and Papert's 1969 book proving the limits of single-layer perceptrons (e.g. XOR), widely blamed for the first AI winter. *(Module 29; also 00b.)* Origin: Minsky & Papert, 1969.
 - **permutation equivariance** — Shuffling the inputs just shuffles the outputs the same way. Plain attention has it, so it can't tell word order without positional information. *(Module 15.)*
 - **perplexity** — exp of the average per-token cross-entropy (in nats): the effective number of choices the model is torn between at each step. Lower is better; only comparable across models with the same tokenizer. *(Module 04; also 14, 18, 21, 27.)*
+- **pinned memory** — Host RAM the operating system promises not to move, so the GPU can copy to and from it directly (DMA) without a staging copy. JAX exposes it as the memory kind `pinned_host`. *(Module 40.)*
 - **pipeline parallelism** — Putting different layers on different devices and streaming microbatches through, like an assembly line. Startup and drain leave idle time, the bubble. *(Module 24.)* Origin: Huang et al., 2018 (GPipe).
 - **PJRT** — The plugin interface between JAX and a hardware backend. On this machine the `jax-rocm` PJRT plugin is the bridge from JAX to the AMD GPU. *(Module 00.)*
 - **policy** — In RL, the rule (here the model's token distribution) that maps a state to actions. Fine-tuning an LLM with RL treats the model as the policy. *(Module 34; also 20, 26, 35, 39.)*
@@ -466,6 +471,7 @@
 - **pre-tokenization** — Splitting text into chunks (words, numbers, spaces) with a regex before BPE, so merges never cross those boundaries. *(Module 13; also 27.)*
 - **preallocation** — By default JAX grabs 75% of GPU memory at startup so later allocations are fast. The course turns it off (`XLA_PYTHON_CLIENT_PREALLOCATE=false`) so several notebooks can share one card. *(Module 00.)*
 - **preference data** — Pairs of responses to the same prompt with a label saying which is better; the training data for reward models and DPO. *(Module 35.)*
+- **prefetch** — Start loading data you'll need next while the current work runs, so the wait hides behind it. Possible whenever the addresses are known in advance. *(Module 40.)*
 - **prefill** — The first phase of generation: run the whole prompt through the model at once, filling the KV cache. Compute-bound. *(Module 18; also 17, 19, 39.)*
 - **prefix scan** — Computing all running results (running sums, running products) of a sequence; with an associative operator it parallelizes in O(log L) steps. *(Module 36.)* Origin: Blelloch, 1990.
 - **previous-token head** — An attention head that mostly attends to the immediately preceding token; the first half of an induction circuit. *(Module 37.)*
@@ -574,6 +580,7 @@
 - **sparse activation** — Only part of the model runs per token (the chosen experts), so active parameters are far fewer than total parameters. *(Module 17.)*
 - **sparse autoencoder** — An autoencoder with a sparsity penalty trained on a model's activations, to pull superposed features apart into separate, more interpretable units. *(Module 37.)* Origin: Bricken et al., 2023.
 - **sparse retrieval** — Search by exact word overlap, using sparse vectors with one dimension per vocabulary word (TF-IDF, BM25). *(Module 38.)*
+- **sparsity** — Having many parameters but using only a few for each input: an MoE's unpicked experts, an Engram table's unread rows. Capacity grows without per-token compute growing. *(Module 40; also 17.)*
 - **special tokens** — Reserved tokens with structural meaning, like end-of-text or chat-role markers, that never come from ordinary text. *(Module 13.)*
 - **speculative decoding** — A small draft model guesses several tokens, the big target model checks them all in one forward pass, and every accepted guess is a token gained. The output distribution is unchanged. *(Module 18; also 17, 27.)* Origin: Leviathan et al., 2022; Chen et al., 2023.
 - **speed ladder** — Module 22's sequence of changes, each timed on the same model: eager → jit → mixed precision → donation → scanned steps. *(Module 22.)*
@@ -614,6 +621,7 @@
 - **tiling** — Splitting a big computation into blocks that fit in registers or LDS, so each piece of data is loaded from memory once and reused many times. *(Module 23; also 24.)*
 - **token** — One unit of text as a model sees it, an integer id for a character, byte, word piece or word. *(Module 13; also 16, 17, 18, 21, 32.)*
 - **tokenizer** — The component that turns text into a sequence of token ids and back. It is fixed before training and shapes cost and behaviour. *(Module 13; also 16, 18, 21, 27, 32.)*
+- **tokenizer compression** — Map token ids that mean the same thing after normalization (case, accents, spaces) to one canonical id. Engram indexes its tables this way, so variants share rows. *(Module 40; also 13.)* Origin: Cheng et al. (DeepSeek-AI), 2026.
 - **tool calling** — A model emitting a structured request (tool name + JSON arguments) that the host program executes, feeding the result back as a message. *(Module 27; also 25, 39.)* Origin: Schick et al., 2023 (Toolformer).
 - **top-k sampling** — Sample only from the k most probable tokens, renormalized. *(Module 18.)* Origin: Fan et al., 2018.
 - **top-p sampling** — Sample from the smallest set of tokens whose probabilities add up to p, so the candidate set adapts to how confident the model is. *(Module 18.)* Origin: Holtzman et al., 2019.

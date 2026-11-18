@@ -9,7 +9,9 @@ out=site/build/$theme; mkdir -p "$out"
 lock=${GPU_LOCK:-/tmp/learn-jax-gpu.lock}
 for f in modules/$glob/lesson.py; do
   m=$(basename "$(dirname "$f")")
-  [[ -s "$out/$m.ipynb" && "$out/$m.ipynb" -nt "$f" ]] && { echo "$m: up to date"; continue; }
+  # up to date unless the lesson or any other .py in its folder (events.py, models.py, ...) is newer
+  [[ -s "$out/$m.ipynb" && -z $(find "$(dirname "$f")" -name '*.py' -newer "$out/$m.ipynb" -print -quit) ]] &&
+    { echo "$m: up to date"; continue; }
   s=$(date +%s)
   flock "$lock" env LEARNJAX_SOLUTIONS=1 LEARNJAX_BOOK=1 MATPLOTLIBRC=/course/tools/book/$theme.matplotlibrc \
     containers/run.sh marimo export ipynb "$f" -o "/course/$out/$m.ipynb" --include-outputs -f >/dev/null 2>"$out/$m.log"

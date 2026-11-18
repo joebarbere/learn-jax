@@ -71,6 +71,8 @@ SOURCES: dict[str, str] = {
     _ax("2502.02737"): "SmolLM2: When Smol Goes Big -- Data-Centric Training of a Small Language Model",
     "https://huggingface.co/blog/smollm3": "SmolLM3: smol, multilingual, long-context reasoner",
     "https://ai.meta.com/blog/llama-4-multimodal-intelligence/": "The Llama 4 herd",
+    _ax("2604.12374"): ("Nemotron 3 Super: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for "
+                        "Agentic Reasoning"),
 }
 
 ATT, T5P, VIT = _ax("1706.03762"), _ax("1910.10683"), _ax("2010.11929")
@@ -167,6 +169,12 @@ BLOCKS: list[Block] = [
     Block("aux_free", "aux-loss-free balancing", "feed-forward",
           "Balance experts with a bias on the router instead of an extra loss.", _ax("2408.15664"),
           None, "17"),
+    Block("latent_moe", "latent experts (LatentMoE)", "feed-forward",
+          "Routed experts work in a narrower latent width; α× as many of them, same bytes per token.",
+          _ax("2601.18089"), None, "40"),
+    Block("engram", "hashed n-gram memory (Engram)", "feed-forward",
+          "A table indexed by the last few tokens, read in O(1) and gated by the hidden state.",
+          _ax("2601.07372"), "engram27b", "40"),
     # ---------------------------------------------------------------- connectivity
     Block("residual", "residual connections", "connectivity", "Add each layer's input to its output.",
           _ax("1512.03385"), "resnet", "11"),
@@ -350,6 +358,10 @@ MODELS: list[Model] = [
           ("gqa", "moe_topk", "shared_experts", "rope_nope_mix", "dpo") + LLAMA_CORE,
           "Meta's first MoE: routed plus shared experts, no RoPE in every 4th layer, natively multimodal.",
           "https://ai.meta.com/blog/llama-4-multimodal-intelligence/", None),
+    Model("engram27b", "Engram-27B", 2026, "DeepSeek", "MoE decoder", ("deepseek_v3",),
+          ("mla", "rope", "moe_topk", "shared_experts", "aux_free", "engram", "residual", "next_token", "byte_bpe"),
+          "A research model (no released weights): part of the expert budget moved into hashed n-gram tables; "
+          "also uses manifold-constrained hyper-connections.", _ax("2601.07372"), "40"),
     # ---------------------------------------------------------------- SSMs and hybrids
     Model("s4", "S4", 2021, "Stanford", "SSM & hybrid", (), ("s4", "residual"),
           "Structured state spaces handle sequences of thousands of steps.", _ax("2111.00396"), "36"),
@@ -365,6 +377,11 @@ MODELS: list[Model] = [
            "next_token"),
           "Mamba layers with attention every 8th layer and MoE, and no positional encoding.", _ax("2403.19887"),
           "36", "ai21labs/Jamba-v0.1"),
+    Model("nemotron3_super", "Nemotron 3 Super", 2026, "NVIDIA", "SSM & hybrid", ("jamba", "deepseek_v3"),
+          ("ssd", "attn_ssm_mix", "gqa", "nope", "moe_topk", "shared_experts", "latent_moe", "mtp", "rmsnorm",
+           "residual", "next_token"),
+          "Mamba-2 layers with a few attention layers, and LatentMoE: 512 experts in a 1,024-wide latent, top-22.",
+          _ax("2604.12374"), "40"),
     # ---------------------------------------------------------------- vision-language and diffusion
     Model("ddpm", "DDPM", 2020, "UC Berkeley", "vision-language & diffusion", (), ("diffusion", "residual"),
           "Denoising diffusion produces high-quality images.", _ax("2006.11239"), "33"),

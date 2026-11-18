@@ -101,7 +101,7 @@ TERMS: list[Term] = [
     Term("all-to-all", ("all to all",),
          "Every device sends a different piece to every other device; used to route tokens to experts in "
          "expert parallelism.",
-         "24", (), ""),
+         "24", ("40",), ""),
     Term("AlphaGo", ("AlphaGo Zero",),
          "DeepMind's Go program that beat Lee Sedol in 2016, combining neural networks with MCTS; AlphaGo "
          "Zero (2017) learned from self-play alone.",
@@ -141,7 +141,7 @@ TERMS: list[Term] = [
     Term("asynchronous dispatch", ("dispatches asynchronously", "async dispatch", "block_until_ready"),
          "JAX returns from a call as soon as the work is queued on the GPU, not when it finishes. Timing "
          "must call `block_until_ready()` or you measure only the launch.",
-         "06", ("10", "16", "18", "20", "33"), ""),
+         "06", ("10", "16", "18", "20", "33", "40"), ""),
     Term("attention", ("attention mechanism",),
          "A soft dictionary lookup: each position scores every position it may see, softmaxes the scores "
          "into weights, and takes the weighted average of their values. Lets any token read from any "
@@ -258,7 +258,7 @@ TERMS: list[Term] = [
     Term("byte-level BPE", ("byte-level",),
          "BPE starting from the 256 byte values, so any text can be encoded with no unknown tokens. Used "
          "by GPT-2 and most modern LLMs.",
-         "13", (), "Radford et al., 2019"),
+         "13", ("40",), "Radford et al., 2019"),
     Term("byte-pair encoding", ("BPE", "byte pair encoding"),
          "A tokenizer trained by repeatedly merging the most frequent adjacent pair of tokens into a new "
          "token, starting from bytes or characters. The merges are applied in order to tokenize.",
@@ -480,7 +480,7 @@ TERMS: list[Term] = [
     Term("depthwise convolution", ("causal depthwise convolution", "depthwise"),
          "A convolution applied to each channel separately; Mamba blocks use a short causal one before the "
          "SSM.",
-         "36", (), ""),
+         "36", ("40",), ""),
     Term("derivative", ("derivatives",),
          "The slope of a function at a point: how much the output changes per unit change in the input.",
          "03", ("10",), ""),
@@ -499,7 +499,7 @@ TERMS: list[Term] = [
     Term("dilated convolution", ("dilated causal convolution",),
          "A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with "
          "dilations 1-2-4-8. WaveNet stacks them causally.",
-         "12", (), "van den Oord et al., 2016 (WaveNet)"),
+         "12", ("40",), "van den Oord et al., 2016 (WaveNet)"),
     Term("discounted return", ("discount factor", "discounted sum"),
          "The total (usually discounted) reward from a point onward; what an RL agent maximizes.",
          "34", (), ""),
@@ -614,7 +614,7 @@ TERMS: list[Term] = [
     Term("expert parallelism", ("expert parallel",),
          "Placing different MoE experts on different devices and using all-to-all to send each token to "
          "its experts' devices.",
-         "24", (), ""),
+         "24", ("40",), ""),
     Term("expert system", ("expert systems",),
          "AI built from hand-written if-then rules elicited from human experts. Commercially popular in "
          "the 1980s, they were brittle outside their rules, which helped bring on the second AI winter.",
@@ -860,7 +860,7 @@ TERMS: list[Term] = [
     Term("hybrid model", ("hybrids", "Jamba", "hybrid models"),
          "An architecture interleaving attention layers with SSM (Mamba) layers to get most of attention's "
          "recall at a fraction of its cost; Jamba is one.",
-         "36", (), "Lieber et al., 2024 (Jamba)"),
+         "36", ("40",), "Lieber et al., 2024 (Jamba)"),
     Term("hybrid search", ("hybrid retrieval",),
          "Combining keyword (BM25) and dense retrieval results, which usually beats either alone.",
          "38", (), ""),
@@ -1080,7 +1080,7 @@ TERMS: list[Term] = [
     Term("load balancing", ("load-balancing", "auxiliary loss", "aux loss", "aux-loss-free"),
          "Keeping MoE experts evenly used. Classic MoE adds an auxiliary loss; DeepSeek-V3 instead nudges "
          "a per-expert bias in the router after each step (aux-loss-free).",
-         "17", (), "DeepSeek-AI, 2024 (V3)"),
+         "17", ("40",), "DeepSeek-AI, 2024 (V3)"),
     Term("log-sum-exp", ("logsumexp", "log_softmax", "log-softmax"),
          "log(Σ exp xᵢ), computed safely by subtracting the max first so nothing overflows. It is the "
          "normalizer inside log-softmax and cross-entropy.",
@@ -1200,7 +1200,7 @@ TERMS: list[Term] = [
     Term("mixture of experts", ("MoE", "mixture-of-experts"),
          "Replace one big MLP with many expert MLPs and a router that sends each token to a few of them. "
          "Parameters grow without per-token compute growing.",
-         "17", ("00b", "16", "19", "24"), "Shazeer et al., 2017"),
+         "17", ("00b", "16", "19", "24", "40"), "Shazeer et al., 2017"),
     Term("mode collapse", ("mode-collapses", "mode collapses"),
          "A GAN failure in which the generator produces only a few kinds of output, ignoring the variety "
          "of the data.",
@@ -1273,7 +1273,7 @@ TERMS: list[Term] = [
     Term("n-gram", ("n-grams", "n-gram model"),
          "A run of n consecutive tokens; an n-gram model predicts from the previous n − 1. Also used to "
          "measure text overlap in evaluation and contamination checks.",
-         "14", ("21",), "Shannon, 1948"),
+         "14", ("21", "40"), "Shannon, 1948"),
     Term("NaN", ("NaNs",),
          "Not-a-Number: the result of invalid float math like 0/0 or inf − inf. One NaN poisons everything "
          "it touches, so catching its source is a key debugging skill.",
@@ -2203,4 +2203,36 @@ TERMS: list[Term] = [
          "Take a random action with probability ε, otherwise the best-known one: the simplest balance of "
          "exploration and exploitation.",
          "34", (), ""),
+    Term("capacity factor", ("capacity factors",),
+         "How many token slots an expert (or a device's experts) accepts per batch, as a multiple of the even "
+         "share. Slots past capacity are dropped; 1.25 leaves room for uneven routing.",
+         "40", ("24",), "Lepikhin et al., 2020 (GShard)"),
+    Term("conditional memory", ("Engram", "Engram module", "n-gram memory"),
+         "A lookup table read at a few layers, indexed by the last few tokens (hashed) and gated by the hidden "
+         "state: knowledge fetched in O(1) instead of rebuilt by computation. DeepSeek's Engram.",
+         "40", (), "Cheng et al. (DeepSeek-AI), 2026"),
+    Term("hashing trick", ("hash embeddings", "feature hashing", "hashed n-gram", "hash collision"),
+         "Map a huge or open-ended set of keys (words, n-grams) to rows of a fixed-size table with a hash "
+         "function, accepting that some keys share a row. Several independent hashes make a shared row harmless.",
+         "40", (), "Weinberger et al., 2009"),
+    Term("LatentMoE", ("latent experts", "ℓ-MoE", "latent MoE"),
+         "A mixture-of-experts layer whose routed experts work in a narrower latent width ℓ = d/α: tokens are "
+         "projected down before they're sent to experts and up after. The savings buy α× as many experts.",
+         "40", (), "Elango et al. (NVIDIA), 2026"),
+    Term("pinned memory", ("pinned_host", "page-locked memory", "pinned host memory"),
+         "Host RAM the operating system promises not to move, so the GPU can copy to and from it directly "
+         "(DMA) without a staging copy. JAX exposes it as the memory kind `pinned_host`.",
+         "40", (), ""),
+    Term("prefetch", ("prefetching", "prefetched"),
+         "Start loading data you'll need next while the current work runs, so the wait hides behind it. "
+         "Possible whenever the addresses are known in advance.",
+         "40", (), ""),
+    Term("sparsity", ("sparse model", "sparse parameters"),
+         "Having many parameters but using only a few for each input: an MoE's unpicked experts, an Engram "
+         "table's unread rows. Capacity grows without per-token compute growing.",
+         "40", ("17",), ""),
+    Term("tokenizer compression", ("canonical ids", "vocabulary compression", "compressed tokenizer"),
+         "Map token ids that mean the same thing after normalization (case, accents, spaces) to one canonical "
+         "id. Engram indexes its tables this way, so variants share rows.",
+         "40", ("13",), "Cheng et al. (DeepSeek-AI), 2026"),
 ]

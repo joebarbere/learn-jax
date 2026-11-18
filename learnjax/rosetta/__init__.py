@@ -23,7 +23,7 @@ import numpy as np
 from learnjax.rosetta.entry import LABELS, TOPICS, VARIANTS, Entry, code  # noqa: F401  (re-exported)
 
 # One file per area; each defines ENTRIES. Order here is the order in docs/ROSETTA.md within a topic.
-PARTS = ["basics", "arrays", "calculus_random", "training", "layers_attention", "milestones"]
+PARTS = ["basics", "arrays", "calculus_random", "training", "layers_attention", "milestones", "frontier"]
 ENTRIES: list[Entry] = [e for p in PARTS for e in importlib.import_module(f"learnjax.rosetta.{p}").ENTRIES]
 BY_NAME = {e.name: e for e in ENTRIES}
 

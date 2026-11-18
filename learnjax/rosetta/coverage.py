@@ -45,6 +45,7 @@ _GROUPS: dict[str, str] = {
         jax.sharding.AxisType.Auto jax.sharding.AxisType.Explicit jax.make_mesh jax.set_mesh jax.shard_map
         jax.reshard jax.lax.with_sharding_constraint jax.lax.pcast jax.lax.axis_index
         jax.debug.visualize_array_sharding jax.distributed.initialize jax.distributed.shutdown
+        jax.NamedSharding jax.sharding.SingleDeviceSharding
         jax.make_array_from_process_local_data jax.new_ref jax.ref jax.lax.psum jax.lax.all_gather
         jax.lax.psum_scatter jax.lax.all_to_all jax.lax.ppermute""",
 }

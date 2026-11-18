@@ -175,6 +175,8 @@ it's first taught; `make rosetta-browse` opens them all in one notebook, and the
 | **Part 11 — Systems around the model: retrieval and agents** | | |
 | 38 | Retrieval-augmented generation, from BM25 to rerankers (1994–2024) | ✅ |
 | 39 | Agents: tools, memory, workflows and multi-agent systems (2022–) | ✅ |
+| **Part 12 — Frontier architectures** | | |
+| 40 | Latent experts and conditional memory: LatentMoE and Engram (2025–2026) | ✅ |
 
 ✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 
@@ -199,6 +201,9 @@ creators for videos, posts and docs. Most of all:
   [nanochat](https://github.com/karpathy/nanochat) (MIT), the blueprint for Module 25's capstone. Module 05's Muon
   sidebar follows **Keller Jordan**'s [post](https://kellerjordan.github.io/posts/muon/). Module 17's "Beyond RoPE" section and
   stretch experiment follow **Sebastian Raschka**'s [Understanding Positional Embeddings in Modern LLMs](https://magazine.sebastianraschka.com/p/understanding-positional-embeddings).
+- **DeepSeek-AI**, [Engram](https://github.com/deepseek-ai/Engram) (Apache-2.0). Module 40's n-gram hashing and
+  tokenizer compression follow its `engram_demo_v1.py` and are checked against it bit for bit. Module 40's
+  LatentMoE follows **Venmugil Elango et al.** (NVIDIA), [LatentMoE](https://arxiv.org/abs/2601.18089).
 - **Saurabh Alone**, ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax).
   Its RoPE explanation and two real KV-cache bugs became Module 17's exercises.
 - **Models:** [SmolLM2](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) by Hugging Face (Apache-2.0)

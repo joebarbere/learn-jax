@@ -2,7 +2,7 @@
 
 Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Section 12) draws it as an interactive graph. `make lineage` checks the registry's rules, the sources' arXiv titles, and every open model's Hugging Face `config.json` against the blocks listed here.
 
-51 models, 53 building blocks in 8 slots.
+53 models, 55 building blocks in 8 slots.
 
 ## The taxonomy: building blocks by slot
 
@@ -13,7 +13,7 @@ Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Sect
 | block | what it does | introduced in | first model | used by | module |
 |---|---|---|---|---|---|
 | **BPE subwords** | Merge frequent character pairs into a subword vocabulary. | [Sennrich, Haddow, Birch, 2015](https://arxiv.org/abs/1508.07909) | — | Transformer, GPT, LLaMA, Llama 2, Mistral 7B, Mixtral 8x7B | 13 |
-| **byte-level BPE** | BPE over raw bytes: any text encodes, no unknown tokens. | [Radford et al., 2019](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf) | GPT-2 | GPT-2, RoBERTa, GPT-3, CLIP, BLOOM, GPT-NeoX-20B, InstructGPT, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Llama 3, Qwen2.5, DeepSeek-R1, Qwen3, SmolLM2, SmolLM3 | 13 |
+| **byte-level BPE** | BPE over raw bytes: any text encodes, no unknown tokens. | [Radford et al., 2019](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf) | GPT-2 | GPT-2, RoBERTa, GPT-3, CLIP, BLOOM, GPT-NeoX-20B, InstructGPT, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Llama 3, Qwen2.5, DeepSeek-R1, Qwen3, SmolLM2, SmolLM3, Engram-27B | 13 |
 | **skip-gram embeddings** | Learn word vectors by predicting a word's neighbours. | [Mikolov et al., 2013](https://arxiv.org/abs/1301.3781) | word2vec | word2vec | 30 |
 | **tied input/output embeddings** | Use the token-embedding matrix as the output layer too: fewer parameters, better perplexity. | [Press, Wolf, 2016](https://arxiv.org/abs/1608.05859) | — | GPT-2, T5, BLOOM, PaLM, SmolLM2, SmolLM3 | 16 |
 | **patch embeddings** | Cut an image into 16×16 patches and treat each as a token. | [Dosovitskiy et al., 2020](https://arxiv.org/abs/2010.11929) | Vision Transformer (ViT) | Vision Transformer (ViT), CLIP | — |
@@ -26,9 +26,9 @@ Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Sect
 | **learned absolute positions** | A trained vector per position, added to the token embedding; caps the context length. | [Gehring et al., 2017](https://arxiv.org/abs/1705.03122) | — | BERT, GPT, GPT-2, RoBERTa, GPT-3, Vision Transformer (ViT), InstructGPT | 16 |
 | **relative position bias** | A learned number per head and distance bucket, added to attention scores. | [Raffel et al., 2019](https://arxiv.org/abs/1910.10683) | T5 | T5, Switch Transformer | 17 |
 | **ALiBi** | A fixed penalty proportional to distance, added to attention scores. | [Press, Smith, Lewis, 2021](https://arxiv.org/abs/2108.12409) | — | BLOOM | 17 |
-| **RoPE** | Rotate queries and keys by position; scores see only the offset. | [Su et al., 2021](https://arxiv.org/abs/2104.09864) | — | PaLM, LLaMA, Llama 2, Mistral 7B, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Llama 3, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3 | 17 |
+| **RoPE** | Rotate queries and keys by position; scores see only the offset. | [Su et al., 2021](https://arxiv.org/abs/2104.09864) | — | PaLM, LLaMA, Llama 2, Mistral 7B, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Llama 3, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3, Engram-27B | 17 |
 | **partial RoPE** | Rotate only a slice of each head's features. | [Black et al., 2022](https://arxiv.org/abs/2204.06745) | GPT-NeoX-20B | GPT-NeoX-20B, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeek-R1 | 17 |
-| **NoPE** | No position signal at all: the causal mask is the only clue. | [Haviv et al., 2022](https://arxiv.org/abs/2203.16634) | — | Jamba | 17 |
+| **NoPE** | No position signal at all: the causal mask is the only clue. | [Haviv et al., 2022](https://arxiv.org/abs/2203.16634) | — | Jamba, Nemotron 3 Super | 17 |
 | **RoPE/NoPE hybrid layers** | RoPE in most layers, none in every few. | [SmolLM3: smol, multilingual, long-context reasoner](https://huggingface.co/blog/smollm3) | — | Llama 4, SmolLM3 | 17 |
 
 ### normalization
@@ -37,7 +37,7 @@ Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Sect
 |---|---|---|---|---|---|
 | **BatchNorm** | Normalize each feature over the batch. | [Ioffe, Szegedy, 2015](https://arxiv.org/abs/1502.03167) | — | ResNet, AlphaGo Zero, AlphaZero, MuZero | 11 |
 | **LayerNorm** | Normalize each token's features to zero mean, unit variance. | [Ba, Kiros, Hinton, 2016](https://arxiv.org/abs/1607.06450) | — | Transformer, BERT, GPT, GPT-2, RoBERTa, GPT-3, Vision Transformer (ViT), CLIP, BLOOM, GPT-NeoX-20B, InstructGPT, PaLM, Pythia | 11 |
-| **RMSNorm** | LayerNorm without the mean: rescale by root-mean-square. | [Zhang, Sennrich, 2019](https://arxiv.org/abs/1910.07467) | — | LLaMA, Llama 2, Mamba, Mistral 7B, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Llama 3, Mamba-2, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3 | 11 |
+| **RMSNorm** | LayerNorm without the mean: rescale by root-mean-square. | [Zhang, Sennrich, 2019](https://arxiv.org/abs/1910.07467) | — | LLaMA, Llama 2, Mamba, Mistral 7B, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Llama 3, Mamba-2, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3, Nemotron 3 Super | 11 |
 | **post-norm** | Normalize after adding the residual (the 2017 layout). | [Vaswani et al., 2017](https://arxiv.org/abs/1706.03762) | Transformer | Transformer, BERT, GPT, RoBERTa | — |
 | **pre-norm** | Normalize each sub-layer's input; the residual path stays clean, so deep stacks train stably. | [Radford et al., 2019](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf) | GPT-2 | GPT-2, T5, GPT-3, Vision Transformer (ViT), CLIP, Switch Transformer, BLOOM, GPT-NeoX-20B, InstructGPT, PaLM, LLaMA, Llama 2, Mamba, Mistral 7B, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Llama 3, Mamba-2, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3 | 11 |
 | **QK-Norm** | Normalize queries and keys before the dot product. | [Henry et al., 2020](https://arxiv.org/abs/2010.04245) | — | Qwen3 | — |
@@ -51,13 +51,13 @@ Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Sect
 | **additive attention** | A decoder learns where to look in the encoder's states. | [Bahdanau, Cho, Bengio, 2014](https://arxiv.org/abs/1409.0473) | RNNsearch (Bahdanau attention) | RNNsearch (Bahdanau attention) | 31 |
 | **multi-head self-attention** | Every token attends to every other, in several heads at once. | [Vaswani et al., 2017](https://arxiv.org/abs/1706.03762) | Transformer | Transformer, BERT, GPT, GPT-2, RoBERTa, T5, GPT-3, GShard, Vision Transformer (ViT), CLIP, Switch Transformer, BLOOM, GPT-NeoX-20B, InstructGPT, Latent diffusion / Stable Diffusion, LLaMA, Llama 2, Pythia, DeepSeekMoE 16B | 15 |
 | **multi-query attention** | All query heads share one key/value head. | [Shazeer, 2019](https://arxiv.org/abs/1911.02150) | — | PaLM | 17 |
-| **grouped-query attention** | Groups of query heads share key/value heads. | [Ainslie et al., 2023](https://arxiv.org/abs/2305.13245) | — | Llama 2, Mistral 7B, Jamba, Llama 3, Mixtral 8x7B, Qwen2.5, Llama 4, Qwen3, SmolLM2, SmolLM3 | 17 |
-| **multi-head latent attention** | Cache a small compressed latent instead of per-head keys and values. | [DeepSeek-AI, 2024](https://arxiv.org/abs/2405.04434) | DeepSeek-V2 | DeepSeek-V2, DeepSeek-V3, DeepSeek-R1 | 17 |
+| **grouped-query attention** | Groups of query heads share key/value heads. | [Ainslie et al., 2023](https://arxiv.org/abs/2305.13245) | — | Llama 2, Mistral 7B, Jamba, Llama 3, Mixtral 8x7B, Qwen2.5, Llama 4, Qwen3, SmolLM2, SmolLM3, Nemotron 3 Super | 17 |
+| **multi-head latent attention** | Cache a small compressed latent instead of per-head keys and values. | [DeepSeek-AI, 2024](https://arxiv.org/abs/2405.04434) | DeepSeek-V2 | DeepSeek-V2, DeepSeek-V3, DeepSeek-R1, Engram-27B | 17 |
 | **sliding-window attention** | Each token attends only to the last W tokens. | [Beltagy, Peters, Cohan, 2020](https://arxiv.org/abs/2004.05150) | — | Mistral 7B | — |
 | **structured state space (S4)** | A linear recurrence with a structured state matrix, trainable as a long convolution. | [Gu, Goel, Ré, 2021](https://arxiv.org/abs/2111.00396) | S4 | S4 | 36 |
 | **selective SSM** | State-space recurrence whose parameters depend on the input (Mamba's selection). | [Gu, Dao, 2023](https://arxiv.org/abs/2312.00752) | Mamba | Mamba, Jamba | 36 |
-| **state space duality (SSD)** | A restricted selective SSM that runs as matmuls, like masked attention. | [Dao, Gu, 2024](https://arxiv.org/abs/2405.21060) | Mamba-2 | Mamba-2 | 36 |
-| **attention/SSM hybrid layers** | Mostly SSM layers with an attention layer every few. | [Lieber et al., 2024](https://arxiv.org/abs/2403.19887) | Jamba | Jamba | 36 |
+| **state space duality (SSD)** | A restricted selective SSM that runs as matmuls, like masked attention. | [Dao, Gu, 2024](https://arxiv.org/abs/2405.21060) | Mamba-2 | Mamba-2, Nemotron 3 Super | 36 |
+| **attention/SSM hybrid layers** | Mostly SSM layers with an attention layer every few. | [Lieber et al., 2024](https://arxiv.org/abs/2403.19887) | Jamba | Jamba, Nemotron 3 Super | 36 |
 
 ### feed-forward
 
@@ -66,29 +66,31 @@ Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Sect
 | **ReLU feed-forward** | Two linear layers with a ReLU between. | [Vaswani et al., 2017](https://arxiv.org/abs/1706.03762) | Transformer | Transformer, T5 | 10 |
 | **GELU** | A smooth ReLU, weighting inputs by how likely they are positive. | [Hendrycks, Gimpel, 2016](https://arxiv.org/abs/1606.08415) | — | BERT, GPT, GPT-2, RoBERTa, GPT-3, Vision Transformer (ViT), BLOOM, GPT-NeoX-20B, InstructGPT, Pythia | 10 |
 | **SwiGLU** | A gated feed-forward: silu(xW1) ⊙ xW3, then W2. | [Shazeer, 2020](https://arxiv.org/abs/2002.05202) | — | PaLM, LLaMA, Llama 2, Mistral 7B, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Llama 3, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3 | 17 |
-| **top-k mixture of experts** | A router sends each token to k of many feed-forward experts. | [Shazeer et al., 2017](https://arxiv.org/abs/1701.06538) | — | GShard, Switch Transformer, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Mixtral 8x7B, DeepSeek-R1, Llama 4, Qwen3 | 17 |
+| **top-k mixture of experts** | A router sends each token to k of many feed-forward experts. | [Shazeer et al., 2017](https://arxiv.org/abs/1701.06538) | — | GShard, Switch Transformer, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Mixtral 8x7B, DeepSeek-R1, Llama 4, Qwen3, Engram-27B, Nemotron 3 Super | 17 |
 | **top-1 routing** | Route each token to a single expert. | [Fedus, Zoph, Shazeer, 2021](https://arxiv.org/abs/2101.03961) | Switch Transformer | Switch Transformer | 17 |
-| **fine-grained + shared experts** | Many small routed experts plus always-on shared ones. | [Dai et al., 2024](https://arxiv.org/abs/2401.06066) | DeepSeekMoE 16B | DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, DeepSeek-R1, Llama 4 | 17 |
-| **aux-loss-free balancing** | Balance experts with a bias on the router instead of an extra loss. | [Wang et al., 2024](https://arxiv.org/abs/2408.15664) | — | DeepSeek-V3, DeepSeek-R1 | 17 |
+| **fine-grained + shared experts** | Many small routed experts plus always-on shared ones. | [Dai et al., 2024](https://arxiv.org/abs/2401.06066) | DeepSeekMoE 16B | DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, DeepSeek-R1, Llama 4, Engram-27B, Nemotron 3 Super | 17 |
+| **aux-loss-free balancing** | Balance experts with a bias on the router instead of an extra loss. | [Wang et al., 2024](https://arxiv.org/abs/2408.15664) | — | DeepSeek-V3, DeepSeek-R1, Engram-27B | 17 |
+| **latent experts (LatentMoE)** | Routed experts work in a narrower latent width; α× as many of them, same bytes per token. | [Elango et al., 2026](https://arxiv.org/abs/2601.18089) | — | Nemotron 3 Super | 40 |
+| **hashed n-gram memory (Engram)** | A table indexed by the last few tokens, read in O(1) and gated by the hidden state. | [Cheng et al. (DeepSeek-AI), 2026](https://arxiv.org/abs/2601.07372) | Engram-27B | Engram-27B | 40 |
 
 ### connectivity
 
 | block | what it does | introduced in | first model | used by | module |
 |---|---|---|---|---|---|
-| **residual connections** | Add each layer's input to its output. | [He et al., 2015](https://arxiv.org/abs/1512.03385) | ResNet | ResNet, AlphaGo Zero, AlphaZero, Transformer, BERT, GPT, GPT-2, MuZero, RoBERTa, T5, DDPM, GPT-3, GShard, Vision Transformer (ViT), CLIP, S4, Switch Transformer, BLOOM, GPT-NeoX-20B, InstructGPT, Latent diffusion / Stable Diffusion, PaLM, LLaMA, Llama 2, Mamba, Mistral 7B, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Llama 3, Mamba-2, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3 | 11 |
+| **residual connections** | Add each layer's input to its output. | [He et al., 2015](https://arxiv.org/abs/1512.03385) | ResNet | ResNet, AlphaGo Zero, AlphaZero, Transformer, BERT, GPT, GPT-2, MuZero, RoBERTa, T5, DDPM, GPT-3, GShard, Vision Transformer (ViT), CLIP, S4, Switch Transformer, BLOOM, GPT-NeoX-20B, InstructGPT, Latent diffusion / Stable Diffusion, PaLM, LLaMA, Llama 2, Mamba, Mistral 7B, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Llama 3, Mamba-2, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3, Engram-27B, Nemotron 3 Super | 11 |
 | **dropout** | Randomly zero activations during training. | [Srivastava et al., 2014](https://jmlr.org/papers/v15/srivastava14a.html) | — | AlexNet, Transformer, BERT, GPT, GPT-2, RoBERTa, T5 | 11 |
 
 ### objective
 
 | block | what it does | introduced in | first model | used by | module |
 |---|---|---|---|---|---|
-| **next-token prediction** | Predict the next token from the ones before. | [Bengio et al., 2003](https://jmlr.org/papers/v3/bengio03a.html) | Neural probabilistic LM | Neural probabilistic LM, RNN encoder-decoder, RNNsearch (Bahdanau attention), seq2seq, Transformer, ELMo, GPT, GPT-2, GPT-3, BLOOM, GPT-NeoX-20B, InstructGPT, PaLM, LLaMA, Llama 2, Mamba, Mistral 7B, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Llama 3, Mamba-2, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3 | 14 |
+| **next-token prediction** | Predict the next token from the ones before. | [Bengio et al., 2003](https://jmlr.org/papers/v3/bengio03a.html) | Neural probabilistic LM | Neural probabilistic LM, RNN encoder-decoder, RNNsearch (Bahdanau attention), seq2seq, Transformer, ELMo, GPT, GPT-2, GPT-3, BLOOM, GPT-NeoX-20B, InstructGPT, PaLM, LLaMA, Llama 2, Mamba, Mistral 7B, Pythia, DeepSeek-V2, DeepSeek-V3, DeepSeekMoE 16B, Jamba, Llama 3, Mamba-2, Mixtral 8x7B, Qwen2.5, DeepSeek-R1, Llama 4, Qwen3, SmolLM2, SmolLM3, Engram-27B, Nemotron 3 Super | 14 |
 | **masked language modeling** | Hide some tokens and predict them from both sides. | [Devlin et al., 2018](https://arxiv.org/abs/1810.04805) | BERT | BERT, RoBERTa | 32 |
 | **span corruption** | Replace spans with sentinels; decode the spans. | [Raffel et al., 2019](https://arxiv.org/abs/1910.10683) | T5 | T5, Switch Transformer | — |
 | **contrastive image-text** | Pull matching image/caption pairs together, push the rest apart. | [Radford et al., 2021](https://arxiv.org/abs/2103.00020) | CLIP | CLIP | 33 |
 | **denoising diffusion** | Learn to remove noise, step by step. | [Ho, Jain, Abbeel, 2020](https://arxiv.org/abs/2006.11239) | DDPM | DDPM, Latent diffusion / Stable Diffusion | 33 |
 | **latent diffusion** | Diffuse in an autoencoder's latent space. | [Rombach et al., 2021](https://arxiv.org/abs/2112.10752) | Latent diffusion / Stable Diffusion | Latent diffusion / Stable Diffusion | 33 |
-| **multi-token prediction** | Also predict tokens two or more steps ahead. | [Gloeckle et al., 2024](https://arxiv.org/abs/2404.19737) | — | DeepSeek-V3, DeepSeek-R1 | 17 |
+| **multi-token prediction** | Also predict tokens two or more steps ahead. | [Gloeckle et al., 2024](https://arxiv.org/abs/2404.19737) | — | DeepSeek-V3, DeepSeek-R1, Nemotron 3 Super | 17 |
 | **deep Q-learning** | Learn action values from rewards with a network. | [Mnih et al., 2013](https://arxiv.org/abs/1312.5602) | DQN | DQN | 34 |
 | **self-play + MCTS** | Train policy and value from games against itself, with tree search as the teacher. | [Silver et al., 2017](https://doi.org/10.1038/nature24270) | AlphaGo Zero | AlphaGo Zero, AlphaZero, MuZero | 34 |
 | **planning with a learned model** | Search inside a model of the game the network learned itself. | [Schrittwieser et al., 2019](https://arxiv.org/abs/1911.08265) | MuZero | MuZero | 34 |
@@ -183,6 +185,7 @@ Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Sect
 | [DeepSeek-R1](https://arxiv.org/abs/2501.12948) | 2025 | DeepSeek | DeepSeek-V3 | — | Reasoning learned largely through RL on verifiable rewards. | 26 |
 | [Llama 4](https://ai.meta.com/blog/llama-4-multimodal-intelligence/) | 2025 | Meta | Llama 3 | top-k mixture of experts, fine-grained + shared experts, RoPE/NoPE hybrid layers | Meta's first MoE: routed plus shared experts, no RoPE in every 4th layer, natively multimodal. | — |
 | [Qwen3](https://arxiv.org/abs/2505.09388) | 2025 | Alibaba | Qwen2.5 | QK-Norm, top-k mixture of experts | Dense and MoE models with QK-Norm and switchable thinking. | — |
+| [Engram-27B](https://arxiv.org/abs/2601.07372) | 2026 | DeepSeek | DeepSeek-V3 | hashed n-gram memory (Engram) | A research model (no released weights): part of the expert budget moved into hashed n-gram tables; also uses manifold-constrained hyper-connections. | 40 |
 
 ### SSM & hybrid
 
@@ -192,6 +195,7 @@ Generated from `learnjax/lineage.py` by `tools/gen_lineage.py`; module 00b (Sect
 | [Mamba](https://arxiv.org/abs/2312.00752) | 2023 | CMU & Princeton | S4 | selective SSM, RMSNorm, pre-norm, next-token prediction | Input-dependent state spaces: attention-quality language modeling in linear time. | 36 |
 | [Jamba](https://arxiv.org/abs/2403.19887) | 2024 | AI21 Labs | Mamba, Mixtral 8x7B | attention/SSM hybrid layers, NoPE | Mamba layers with attention every 8th layer and MoE, and no positional encoding. | 36 |
 | [Mamba-2](https://arxiv.org/abs/2405.21060) | 2024 | CMU & Princeton | Mamba | state space duality (SSD) | State space duality: SSMs as structured attention, running on tensor cores. | 36 |
+| [Nemotron 3 Super](https://arxiv.org/abs/2604.12374) | 2026 | NVIDIA | Jamba, DeepSeek-V3 | state space duality (SSD), latent experts (LatentMoE) | Mamba-2 layers with a few attention layers, and LatentMoE: 512 experts in a 1,024-wide latent, top-22. | 40 |
 
 ### vision-language & diffusion
 

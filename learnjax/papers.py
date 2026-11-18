@@ -430,6 +430,17 @@ PAPERS.update({
             arxiv("2308.08155"), "Multi-agent conversation as a programming model (the framework, now in maintenance)."),
          _p("Fundamentals of Building Autonomous LLM Agents", "de Lamo Castrillo et al.", 2025, arxiv("2510.09244"),
             "A survey (no experiments): perception, reasoning, memory, execution; useful vocabulary.")],
+    40: [_p("LatentMoE: Toward Optimal Accuracy per FLOP and Parameter in Mixture of Experts", "Elango et al.", 2026,
+            arxiv("2601.18089"), "Routed experts in a latent width d/α, α× as many: same bytes, better accuracy."),
+         _p("NVIDIA Nemotron 3: Efficient and Open Intelligence", "NVIDIA", 2025, arxiv("2512.20856"),
+            "LatentMoE in a hybrid Mamba/attention model family (Super and Ultra)."),
+         _p("Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models",
+            "Cheng et al. (DeepSeek-AI)", 2026, arxiv("2601.07372"),
+            "Engram: hashed n-gram tables beside the experts, and how to split the sparse budget between them."),
+         _p("Hash Embeddings for Efficient Word Representations", "Svenstrup, Hansen, Winther", 2017,
+            arxiv("1709.03933"), "Several hashes per token, combined, so collisions in one hash don't matter."),
+         _p("Large Memory Layers with Product Keys", "Lample et al.", 2019, arxiv("1907.05242"),
+            "An earlier big lookup memory inside a Transformer, chosen by learned keys instead of by hashing.")],
 })
 
 

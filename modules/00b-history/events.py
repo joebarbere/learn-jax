@@ -203,6 +203,12 @@ EVENTS = [
          "what": "An open model trained with reinforcement learning on verifiable rewards to reason step by step.",
          "why_it_mattered": "Showed RL with checkable answers can teach models to reason, and released it openly.",
          "module": "26-reasoning", "url": W + "DeepSeek"},
+    {"year": 2026, "title": "New axes of sparsity: LatentMoE and Engram", "who": "NVIDIA; DeepSeek",
+         "what": "Experts that work in a compressed latent width (shipped in Nemotron 3), and hashed n-gram lookup "
+              "tables beside the experts.",
+         "why_it_mattered": "Once FLOPs were sparse, the limits became bytes moved and knowledge rebuilt by "
+                            "computation; both papers attack those.",
+         "module": "40-latentmoe-engram", "url": "https://arxiv.org/abs/2601.07372"},
     # ---------------------------------------------------------------- symbolic ↔ statistical bridge
     {"year": 2023, "title": "Vector-symbolic architectures solve Raven's matrices", "who": "IBM Research Zurich",
          "what": "A system combining neural perception with hyperdimensional (vector-symbolic) reasoning solves "

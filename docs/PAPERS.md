@@ -404,6 +404,16 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation](https://arxiv.org/abs/2308.08155)** — Wu et al., 2023. Multi-agent conversation as a programming model (the framework, now in maintenance).
 - **[Fundamentals of Building Autonomous LLM Agents](https://arxiv.org/abs/2510.09244)** — de Lamo Castrillo et al., 2025. A survey (no experiments): perception, reasoning, memory, execution; useful vocabulary.
 
+## Part 12 — Frontier architectures
+
+### 40 · Latent experts and conditional memory: LatentMoE and Engram (2025–2026)
+
+- **[LatentMoE: Toward Optimal Accuracy per FLOP and Parameter in Mixture of Experts](https://arxiv.org/abs/2601.18089)** — Elango et al., 2026. Routed experts in a latent width d/α, α× as many: same bytes, better accuracy.
+- **[NVIDIA Nemotron 3: Efficient and Open Intelligence](https://arxiv.org/abs/2512.20856)** — NVIDIA, 2025. LatentMoE in a hybrid Mamba/attention model family (Super and Ultra).
+- **[Conditional Memory via Scalable Lookup: A New Axis of Sparsity for Large Language Models](https://arxiv.org/abs/2601.07372)** — Cheng et al. (DeepSeek-AI), 2026. Engram: hashed n-gram tables beside the experts, and how to split the sparse budget between them.
+- **[Hash Embeddings for Efficient Word Representations](https://arxiv.org/abs/1709.03933)** — Svenstrup, Hansen, Winther, 2017. Several hashes per token, combined, so collisions in one hash don't matter.
+- **[Large Memory Layers with Product Keys](https://arxiv.org/abs/1907.05242)** — Lample et al., 2019. An earlier big lookup memory inside a Transformer, chosen by learned keys instead of by hashing.
+
 ## Books
 
 For a second pass, or a different angle. Most are free to read online from their authors; each entry says so.

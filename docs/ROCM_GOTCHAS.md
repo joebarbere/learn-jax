@@ -152,6 +152,9 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
 - **Fix:** a persistent cache for long runs: `jax.config.update("jax_compilation_cache_dir", "/cache/jaxcache")`
   and `jax_persistent_cache_min_compile_time_secs=1.0` (Module 16's `train.py`; Module 25: the first run
   compiles for about a minute).
+- **Measured** (Module 40): a 25-step `lax.scan` training chunk of a small MLA + MoE model took 49 s to
+  compile cold and 1.8 s from the persistent cache in a fresh process. The scan length barely matters
+  (after the first compile, a 100-step chunk compiled and ran in 4 s).
 
 ### 19. Measuring a huge shape OOMs during autotuning
 - **Fix:** compile with autotuning off, then read the memory analysis:
@@ -172,6 +175,13 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
   `hipError_t(98)` "Failed to set shared memory size", depending on shape (an IVF gather + einsum + top-k; a
   sparse BCOO matmul + top-k over 235k rows). `jax.lax.optimization_barrier` between the two didn't help.
 - **Fix:** split scoring and top-k into two jitted functions. (Module 38.)
+
+### 20c. Pinned host memory works (good news)
+- JAX 0.11.1 on ROCm 10.1 exposes `['device', 'pinned_host']` as the RX 7600 XT's memory kinds, and
+  `jax.device_put(x, jax.sharding.SingleDeviceSharding(dev, memory_kind="pinned_host"))` works. Module 40
+  keeps an Engram table in host RAM and prefetches its rows: within 1–2% of a GPU-resident table for a
+  forward pass of 32 × 256 tokens. Gathers from a big f32 table under `jit` + `scan` + `grad` didn't hit
+  #20's page fault there.
 
 ## Reading profiles and HLO on ROCm
 
