@@ -6,16 +6,16 @@ Each operation the course introduces, written five ways: the formula (and how pa
 
 - **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add)
 - **Elementwise math:** [exp, log and powers](#exp-log-and-powers), [trig and sign functions](#trig-and-sign-functions), [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero), [clip, maximum and minimum (elementwise)](#clip-maximum-and-minimum-elementwise), [round to bfloat16](#round-to-bfloat16)
-- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares)
+- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution)
 - **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient)
 - **Random numbers:** [normal samples](#normal-samples), [uniform samples](#uniform-samples), [random integers](#random-integers), [categorical sampling](#categorical-sampling), [Bernoulli samples](#bernoulli-samples), [shuffle (random permutation)](#shuffle-random-permutation), [sample without replacement](#sample-without-replacement), [He (Kaiming) normal initialization](#he-kaiming-normal-initialization)
 - **Control flow and transforms:** [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap), [loop with carried state: lax.scan](#loop-with-carried-state-laxscan), [fixed and open-ended loops: fori_loop and while_loop](#fixed-and-open-ended-loops-foriloop-and-whileloop), [branches: lax.cond and lax.switch](#branches-laxcond-and-laxswitch)
-- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss)
+- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t)
 - **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz)
 - **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
 - **Sampling and inference:** [KV cache write](#kv-cache-write), [temperature and top-k filter](#temperature-and-top-k-filter), [top-p (nucleus) filter](#top-p-nucleus-filter), [int8 absmax quantization](#int8-absmax-quantization)
-- **Sequence and state-space models:** [LSTM cell](#lstm-cell), [linear recurrence as a parallel scan](#linear-recurrence-as-a-parallel-scan), [long convolution via FFT](#long-convolution-via-fft)
+- **Sequence and state-space models:** [LSTM cell](#lstm-cell), [linear recurrence as a parallel scan](#linear-recurrence-as-a-parallel-scan), [long convolution via FFT](#long-convolution-via-fft), [decayed linear attention (recurrent form)](#decayed-linear-attention-recurrent-form), [gated delta rule](#gated-delta-rule)
 - **Generative models:** [VAE reparameterization and Gaussian KL](#vae-reparameterization-and-gaussian-kl), [diffusion forward noising](#diffusion-forward-noising), [contrastive (CLIP / InfoNCE) loss](#contrastive-clip--infonce-loss)
 - **Reinforcement learning and preferences:** [GRPO group-relative advantage](#grpo-group-relative-advantage), [DQN target and Huber loss](#dqn-target-and-huber-loss), [PUCT score (AlphaZero search)](#puct-score-alphazero-search), [Bradley–Terry reward-model loss](#bradleyterry-reward-model-loss), [DPO loss](#dpo-loss)
 - **Retrieval and evaluation:** [BM25 scoring as a sparse matrix product](#bm25-scoring-as-a-sparse-matrix-product), [reciprocal rank fusion](#reciprocal-rank-fusion), [MRR and nDCG@k](#mrr-and-ndcgk)
@@ -2000,6 +2000,83 @@ def lstsq(X, y):
 - PyTorch's default driver is `gelsy` (QR with pivoting) on the CPU, but on a GPU the only driver is `gels`, which assumes X has full rank.
 - The normal equations square the condition number, so the loop version loses accuracy on nearly collinear features; the library calls don't form $X^\top X$.
 
+### triangular solve (forward substitution)
+
+*Module 41.*
+
+Solve L x = b when L is lower-triangular: the first equation has one unknown, the second two (one already known), and so on — no matrix inverse needed. The chunked delta rule solves one per chunk.
+
+$$
+x_i = \frac{1}{L_{ii}}\Big(b_i - \sum_{j < i} L_{ij}\, x_j\Big),\quad i = 1, \dots, n
+$$
+
+**In papers:** $X = L^{-1} B$ for lower-triangular $L$; with a unit diagonal, $(I + A)^{-1}$ (the UT transform)
+
+**Shapes:** `L (n, n) lower-triangular, b (n, m) -> (n, m)`
+
+**JAX names:** `jax.scipy.linalg.solve_triangular`
+
+**Python**
+
+```python
+def tri_solve(L, b):
+    n, m = len(L), len(b[0])
+    x = [[0.0] * m for _ in range(n)]
+    for i in range(n):
+        for c in range(m):
+            s = b[i][c] - sum(L[i][j] * x[j][c] for j in range(i))
+            x[i][c] = s / L[i][i]
+    return x
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def tri_solve(L, b):
+    x = np.zeros_like(b, dtype=float)
+    for i in range(len(L)):
+        x[i] = (b[i] - L[i, :i] @ x[:i]) / L[i, i]
+    return x
+```
+
+**JAX**
+
+```python
+import jax
+
+def tri_solve(L, b):
+    return jax.scipy.linalg.solve_triangular(L, b, lower=True)
+```
+
+**JAX, by hand**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def tri_solve(L, b):
+    def row(x, i):
+        xi = (b[i] - jnp.where(jnp.arange(len(L)) < i, L[i], 0.0) @ x) / L[i, i]
+        return x.at[i].set(xi), None
+    return jax.lax.scan(row, jnp.zeros_like(b), jnp.arange(len(L)))[0]
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def tri_solve(L, b):
+    return torch.linalg.solve_triangular(L, b, upper=False)
+```
+
+**Where they differ**
+
+- O(n²) per right-hand side, against O(n³) for a general solve; a unit diagonal (`unit_diagonal=True`) skips the division.
+- PyTorch says `upper=False` where JAX and SciPy say `lower=True`.
+
 ## Calculus and autodiff
 
 ### gradient
@@ -3902,6 +3979,81 @@ def sgns_loss(center, context, negatives, emb_in, emb_out):
 
 - Use `log_sigmoid`, never `log(sigmoid(x))`: in float32 `sigmoid(-200)` rounds to 0 and the log is -inf, while `log_sigmoid(-200)` is -200.
 - Two embedding tables: `emb_in` for center words, `emb_out` for context words. The paper's $v'$ is `emb_out`; Module 30 keeps `emb_in` as the word vectors.
+
+### distillation loss (teacher's top-k, temperature T)
+
+*Module 42; also 26.*
+
+Teach a small model with a big one's predictions instead of only the one true next token. Soften both with a temperature T, keep the teacher's k most likely tokens (renormalized), and minimize the KL divergence from teacher to student; multiply by T² so the gradient's size doesn't depend on T.
+
+$$
+\mathcal L_{\mathrm{KD}} = T^2 \sum_{i \in \mathrm{top}_k} p_i \big(\log p_i - \log q_i\big),\quad p = \mathrm{softmax}_{\mathrm{top}_k}(\ell^{\mathrm{teacher}} / T),\ q = \mathrm{softmax}(z^{\mathrm{student}} / T)
+$$
+
+**In papers:** $\mathcal L = (1-\alpha)\,\mathrm{CE}(y, q) + \alpha\, T^2\, \mathrm{KL}(p_T \,\Vert\, q_T)$ (Hinton et al. 2015; Gemma 2 uses $\alpha = 1$)
+
+**Shapes:** `student logits (N, V), teacher top ids (N, k), teacher top log-probs (N, k), T -> scalar`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def kd(student, ids, logp, T):
+    total = 0.0
+    for z, row_ids, row_lp in zip(student, ids, logp):
+        pt = [math.exp(l / T) for l in row_lp]
+        pt = [x / sum(pt) for x in pt]                        # teacher: top k, renormalized
+        m = max(z) / T
+        lse = m + math.log(sum(math.exp(zi / T - m) for zi in z))
+        total += sum(p * (math.log(p) - (z[i] / T - lse)) for p, i in zip(pt, row_ids))
+    return T * T * total / len(student)
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def kd(student, ids, logp, T):
+    p = np.exp(logp / T - (logp / T).max(-1, keepdims=True))
+    p /= p.sum(-1, keepdims=True)
+    z = student / T
+    logq = z - z.max(-1, keepdims=True)
+    logq -= np.log(np.exp(logq).sum(-1, keepdims=True))
+    return T * T * np.mean(np.sum(p * (np.log(p) - np.take_along_axis(logq, ids, -1)), -1))
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def kd(student, ids, logp, T):
+    p = jax.nn.softmax(logp / T, -1)
+    logq = jnp.take_along_axis(jax.nn.log_softmax(student / T, -1), ids, -1)
+    return T * T * jnp.mean(jnp.sum(p * (jnp.log(p) - logq), -1))
+```
+
+**PyTorch**
+
+```python
+import torch
+import torch.nn.functional as F
+
+def kd(student, ids, logp, T):
+    p = F.softmax(logp / T, -1)
+    logq = torch.gather(F.log_softmax(student / T, -1), -1, ids)
+    return T * T * (p * (p.log() - logq)).sum(-1).mean()
+```
+
+**Where they differ**
+
+- The teacher's log-probabilities are normalized over the whole vocabulary before the top-k cut; dividing them by T and renormalizing over the k kept tokens equals a softmax of the teacher's logits / T restricted to those tokens.
+- PyTorch's `F.kl_div(input, target)` takes the *student's* log-probabilities first and the teacher's probabilities second, and its default reduction averages over every element, not over positions: use `reduction='batchmean'`.
 
 ## Optimization
 
@@ -7036,6 +7188,181 @@ def causal_conv(k, x):
 - `np.convolve(k, x)[:L]` is the same thing directly. PyTorch's `F.conv1d` is cross-correlation (it does not flip the kernel): pass `k.flip(0)` and left-pad by L - 1 to match.
 - `irfft` needs `n` to know the output length; leave it out and an odd length comes back one short.
 
+### decayed linear attention (recurrent form)
+
+*Module 41; also 36, 15.*
+
+Keep one matrix as memory. Every step, fade it by a_t and add the outer product of the key and the value; read it with the query. With a_t = 1 this is linear attention; with a learned a_t it is Mamba-2's SSD (query = C, key = B, value = x).
+
+$$
+S_t = a_t S_{t-1} + k_t v_t^\top,\quad o_t = S_t^\top q_t,\quad a_t = e^{\log a_t}
+$$
+
+**In papers:** $h_t = A_t h_{t-1} + B_t x_t,\ y_t = C_t^\top h_t$ with $A_t = a_t I$ (Mamba-2); $S_n = \gamma S_{n-1} + K_n^\top V_n$ (RetNet, fixed $\gamma$)
+
+**Shapes:** `q, k (T, dk), v (T, dv), log_a (T,) -> (T, dv)`
+
+**Index form:** `einsum(o_{te} = \sum_{s \le t} \Big(\prod_{s < m \le t} a_m\Big) (q_{td} k_{sd})\, v_{se}, ...)`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def lin_attn(q, k, v, log_a):
+    dk, dv = len(k[0]), len(v[0])
+    S = [[0.0] * dv for _ in range(dk)]
+    out = []
+    for qt, kt, vt, la in zip(q, k, v, log_a):
+        a = math.exp(la)
+        S = [[a * S[i][j] + kt[i] * vt[j] for j in range(dv)] for i in range(dk)]
+        out.append([sum(qt[i] * S[i][j] for i in range(dk)) for j in range(dv)])
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def lin_attn(q, k, v, log_a):
+    S, out = np.zeros((k.shape[1], v.shape[1])), []
+    for qt, kt, vt, la in zip(q, k, v, log_a):
+        S = np.exp(la) * S + np.outer(kt, vt)
+        out.append(qt @ S)
+    return np.stack(out)
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def lin_attn(q, k, v, log_a):
+    def step(S, inp):
+        qt, kt, vt, la = inp
+        S = jnp.exp(la) * S + jnp.outer(kt, vt)
+        return S, qt @ S
+    S0 = jnp.zeros((k.shape[1], v.shape[1]))
+    return jax.lax.scan(step, S0, (q, k, v, log_a))[1]
+```
+
+**JAX, by hand**
+
+```python
+import jax.numpy as jnp
+
+def lin_attn(q, k, v, log_a):
+    c = jnp.cumsum(log_a)                                     # the parallel form: masked attention
+    L = jnp.where(jnp.tril(jnp.ones((len(c), len(c)), bool)), c[:, None] - c[None, :], -jnp.inf)
+    return ((q @ k.T) * jnp.exp(L)) @ v
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def lin_attn(q, k, v, log_a):
+    S, out = q.new_zeros(k.shape[1], v.shape[1]), []
+    for qt, kt, vt, la in zip(q, k, v, log_a):
+        S = torch.exp(la) * S + torch.outer(kt, vt)
+        out.append(qt @ S)
+    return torch.stack(out)
+```
+
+**Where they differ**
+
+- The recurrent and the parallel forms are the same function: the recurrence costs O(T·dk·dv) and O(dk·dv) memory, the parallel form O(T²·d) but is all matmuls. Mamba-2 and every modern linear layer use chunks: parallel inside a chunk, recurrent between chunks.
+- Keep the decay in log space and build the mask from differences of a cumulative sum: multiplying many a_t < 1 directly underflows.
+
+### gated delta rule
+
+*Module 41.*
+
+A fixed-size memory that overwrites instead of adding. Fade the memory, ask it what it currently stores for this key, and write back only the difference from the new value, scaled by a write strength β.
+
+$$
+S_t = a_t S_{t-1} + \beta_t\, k_t \big(v_t - (a_t S_{t-1})^\top k_t\big)^\top = a_t (I - \beta_t k_t k_t^\top) S_{t-1} + \beta_t k_t v_t^\top,\quad o_t = S_t^\top q_t
+$$
+
+**In papers:** $\mathbf S_t = \mathbf S_{t-1}\big(\alpha_t(\mathbf I - \beta_t \mathbf k_t \mathbf k_t^\top)\big) + \beta_t \mathbf v_t \mathbf k_t^\top$ (Gated DeltaNet eq. 10; their $\mathbf S$ is our $S^\top$)
+
+**Shapes:** `q, k (T, dk) (unit-length keys), v (T, dv), beta (T,) in (0, 1), log_a (T,) -> (T, dv)`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def gated_delta(q, k, v, beta, log_a):
+    dk, dv = len(k[0]), len(v[0])
+    S = [[0.0] * dv for _ in range(dk)]
+    out = []
+    for qt, kt, vt, b, la in zip(q, k, v, beta, log_a):
+        a = math.exp(la)
+        S = [[a * x for x in row] for row in S]
+        pred = [sum(kt[i] * S[i][j] for i in range(dk)) for j in range(dv)]
+        S = [[S[i][j] + b * kt[i] * (vt[j] - pred[j]) for j in range(dv)] for i in range(dk)]
+        out.append([sum(qt[i] * S[i][j] for i in range(dk)) for j in range(dv)])
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def gated_delta(q, k, v, beta, log_a):
+    S, out = np.zeros((k.shape[1], v.shape[1])), []
+    for qt, kt, vt, b, la in zip(q, k, v, beta, log_a):
+        S = np.exp(la) * S
+        S = S + b * np.outer(kt, vt - kt @ S)
+        out.append(qt @ S)
+    return np.stack(out)
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def gated_delta(q, k, v, beta, log_a):
+    def step(S, inp):
+        qt, kt, vt, b, la = inp
+        S = jnp.exp(la) * S
+        S = S + b * jnp.outer(kt, vt - kt @ S)
+        return S, qt @ S
+    S0 = jnp.zeros((k.shape[1], v.shape[1]))
+    return jax.lax.scan(step, S0, (q, k, v, beta, log_a))[1]
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def gated_delta(q, k, v, beta, log_a):
+    S, out = q.new_zeros(k.shape[1], v.shape[1]), []
+    for qt, kt, vt, b, la in zip(q, k, v, beta, log_a):
+        S = torch.exp(la) * S
+        S = S + b * torch.outer(kt, vt - kt @ S)
+        out.append(qt @ S)
+    return torch.stack(out)
+```
+
+**Where they differ**
+
+- This is one step of gradient descent on the regression loss ½‖Sᵀk − v‖² with learning rate β: the layer learns key→value pairs as it reads (Schlag et al. 2021: 'fast weights').
+- Unit-length keys keep (I − βkkᵀ) a contraction for β in (0, 1); without the normalization the state can blow up.
+- Training runs it chunkwise: the writes inside a chunk solve a small lower-triangular system (the WY / UT transform), so the work is matmuls (Module 41's models.py).
+
 ## Generative models
 
 ### VAE reparameterization and Gaussian KL
@@ -7949,6 +8276,7 @@ Every JAX, optax and Flax name the lessons use for math, and the entry that expl
 | `jax.random.permutation` | [shuffle (random permutation)](#shuffle-random-permutation) |
 | `jax.random.randint` | [random integers](#random-integers) |
 | `jax.random.uniform` | [uniform samples](#uniform-samples) |
+| `jax.scipy.linalg.solve_triangular` | [triangular solve (forward substitution)](#triangular-solve-forward-substitution) |
 | `jax.value_and_grad` | [value and gradient together](#value-and-gradient-together) |
 | `jax.vjp` | [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode) |
 | `jax.vmap` | [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap) |

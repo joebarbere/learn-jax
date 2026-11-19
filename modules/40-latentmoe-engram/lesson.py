@@ -970,8 +970,8 @@ def _(mo):
     * JAX docs: [`jax.lax.ragged_dot`](https://docs.jax.dev/en/latest/_autosummary/jax.lax.ragged_dot.html) — the
       grouped matmul a sparse (dispatching) MoE layer needs on one device.
 
-    **Next:** Part 12 continues with linear attention and hybrid models (planned) — the Mamba/attention mixes
-    that Nemotron 3 pairs with LatentMoE.
+    **Next:** Module 41, linear attention and hybrids — the Mamba/attention mixes that Nemotron 3 pairs with
+    LatentMoE, and the Gated DeltaNet layers inside Qwen3-Next.
     """)
     return
 

@@ -414,6 +414,37 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Hash Embeddings for Efficient Word Representations](https://arxiv.org/abs/1709.03933)** — Svenstrup, Hansen, Winther, 2017. Several hashes per token, combined, so collisions in one hash don't matter.
 - **[Large Memory Layers with Product Keys](https://arxiv.org/abs/1907.05242)** — Lample et al., 2019. An earlier big lookup memory inside a Transformer, chosen by learned keys instead of by hashing.
 
+### 41 · Linear attention and hybrids: from fast weights to Gated DeltaNet (2020–2026)
+
+- **[Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention](https://arxiv.org/abs/2006.16236)** — Katharopoulos et al., 2020. Drop the softmax and attention becomes a recurrence with a matrix state.
+- **[Linear Transformers Are Secretly Fast Weight Programmers](https://arxiv.org/abs/2102.11174)** — Schlag, Irie, Schmidhuber, 2021. Linear attention as fast weights, and a delta-rule write instead of a sum.
+- **[Retentive Network: A Successor to Transformer for Large Language Models](https://arxiv.org/abs/2307.08621)** — Sun et al., 2023. A fixed decay per head; parallel, recurrent and chunkwise forms.
+- **[Gated Linear Attention Transformers with Hardware-Efficient Training](https://arxiv.org/abs/2312.06635)** — Yang et al., 2023. Data-dependent decay, and the chunkwise algorithm that made it fast.
+- **[Parallelizing Linear Transformers with the Delta Rule over Sequence Length](https://arxiv.org/abs/2406.06484)** — Yang et al., 2024. DeltaNet: the WY representation turns the delta rule into chunked matmuls.
+- **[Gated Delta Networks: Improving Mamba2 with Delta Rule](https://arxiv.org/abs/2412.06464)** — Yang, Kautz, Hatamizadeh, 2024. Decay plus overwrite: the linear layer inside Qwen3-Next and Qwen3.5.
+- **[Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free](https://arxiv.org/abs/2505.06708)** — Qiu et al., 2025. A sigmoid gate on attention's output; Qwen3-Next uses it.
+- **[MiniMax-01: Scaling Foundation Models with Lightning Attention](https://arxiv.org/abs/2501.08313)** — MiniMax, 2025. Seven linear-attention layers per softmax layer at 456B parameters.
+- **[Nemotron-H: A Family of Accurate and Efficient Hybrid Mamba-Transformer Models](https://arxiv.org/abs/2504.03624)** — NVIDIA, 2025. Mamba-2 with about 8% attention layers.
+- **[Kimi Linear: An Expressive, Efficient Attention Architecture](https://arxiv.org/abs/2510.26692)** — Kimi Team, 2025. Kimi Delta Attention (a per-channel decay) and MLA at 3 : 1.
+- **[Why Did M2 End Up as a Full Attention Model?](https://www.minimax.io/news/why-did-m2-end-up-as-a-full-attention-model)** — MiniMax, 2025. The case against hybrids at the frontier, from a lab that shipped one.
+
+### 42 · Small models done well: distillation, pruning and borrowing from big models (2015–2026)
+
+- **[Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)** — Hinton, Vinyals, Dean, 2015. Train a small model on a big one's softened predictions; scale the loss by T².
+- **[DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter](https://arxiv.org/abs/1910.01108)** — Sanh et al., 2019. 40% smaller, 60% faster, 97% of BERT's language understanding.
+- **[Gemma 2: Improving Open Language Models at a Practical Size](https://arxiv.org/abs/2408.00118)** — Gemma Team, 2024. The 2B and 9B trained by distillation instead of next-token prediction, far past compute-optimal.
+- **[MiniLLM: On-Policy Distillation of Large Language Models](https://arxiv.org/abs/2306.08543)** — Gu et al., 2023. Reverse KL, so the student doesn't spread mass over what the teacher thinks unlikely.
+- **[Compact Language Models via Pruning and Knowledge Distillation](https://arxiv.org/abs/2407.14679)** — Muralidharan et al., 2024. Minitron: prune by activation importance, heal with distillation, up to 40× fewer tokens.
+- **[LLM Pruning and Distillation in Practice: The Minitron Approach](https://arxiv.org/abs/2408.11796)** — Sreenivas et al., 2024. Llama 3.1 8B → 4B and Mistral NeMo 12B → 8B, with teacher correction.
+- **[ShortGPT: Layers in Large Language Models are More Redundant Than You Expect](https://arxiv.org/abs/2403.03853)** — Men et al., 2024. Block influence: drop the layers that change their input least.
+- **[SmolLM2: When Smol Goes Big -- Data-Centric Training of a Small Language Model](https://arxiv.org/abs/2502.02737)** — Allal et al., 2025. 135M–1.7B models trained on 2–11T carefully mixed tokens; this module's teacher.
+- **[TinyStories: How Small Can Language Models Be and Still Speak Coherent English?](https://arxiv.org/abs/2305.07759)** — Eldan, Li, 2023. Under 10M parameters writes fluent stories, given data a small model can learn.
+- **[Textbooks Are All You Need](https://arxiv.org/abs/2306.11644)** — Gunasekar et al., 2023. phi-1: 1.3B parameters and ~7B tokens of textbook-quality data reach 50.6% on HumanEval.
+- **[The FineWeb Datasets: Decanting the Web for the Finest Text Data at Scale](https://arxiv.org/abs/2406.17557)** — Penedo et al., 2024. FineWeb-Edu: a classifier trained on LLM ratings picks educational pages.
+- **[Muon: An optimizer for hidden layers in neural networks](https://kellerjordan.github.io/posts/muon/)** — Keller Jordan, 2024. Orthogonalized momentum; the nanoGPT speedrun's optimizer.
+- **[Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer](https://arxiv.org/abs/2203.03466)** — Yang et al., 2022. µP: tune on a narrow model, reuse the hyperparameters on a wide one.
+- **[Sparse Upcycling: Training Mixture-of-Experts from Dense Checkpoints](https://arxiv.org/abs/2212.05055)** — Komatsuzaki et al., 2022. Copy a dense model's MLP into every expert and keep training.
+
 ## Books
 
 For a second pass, or a different angle. Most are free to read online from their authors; each entry says so.

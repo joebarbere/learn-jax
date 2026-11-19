@@ -19,7 +19,7 @@ _ALIAS = {"jnp": "jax.numpy", "lax": "jax.lax", "jr": "jax.random", "jsp": "jax.
 _GROUPS: dict[str, str] = {
     "namespaces and links": """jax.numpy jax.numpy.linalg jax.random jax.nn jax.lax jax.experimental jax.sharding
         jax.distributed jax.profiler optax.contrib optax.readthedocs.io jax.dev""",
-    "dtypes, constants and array types": """jax.numpy.bfloat16 jax.numpy.float16 jax.numpy.float32 jax.numpy.int32
+    "dtypes, constants and array types": """jax.numpy.bfloat16 jax.numpy.float16 jax.numpy.float32 jax.numpy.int32 jax.numpy.uint16
         jax.numpy.int8 jax.numpy.dtype jax.numpy.finfo jax.numpy.ndarray jax.Array jax.numpy.pi jax.numpy.inf
         jax.ShapeDtypeStruct jax.typeof""",
     "making and copying arrays": """jax.numpy.array jax.numpy.asarray jax.numpy.zeros jax.numpy.ones jax.numpy.full
@@ -40,7 +40,7 @@ _GROUPS: dict[str, str] = {
         jax.tree_util.tree_unflatten jax.tree_util.tree_structure""",
     "Flax NNX module plumbing": """flax.nnx.List flax.nnx.Module flax.nnx.Optimizer flax.nnx.Param flax.nnx.Rngs
         flax.nnx.jit flax.nnx.merge flax.nnx.split flax.nnx.to_pure_dict flax.nnx.state flax.nnx.update""",
-    "choosing which parameters train": "optax.multi_transform optax.set_to_zero",
+    "choosing which parameters train": "optax.multi_transform optax.set_to_zero optax.GradientTransformation",
     "sharding and multi-device setup (Module 24 draws the math)": """jax.P jax.sharding.PartitionSpec
         jax.sharding.AxisType.Auto jax.sharding.AxisType.Explicit jax.make_mesh jax.set_mesh jax.shard_map
         jax.reshard jax.lax.with_sharding_constraint jax.lax.pcast jax.lax.axis_index

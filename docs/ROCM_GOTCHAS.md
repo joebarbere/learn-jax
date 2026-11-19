@@ -174,7 +174,7 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
 - **Symptom:** a jitted function that scores a corpus and takes `top_k` in one program fails at launch with
   `hipError_t(98)` "Failed to set shared memory size", depending on shape (an IVF gather + einsum + top-k; a
   sparse BCOO matmul + top-k over 235k rows). `jax.lax.optimization_barrier` between the two didn't help.
-- **Fix:** split scoring and top-k into two jitted functions. (Module 38.)
+- **Fix:** split scoring and top-k into two jitted functions. (Module 38; again in Module 42, a SmolLM2-360M forward pass + `top_k` over its 49,152-way output.)
 
 ### 20c. Pinned host memory works (good news)
 - JAX 0.11.1 on ROCm 10.1 exposes `['device', 'pinned_host']` as the RX 7600 XT's memory kinds, and
@@ -182,6 +182,25 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
   keeps an Engram table in host RAM and prefetches its rows: within 1–2% of a GPU-resident table for a
   forward pass of 32 × 256 tokens. Gathers from a big f32 table under `jit` + `scan` + `grad` didn't hit
   #20's page fault there.
+
+### 20d. A GPU hang in the backward pass of an 8-layer linear-attention model
+- **Symptom:** `GPU HANG ANALYSIS` (a kernel with ~590k workgroups of 1,024 threads and 48 KB of shared
+  memory) in `jax.grad` of a Mamba-2-style model whose 8 layers were a Python loop. Its chunked kernel
+  alone, at the same shapes, ran fine (forward and gradient); so did the attention model.
+- **Fix:** write the layers as a `lax.scan` over a stacked, repeating block (Module 41's `block_pattern`):
+  the hang went away and compiles got faster (attention's gradient: 115 s → 6 s). The cause wasn't
+  pinned down; a different fusion of the unrolled layers is the likely trigger. (Module 41.)
+- **Also:** a 2-layer model with plain attention, evaluated on batches of 128 × 768 tokens, hung the GPU
+  and then failed with `ROCM_ERROR_LAUNCH_OUT_OF_RESOURCES`; smaller sequences and the same model with a
+  short convolution in front ran fine. Module 41's recall sweep skips that one configuration.
+
+### 20e. A small column reduction that never finishes compiling
+- **Symptom:** `jnp.mean(a, 0)` with `a` of shape (4096, 10) (or a (32, 128, 10) array reduced over its
+  first two axes) hangs inside XLA's compile, at 0% CPU, forever. (2048, 10), (4096, 16) and (8192, 20)
+  compile in a fraction of a second.
+- **Fix:** reduce over the last axis instead, `jnp.mean(a.T, -1)`, or use a matmul,
+  `jnp.ones(n) @ a / n`; or just a different shape. Found in Module 42's lesson (its demo now uses
+  (16, 128, 10)). Put a `timeout` on headless runs: a hang like this shows up only as silence.
 
 ## Reading profiles and HLO on ROCm
 

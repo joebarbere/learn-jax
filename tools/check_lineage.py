@@ -47,10 +47,10 @@ def config_features(c: dict) -> dict[str, bool | None]:
         "gqa": None if (mla or heads is None) else (1 < kv < heads),
         "mqa": None if (mla or heads is None) else (kv == 1 and heads > 1),
         "moe_topk": experts > 1,
-        "shared_experts": (tc.get("n_shared_experts") or 0) > 0,
+        "shared_experts": (tc.get("n_shared_experts") or 0) > 0 or (tc.get("shared_expert_intermediate_size") or 0) > 0,
         "partial_rope": mla or (rot is not None and rot < 1),
         "swa": bool(sw) and tc.get("use_sliding_window", True) is not False,
-        "mtp": (tc.get("num_nextn_predict_layers") or 0) > 0,
+        "mtp": None if "num_nextn_predict_layers" not in tc else tc["num_nextn_predict_layers"] > 0,
         "rope_nope_mix": None if no_rope is None else (0 in no_rope and 1 in no_rope),
         "tied_emb": tie,
     }

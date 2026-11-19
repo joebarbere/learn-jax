@@ -133,7 +133,7 @@ TERMS: list[Term] = [
     Term("associative recall", ("multi-query associative recall", "MQAR"),
          "A synthetic task: given key–value pairs in context, return the value for a queried key. "
          "Attention solves it easily; it probes what sequence models can store and retrieve.",
-         "15", ("36",), ""),
+         "15", ("36", "41"), ""),
     Term("associative scan", ("lax.associative_scan", "associative_scan"),
          "A parallel prefix scan for any associative combine; JAX's `lax.associative_scan` runs a linear "
          "recurrence in log depth on the GPU.",
@@ -307,7 +307,7 @@ TERMS: list[Term] = [
     Term("Chinchilla scaling", ("Chinchilla", "compute-optimal"),
          "The finding that, for a fixed compute budget, parameters and training tokens should grow "
          "together, roughly 20 tokens per parameter. Many earlier large models were under-trained.",
-         "16", (), "Hoffmann et al., 2022"),
+         "16", ("42",), "Hoffmann et al., 2022"),
     Term("chunking", ("chunk size", "chunk_sentences"),
          "Splitting documents into passages before indexing. Chunk size trades context per hit against "
          "retrieval precision.",
@@ -460,7 +460,7 @@ TERMS: list[Term] = [
     Term("decode", ("decode phase", "generation phase"),
          "The second phase of generation: produce one token per step, each reading all the weights and the "
          "KV cache. Memory-bandwidth-bound.",
-         "18", ("17", "19"), ""),
+         "18", ("17", "19", "41"), ""),
     Term("decoder-only", (),
          "A transformer with only causally masked self-attention, trained to predict the next token. The "
          "architecture of GPT and nearly every modern LLM.",
@@ -510,7 +510,7 @@ TERMS: list[Term] = [
     Term("distillation", ("knowledge distillation", "distill", "distilled"),
          "Training a smaller student model on a larger teacher's outputs (or reasoning traces) so it "
          "inherits the teacher's ability.",
-         "26", ("12", "31"), "Hinton, Vinyals, Dean, 2015"),
+         "26", ("12", "31", "42"), "Hinton, Vinyals, Dean, 2015"),
     Term("distributional hypothesis", (),
          '"You shall know a word by the company it keeps": words in similar contexts have similar '
          "meanings. The idea behind all learned embeddings.",
@@ -860,7 +860,7 @@ TERMS: list[Term] = [
     Term("hybrid model", ("hybrids", "Jamba", "hybrid models"),
          "An architecture interleaving attention layers with SSM (Mamba) layers to get most of attention's "
          "recall at a fraction of its cost; Jamba is one.",
-         "36", ("40",), "Lieber et al., 2024 (Jamba)"),
+         "36", ("40", "41"), "Lieber et al., 2024 (Jamba)"),
     Term("hybrid search", ("hybrid retrieval",),
          "Combining keyword (BM25) and dense retrieval results, which usually beats either alone.",
          "38", (), ""),
@@ -982,7 +982,7 @@ TERMS: list[Term] = [
          "During generation, store each layer's keys and values for past tokens so each new token computes "
          "only its own, instead of re-running the whole prefix. Its size often limits context length and "
          "batch.",
-         "17", ("18", "19", "25", "36", "39"), ""),
+         "17", ("18", "19", "25", "36", "39", "41"), ""),
     Term("L2 regularization", ("L2 penalty", "ridge penalty"),
          "Adding λ·‖w‖² to the loss to penalize large weights. Equivalent to weight decay for plain SGD "
          "but not for Adam.",
@@ -1129,7 +1129,7 @@ TERMS: list[Term] = [
     Term("Mamba", ("Mamba-2",),
          "A selective state-space model with a gated block structure and a hardware-aware scan; linear in "
          "sequence length with a constant-size state for generation.",
-         "36", ("00b",), "Gu & Dao, 2023"),
+         "36", ("00b", "41"), "Gu & Dao, 2023"),
     Term("mantissa", ("significand",),
          "The bits of a float that hold its significant digits. bfloat16 keeps only 7 (about 2–3 decimal "
          "digits).",
@@ -1208,7 +1208,7 @@ TERMS: list[Term] = [
     Term("model FLOPs utilization", ("MFU",),
          "Achieved training FLOP/s (≈ 6 × parameters × tokens per second) divided by the GPU's peak. A "
          "single number for how well you use the hardware.",
-         "16", ("22", "25"), "Chowdhery et al., 2022 (PaLM)"),
+         "16", ("22", "25", "42"), "Chowdhery et al., 2022 (PaLM)"),
     Term("modern Hopfield network", ("modern Hopfield", "dense associative memory"),
          "Hopfield networks with sharper energy functions that store exponentially many patterns; their "
          "update rule is softmax attention.",
@@ -1265,7 +1265,7 @@ TERMS: list[Term] = [
          "An optimizer for hidden 2-D weight matrices: take the momentum, orthogonalize it with "
          "Newton–Schulz iterations (set all its singular values to ≈1), and step along that. Embeddings, "
          "the output head and vector parameters stay on AdamW.",
-         "05", ("25",), "Keller Jordan, 2024"),
+         "05", ("25", "42"), "Keller Jordan, 2024"),
     Term("MuZero", ("Gumbel MuZero", "mctx"),
          "AlphaZero with a learned model of the game's dynamics, so it plans without knowing the rules. "
          "`mctx` is DeepMind's JAX MCTS library built around it.",
@@ -1508,7 +1508,7 @@ TERMS: list[Term] = [
     Term("prefill", ("prompt processing",),
          "The first phase of generation: run the whole prompt through the model at once, filling the KV "
          "cache. Compute-bound.",
-         "18", ("17", "19", "39"), ""),
+         "18", ("17", "19", "39", "41"), ""),
     Term("prefix scan", ("parallel scan", "cumulative sum", "cumsum"),
          "Computing all running results (running sums, running products) of a sequence; with an "
          "associative operator it parallelizes in O(log L) steps.",
@@ -1780,7 +1780,7 @@ TERMS: list[Term] = [
     Term("scaling laws", ("scaling law",),
          "Empirical power laws relating a model's loss to its parameter count, data and compute. They let "
          "you predict how much bigger and better a model gets for a given budget.",
-         "00b", (), "Kaplan et al., 2020; Hoffmann et al., 2022"),
+         "00b", ("42",), "Kaplan et al., 2020; Hoffmann et al., 2022"),
     Term("seatbelt", ("the seatbelt", "auto-stop"),
          "The course's AWS safety rails: budgets, quotas, automatic stop of idle instances, and never "
          "applying infrastructure changes without the owner's go-ahead.",
@@ -1976,7 +1976,7 @@ TERMS: list[Term] = [
     Term("temperature", (),
          "Divide logits by T before softmax: T < 1 sharpens the distribution toward the top choice, T > 1 "
          "flattens it, T → 0 is greedy decoding.",
-         "04", ("14", "16", "18", "19", "26"), ""),
+         "04", ("14", "16", "18", "19", "26", "42"), ""),
     Term("temporal-difference learning", ("TD learning", "TD error", "TD-Gammon", "temporal difference"),
          "Updating value estimates toward a target built from the next step's estimate, learning from "
          "incomplete episodes. TD-Gammon used it to play backgammon in 1992.",
@@ -2235,4 +2235,71 @@ TERMS: list[Term] = [
          "Map token ids that mean the same thing after normalization (case, accents, spaces) to one canonical "
          "id. Engram indexes its tables this way, so variants share rows.",
          "40", ("13",), "Cheng et al. (DeepSeek-AI), 2026"),
+    Term("decay mask", ("segment sum", "segsum"),
+         "The lower-triangular matrix of products a_{s+1}···a_t that turns decayed linear attention into masked "
+         "attention, (QKᵀ ⊙ L)V. Built in log space from differences of a cumulative sum.",
+         "41", ("36",), "Dao & Gu, 2024"),
+    Term("delta rule", ("Widrow–Hoff rule", "delta-rule"),
+         "Update a memory by writing only the error: S ← S + β k (v − Sᵀk)ᵀ, one gradient step on ‖Sᵀk − v‖². "
+         "In a linear-attention layer it overwrites a key's old value instead of adding to it.",
+         "41", (), "Widrow & Hoff, 1960; Schlag et al., 2021"),
+    Term("fast weights", ("fast-weight", "fast weight programmer"),
+         "A weight matrix written by the network itself while it reads its input, rather than by training. A "
+         "linear-attention state is one: a key→value map built from the tokens seen so far.",
+         "41", (), "Schmidhuber, 1992"),
+    Term("gated attention", (),
+         "Softmax attention whose output is multiplied by a sigmoid gate computed from the layer input; used "
+         "in Qwen3-Next's attention layers.",
+         "41", (), "Qiu et al., 2025"),
+    Term("Gated DeltaNet", ("GDN", "gated delta rule", "Gated Delta Networks"),
+         "A linear-attention layer combining Mamba-2's per-step decay with the delta rule: "
+         "S_t = a_t (I − β_t k_t k_tᵀ) S_{t−1} + β_t k_t v_tᵀ. Three of every four layers of Qwen3-Next and Qwen3.5.",
+         "41", (), "Yang, Kautz & Hatamizadeh, 2025"),
+    Term("linear attention", ("linear transformer", "linear-attention"),
+         "Attention without the softmax: o_t = Σ_{s≤t} (q_t·k_s) v_s, which regroups into a recurrence on a fixed "
+         "d_k × d_v state, S_t = S_{t−1} + k_t v_tᵀ. Constant memory and time per generated token.",
+         "41", ("36",), "Katharopoulos et al., 2020"),
+    Term("state space duality", ("SSD",),
+         "Mamba-2's observation that a selective SSM with a scalar decay is decayed linear attention: the same "
+         "function computed as a recurrence or as masked attention, and fastest as chunks of both.",
+         "41", ("36",), "Dao & Gu, 2024"),
+    Term("WY representation", ("UT transform",),
+         "A compact form for a product of (I − β k kᵀ) factors. It lets the delta rule run chunk by chunk with "
+         "one triangular solve and a few matmuls per chunk.",
+         "41", (), "Yang et al., 2024 (DeltaNet)"),
+    Term("block influence", ("BI",),
+         "How much a layer changes its input: 1 − the mean cosine similarity of each token's hidden state before "
+         "and after it. Layers with low block influence are the first to remove when pruning depth.",
+         "42", (), "Men et al., 2024 (ShortGPT)"),
+    Term("continued pretraining", ("continual pretraining", "domain-adaptive pretraining"),
+         "Keep training an already-pretrained model with the same next-token objective on new data (a domain, "
+         "a language), instead of starting from random weights.",
+         "42", (), ""),
+    Term("Newton–Schulz iteration", ("Newton-Schulz", "Newton–Schulz"),
+         "A matmul-only iteration that pushes a matrix's singular values toward 1 while keeping its singular "
+         "vectors: an approximate orthogonalization. Muon runs five steps of a tuned quintic version.",
+         "42", ("05",), "Keller Jordan, 2024 (Muon's coefficients)"),
+    Term("overtraining", ("overtrained", "inference-optimal"),
+         "Training a model on many more tokens than the compute-optimal ~20 per parameter. It costs more to "
+         "train but gives a better model at a size that's cheap to run; SmolLM2-135M saw ~15,000 tokens per "
+         "parameter.",
+         "42", (), ""),
+    Term("perplexity filtering", ("perplexity filter",),
+         "Choosing training data by how predictable a reference model finds it: keep the text it scores well, "
+         "drop the rest. Cheap, but it favors easy, repetitive text as well as clean text.",
+         "42", (), ""),
+    Term("sparse upcycling", ("upcycling", "upcycled"),
+         "Turn a trained dense model into a mixture of experts by copying its feed-forward block into every "
+         "expert, adding a fresh router, and training on.",
+         "42", ("17",), "Komatsuzaki et al., 2022"),
+    Term("structured pruning", ("pruning", "width pruning", "depth pruning", "pruned"),
+         "Make a trained model smaller by removing whole pieces — layers, attention heads, feed-forward neurons, "
+         "embedding channels — chosen by an importance score, then retrain briefly (ideally by distillation).",
+         "42", (), "Muralidharan et al., 2024 (Minitron)"),
+    Term("µP", ("muP", "maximal update parametrization", "µTransfer"),
+         "A way to scale initialization and learning rates with width so the best hyperparameters found on a "
+         "narrow model still work on a wide one.",
+         "42", (), "Yang et al., 2022"),
 ]
+
+

@@ -203,6 +203,20 @@ EVENTS = [
          "what": "An open model trained with reinforcement learning on verifiable rewards to reason step by step.",
          "why_it_mattered": "Showed RL with checkable answers can teach models to reason, and released it openly.",
          "module": "26-reasoning", "url": W + "DeepSeek"},
+    {"year": 2024, "title": "Small models from big ones: distillation and pruning", "who": "Google (Gemma 2); "
+         "NVIDIA (Minitron); Meta (Llama 3.2)",
+         "what": "Small open models trained on a bigger model's predictions instead of only the next token, or cut "
+              "down from a bigger model and healed by distillation.",
+         "why_it_mattered": "Made 1–9B models far better than their size and training budget suggested; most "
+                            "small open models since are distilled.",
+         "module": "42-small-models", "url": "https://arxiv.org/abs/2407.14679"},
+    {"year": 2025, "title": "Linear-attention hybrids go to production", "who": "Alibaba (Qwen3-Next); Moonshot AI "
+         "(Kimi Linear); NVIDIA (Nemotron-H)",
+         "what": "Large models whose layers are mostly Gated DeltaNet or Mamba-2, with attention in a few (one in "
+              "four in Qwen3-Next and Kimi Linear): a fixed-size memory in most layers, a KV cache in the rest.",
+         "why_it_mattered": "Cut long-context memory and decoding cost severalfold, and revived the 1992 idea of "
+                            "fast weights; MiniMax-M2 went the other way, back to full attention.",
+         "module": "41-linear-attention-hybrids", "url": "https://arxiv.org/abs/2510.26692"},
     {"year": 2026, "title": "New axes of sparsity: LatentMoE and Engram", "who": "NVIDIA; DeepSeek",
          "what": "Experts that work in a compressed latent width (shipped in Nemotron 3), and hashed n-gram lookup "
               "tables beside the experts.",

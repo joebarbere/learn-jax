@@ -177,6 +177,8 @@ it's first taught; `make rosetta-browse` opens them all in one notebook, and the
 | 39 | Agents: tools, memory, workflows and multi-agent systems (2022–) | ✅ |
 | **Part 12 — Frontier architectures** | | |
 | 40 | Latent experts and conditional memory: LatentMoE and Engram (2025–2026) | ✅ |
+| 41 | Linear attention and hybrids: from fast weights to Gated DeltaNet (2020–2026) | ✅ |
+| 42 | Small models done well: distillation, pruning and borrowing from big models (2015–2026) | ✅ |
 
 ✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 

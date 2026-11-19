@@ -58,6 +58,10 @@ MODULES = [
     (38, "38-rag", "Retrieval-augmented generation, from BM25 to rerankers (1994–2024)", 11),
     (39, "39-agents", "Agents: tools, memory, workflows and multi-agent systems (2022–)", 11),
     (40, "40-latentmoe-engram", "Latent experts and conditional memory: LatentMoE and Engram (2025–2026)", 12),
+    (41, "41-linear-attention-hybrids", "Linear attention and hybrids: from fast weights to Gated DeltaNet (2020–2026)",
+     12),
+    (42, "42-small-models", "Small models done well: distillation, pruning and borrowing from big models (2015–2026)",
+     12),
 ]
 
 
