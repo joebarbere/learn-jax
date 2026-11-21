@@ -480,10 +480,10 @@ def _(mo):
 @app.cell
 def _(mo):
     quiz = mo.ui.radio(
-        options={"a": "Its patch embedding is a convolution, so it shares the CNN's assumptions",
-                 "b": "It must learn from data that nearby patches belong together, which a CNN assumes from "
-                      "the start",
-                 "c": "Attention can't relate distant patches"},
+        options={"Its patch embedding is a convolution, so it shares the CNN's assumptions": "a",
+                 "It must learn from data that nearby patches belong together, which a CNN assumes from the "
+                 "start": "b",
+                 "Attention can't relate distant patches": "c"},
         label="**Check yourself:** why does a ViT need more data than a CNN?")
     quiz
     return (quiz,)

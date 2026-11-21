@@ -550,9 +550,9 @@ def _(mo):
 @app.cell
 def _(mo):
     quiz = mo.ui.radio(
-        options={"a": "Distillation needs the teacher at every training step, so it doubles the cost",
-                 "b": "The teacher and student must use the same tokenizer for token-level distillation",
-                 "c": "A pruned model needs no further training"},
+        options={"Distillation needs the teacher at every training step, so it doubles the cost": "a",
+                 "The teacher and student must use the same tokenizer for token-level distillation": "b",
+                 "A pruned model needs no further training": "c"},
         label="**Check yourself:** which is true of this module's recipes?")
     quiz
     return (quiz,)

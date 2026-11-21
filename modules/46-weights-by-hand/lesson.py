@@ -662,10 +662,10 @@ def _(mo):
 @app.cell
 def _(mo):
     quiz = mo.ui.radio(
-        options={"a": "It finds where the fact is stored by gradient descent over the whole model",
-                 "b": "It writes a new output for one key in one MLP matrix, changing that matrix as little as "
-                      "possible on the keys the layer usually sees",
-                 "c": "It fine-tunes the model on the new fact with a small learning rate"},
+        options={"It finds where the fact is stored by gradient descent over the whole model": "a",
+                 "It writes a new output for one key in one MLP matrix, changing that matrix as little as "
+                 "possible on the keys the layer usually sees": "b",
+                 "It fine-tunes the model on the new fact with a small learning rate": "c"},
         label="**Check yourself:** what does a ROME edit change?")
     quiz
     return (quiz,)

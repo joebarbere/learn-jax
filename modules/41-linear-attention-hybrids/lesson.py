@@ -787,9 +787,9 @@ def _(lineage, mo):
 @app.cell
 def _(mo):
     quiz = mo.ui.radio(
-        options={"a": "Every layer's memory grows with the context, just more slowly",
-                 "b": "Only the attention layers' KV cache grows; the Gated DeltaNet states stay the same size",
-                 "c": "Nothing grows: the hybrid has a fixed-size memory"},
+        options={"Every layer's memory grows with the context, just more slowly": "a",
+                 "Only the attention layers' KV cache grows; the Gated DeltaNet states stay the same size": "b",
+                 "Nothing grows: the hybrid has a fixed-size memory": "c"},
         label="**Check yourself:** a 3 : 1 hybrid generates its millionth token. What has grown with the context?")
     quiz
     return (quiz,)

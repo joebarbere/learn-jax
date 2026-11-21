@@ -504,9 +504,9 @@ def _(mo):
 @app.cell
 def _(mo):
     quiz = mo.ui.radio(
-        options={"a": "Its loss on generated text, scored by an autoregressive model, is lowest",
-                 "b": "Its loss is low, its vocabulary is as varied as real text, and it rarely repeats itself",
-                 "c": "It needs the fewest model calls"},
+        options={"Its loss on generated text, scored by an autoregressive model, is lowest": "a",
+                 "Its loss is low, its vocabulary is as varied as real text, and it rarely repeats itself": "b",
+                 "It needs the fewest model calls": "c"},
         label="**Check yourself:** what should convince you a sampler writes good text?")
     quiz
     return (quiz,)

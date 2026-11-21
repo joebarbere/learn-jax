@@ -926,9 +926,9 @@ def _(mo, prefetch):
 def _(mo):
     quiz = mo.ui.radio(
         options={
-            "a": "LatentMoE-acc moves fewer bytes per token than a standard MoE layer",
-            "b": "LatentMoE-acc moves the same bytes per token but picks 4× more, 4× smaller experts",
-            "c": "LatentMoE runs the router on the latent, so routing is 4× cheaper",
+            "LatentMoE-acc moves fewer bytes per token than a standard MoE layer": "a",
+            "LatentMoE-acc moves the same bytes per token but picks 4× more, 4× smaller experts": "b",
+            "LatentMoE runs the router on the latent, so routing is 4× cheaper": "c",
         },
         label="**Check yourself:** at α = 4, which is true?")
     quiz

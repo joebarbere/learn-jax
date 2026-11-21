@@ -526,10 +526,10 @@ def _(mo):
 @app.cell
 def _(mo):
     quiz = mo.ui.radio(
-        options={"a": "The first token carries the most information about the passage",
-                 "b": "Softmax weights must sum to 1, and the model learned to park unneeded weight on the "
-                      "first token, which every query can see",
-                 "c": "RoPE gives the first position a special encoding"},
+        options={"The first token carries the most information about the passage": "a",
+                 "Softmax weights must sum to 1, and the model learned to park unneeded weight on the first "
+                 "token, which every query can see": "b",
+                 "RoPE gives the first position a special encoding": "c"},
         label="**Check yourself:** why does dropping the first token break a pretrained model's window?")
     quiz
     return (quiz,)
