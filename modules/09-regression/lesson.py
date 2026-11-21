@@ -603,6 +603,12 @@ def _(ex, fm_pred, fm_yte, lj, mo, np):
 
 
 @app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "trace of a matrix")
+    return
+
+
+@app.cell
 def _(mo):
     import learnjax.papers as _papers
 

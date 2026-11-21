@@ -179,6 +179,9 @@ it's first taught; `make rosetta-browse` opens them all in one notebook, and the
 | 40 | Latent experts and conditional memory: LatentMoE and Engram (2025–2026) | ✅ |
 | 41 | Linear attention and hybrids: from fast weights to Gated DeltaNet (2020–2026) | ✅ |
 | 42 | Small models done well: distillation, pruning and borrowing from big models (2015–2026) | ✅ |
+| 43 | From pixels to words: vision transformers and vision-language models (2020–2025) | ✅ |
+| 44 | Efficient and sparse attention: reading only part of the past (2019–2026) | ✅ |
+| 45 | Diffusion language models: writing a whole passage at once (2021–2026) | ✅ |
 
 ✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 
@@ -212,14 +215,17 @@ creators for videos, posts and docs. Most of all:
   and [Qwen2.5-Coder](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF) by the Qwen Team (Apache-2.0),
   served with [llama.cpp](https://github.com/ggml-org/llama.cpp) by ggml-org (MIT);
   [Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) by the Qwen Team (Apache-2.0) for
-  Module 27's tool-calling demo.
+  Module 27's tool-calling demo; [SigLIP-B/16-224](https://huggingface.co/google/siglip-base-patch16-224) by
+  Google (Apache-2.0), loaded into JAX in Module 43.
 - **[LM Studio](https://lmstudio.ai/)** by Element Labs (Module 27), free for personal and internal business use
   under its [app terms](https://lmstudio.ai/app-terms). The course fetches it only inside a container build.
 - **Data:** [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) by Zalando Research (MIT);
   [tiny Shakespeare](https://github.com/karpathy/char-rnn) from Andrej Karpathy's char-rnn; public-domain
   detective novels from Standard Ebooks and Project Gutenberg, via deepseek-v3-jax;
   [ARC](https://allenai.org/data/arc) by the Allen Institute for AI (CC BY-SA 4.0); 49,950 arXiv abstracts
-  from the [aws-ai](https://github.com/joebarbere/aws-ai) `local-kb` benchmark (Module 38).
+  from the [aws-ai](https://github.com/joebarbere/aws-ai) `local-kb` benchmark (Module 38);
+  [COCO 2017](https://cocodataset.org/) validation images and captions by the COCO Consortium (annotations
+  CC BY 4.0; images from Flickr under their owners' terms), Module 43.
 - **Papers:** the 90-plus seminal papers are credited to their authors in every lesson and in docs/PAPERS.md.
 
 ## License

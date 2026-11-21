@@ -217,6 +217,31 @@ EVENTS = [
          "why_it_mattered": "Cut long-context memory and decoding cost severalfold, and revived the 1992 idea of "
                             "fast weights; MiniMax-M2 went the other way, back to full attention.",
          "module": "41-linear-attention-hybrids", "url": "https://arxiv.org/abs/2510.26692"},
+    {"year": 2020, "title": "Vision transformers", "who": "Dosovitskiy et al. (Google Brain)",
+         "what": "A plain Transformer on an image cut into 16 × 16 patches matched the best CNNs once pretrained on "
+              "enough data.",
+         "why_it_mattered": "One architecture for text and images; ViT encoders became the eyes of CLIP, SigLIP "
+                            "and every open vision-language model.",
+         "module": "43-vision-language", "url": "https://arxiv.org/abs/2010.11929"},
+    {"year": 2023, "title": "Language models learn to see: LLaVA", "who": "Liu, Li, Wu, Lee (Wisconsin, Microsoft)",
+         "what": "A frozen CLIP image encoder, a small projector into an open LLM, and GPT-4-written visual "
+              "instruction data.",
+         "why_it_mattered": "A recipe any lab could afford; most open vision-language models since (SmolVLM, "
+                            "PaliGemma, Qwen-VL) follow its shape.",
+         "module": "43-vision-language", "url": "https://arxiv.org/abs/2304.08485"},
+    {"year": 2025, "title": "Learned sparse attention", "who": "DeepSeek (NSA, DSA); Moonshot AI (MoBA)",
+         "what": "Attention where each query reads a few blocks or tokens it selects itself, trained sparse; "
+              "DeepSeek V3.2 reads 2,048 tokens per query, chosen by a small indexer.",
+         "why_it_mattered": "Long contexts got cheaper without giving up attention: DeepSeek halved its API prices "
+                            "on V3.2's launch.",
+         "module": "44-sparse-attention", "url": "https://arxiv.org/abs/2502.11089"},
+    {"year": 2025, "title": "Diffusion language models scale up", "who": "Renmin University & Ant Group (LLaDA); "
+         "Inception (Mercury); Google DeepMind (Gemini Diffusion)",
+         "what": "Language models that start from a passage of blanks and fill in many tokens per step, in any "
+              "order, trained by masked diffusion; LLaDA reached 8B parameters.",
+         "why_it_mattered": "The first serious alternative to left-to-right generation; sold on speed (over "
+                            "1,000 tokens/s reported), at some cost in quality per parameter.",
+         "module": "45-diffusion-lm", "url": "https://arxiv.org/abs/2502.09992"},
     {"year": 2026, "title": "New axes of sparsity: LatentMoE and Engram", "who": "NVIDIA; DeepSeek",
          "what": "Experts that work in a compressed latent width (shipped in Nemotron 3), and hashed n-gram lookup "
               "tables beside the experts.",

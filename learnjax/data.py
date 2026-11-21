@@ -5,8 +5,11 @@ NumPy only (no JAX), so the PyTorch side-by-side notebooks can use it too.
 from __future__ import annotations
 
 import gzip
+import json
 import os
+import shutil
 import urllib.request
+import zipfile
 from pathlib import Path
 
 import numpy as np
@@ -31,7 +34,7 @@ def _download(url: str, dest: Path) -> Path:
         tmp = dest.with_suffix(dest.suffix + ".part")
         req = urllib.request.Request(url, headers={"User-Agent": "learn-jax-course"})
         with urllib.request.urlopen(req, timeout=120) as r, open(tmp, "wb") as f:
-            f.write(r.read())
+            shutil.copyfileobj(r, f, 1 << 20)                      # stream: some files are ~1 GB
         tmp.rename(dest)
     return dest
 
@@ -99,3 +102,34 @@ def radio_abstracts() -> list[dict]:
         raise FileNotFoundError(f"{path} is missing: run `make rag-data` on the host first.")
     with path.open(encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
+
+
+COCO_URL = "http://images.cocodataset.org/"
+
+
+def coco_val2017() -> dict:
+    """COCO 2017 validation set: 5,000 photos, each with 5 human-written captions (~1.07 GB download, once).
+
+    Returns {"image_dir": Path to the JPEGs, "images": [(image_id, file_name), …] sorted by id,
+    "captions": {image_id: [str, …]}}. Annotations CC BY 4.0 (the COCO Consortium); the photos come from
+    Flickr under their owners' licences, for research use.
+    """
+    d = CACHE / "coco"
+    image_dir = d / "val2017"
+    if not image_dir.exists():
+        z = _download(COCO_URL + "zips/val2017.zip", d / "val2017.zip")
+        with zipfile.ZipFile(z) as f:
+            f.extractall(d)
+        z.unlink()
+    cap = d / "captions_val2017.json"
+    if not cap.exists():
+        z = _download(COCO_URL + "annotations/annotations_trainval2017.zip", d / "annotations.zip")
+        with zipfile.ZipFile(z) as f:
+            cap.write_bytes(f.read("annotations/captions_val2017.json"))
+        z.unlink()
+    meta = json.loads(cap.read_text())
+    captions: dict[int, list[str]] = {}
+    for a in meta["annotations"]:
+        captions.setdefault(a["image_id"], []).append(a["caption"].strip())
+    images = sorted((im["id"], im["file_name"]) for im in meta["images"])
+    return {"image_dir": image_dir, "images": images, "captions": captions}

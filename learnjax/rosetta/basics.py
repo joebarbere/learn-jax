@@ -334,6 +334,35 @@ ENTRIES: list[E] = [
              "$-v$; compare $Q\\Lambda Q^\\top$, not $Q$.")),
       apis=("jax.numpy.linalg.eigh",),
       module="02"),
+    E("trace of a matrix", "Linear algebra",
+      "Add up the diagonal. It equals the sum of the eigenvalues, so it doesn't change when you rotate the "
+      "matrix into another basis; for a confusion matrix it counts the correct answers.",
+      r"\mathrm{tr}(A) = \sum_{i=1}^{n} A_{ii} = \sum_{i=1}^{n} \lambda_i",
+      r"$\mathrm{tr}(AB) = \mathrm{tr}(BA)$", "(n, n) -> scalar", "trace(A)",
+      lambda r: {"A": r.normal(size=(4, 4))},
+      python="""
+        def trace(A):
+            return sum(A[i][i] for i in range(len(A)))
+      """,
+      numpy="""
+        def trace(A):
+            return np.trace(A)
+      """,
+      jax="""
+        def trace(A):
+            return jnp.trace(A)
+      """,
+      torch="""
+        def trace(A):
+            return torch.trace(A)  # 2-D only; for a batch: torch.diagonal(A, dim1=-2, dim2=-1).sum(-1)
+      """,
+      notes=(("Batches of matrices: `jnp.trace(A, axis1=-2, axis2=-1)` gives one trace per matrix. PyTorch's "
+              "`torch.trace` takes only a single 2-D matrix."),
+             ("Papers use the trace to write sums compactly: the Frobenius inner product is "
+              "$\\langle A, B\\rangle = \\mathrm{tr}(A^\\top B)$, and the KL divergence between two Gaussians "
+              "contains $\\mathrm{tr}(\\Sigma_2^{-1}\\Sigma_1)$.")),
+      apis=("jax.numpy.trace",),
+      module="09", also=("43",)),
     E("low-rank approximation (SVD)", "Linear algebra",
       "Keep only the k biggest stretches of a matrix: the best rank-k copy of it.",
       r"A_k = \sum_{i=1}^{k} \sigma_i\, u_i v_i^\top = U_k \Sigma_k V_k^\top", r"$A = U \Sigma V^\top$",

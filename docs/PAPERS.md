@@ -445,6 +445,41 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer](https://arxiv.org/abs/2203.03466)** — Yang et al., 2022. µP: tune on a narrow model, reuse the hyperparameters on a wide one.
 - **[Sparse Upcycling: Training Mixture-of-Experts from Dense Checkpoints](https://arxiv.org/abs/2212.05055)** — Komatsuzaki et al., 2022. Copy a dense model's MLP into every expert and keep training.
 
+### 43 · From pixels to words: vision transformers and vision-language models (2020–2025)
+
+- **[An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)** — Dosovitskiy et al., 2020. ViT: cut the image into patches, treat them as tokens; wins once pretrained on enough data.
+- **[Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020)** — Radford et al., 2021. CLIP: 400M image-text pairs, a contrastive loss, zero-shot classification by text.
+- **[Sigmoid Loss for Language Image Pre-Training](https://arxiv.org/abs/2303.15343)** — Zhai et al., 2023. SigLIP: one yes/no question per image-text pair instead of a softmax over the batch.
+- **[Visual Instruction Tuning](https://arxiv.org/abs/2304.08485)** — Liu et al., 2023. LLaVA: a frozen CLIP encoder, a projection into an LLM, then instruction tuning.
+- **[Improved Baselines with Visual Instruction Tuning](https://arxiv.org/abs/2310.03744)** — Liu et al., 2023. LLaVA-1.5: a 2-layer MLP projector, higher resolution; the recipe most open VLMs copied.
+- **[PaliGemma: A versatile 3B VLM for transfer](https://arxiv.org/abs/2407.07726)** — Beyer et al., 2024. SigLIP + Gemma, trained end to end, image tokens attended bidirectionally.
+- **[Qwen2.5-VL Technical Report](https://arxiv.org/abs/2502.13923)** — Qwen Team, 2025. Native dynamic resolution: as many image tokens as the image needs, with windowed attention.
+- **[SmolVLM: Redefining small and efficient multimodal models](https://arxiv.org/abs/2504.05299)** — Marafioti et al., 2025. SigLIP + SmolLM2 in 256M parameters; pixel shuffle cuts 1,024 patches to 64 tokens.
+
+### 44 · Efficient and sparse attention: reading only part of the past (2019–2026)
+
+- **[Generating Long Sequences with Sparse Transformers](https://arxiv.org/abs/1904.10509)** — Child et al., 2019. Strided and local attention patterns: O(T√T) instead of O(T²).
+- **[Longformer: The Long-Document Transformer](https://arxiv.org/abs/2004.05150)** — Beltagy, Peters, Cohan, 2020. Sliding-window attention plus a few global tokens.
+- **[Big Bird: Transformers for Longer Sequences](https://arxiv.org/abs/2007.14062)** — Zaheer et al., 2020. Window + global + random keys, with a proof that it stays as expressive as full attention.
+- **[Mistral 7B](https://arxiv.org/abs/2310.06825)** — Jiang et al., 2023. A 4,096-token sliding window and a rolling KV cache.
+- **[Efficient Streaming Language Models with Attention Sinks](https://arxiv.org/abs/2309.17453)** — Xiao et al., 2023. StreamingLLM: keep the first 4 tokens and a window; pretrained models then run on endless streams.
+- **[Gemma 3 Technical Report](https://arxiv.org/abs/2503.19786)** — Gemma Team, 2025. 5 local (1,024-token window) : 1 global layers to shrink the KV cache at 128K context.
+- **[MoBA: Mixture of Block Attention for Long-Context LLMs](https://arxiv.org/abs/2502.13189)** — Lu et al., 2025. Route each query to its top blocks by mean key; used in Kimi's long-context serving.
+- **[Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention](https://arxiv.org/abs/2502.11089)** — Yuan et al., 2025. Compressed, selected and sliding branches with a learned gate, trained sparse from the start.
+- **[DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models](https://arxiv.org/abs/2512.02556)** — DeepSeek-AI, 2025. DeepSeek Sparse Attention: a lightning indexer picks 2,048 tokens per query.
+
+### 45 · Diffusion language models: writing a whole passage at once (2021–2026)
+
+- **[Structured Denoising Diffusion Models in Discrete State-Spaces](https://arxiv.org/abs/2107.03006)** — Austin et al., 2021. D3PM: diffusion over discrete tokens; the absorbing [MASK] noise used here is one of its options.
+- **[Discrete Diffusion Modeling by Estimating the Ratios of the Data Distribution](https://arxiv.org/abs/2310.16834)** — Lou, Meng, Ermon, 2024. SEDD: score entropy for discrete data; ICML 2024 best paper.
+- **[Simple and Effective Masked Diffusion Language Models](https://arxiv.org/abs/2406.07524)** — Sahoo et al., 2024. MDLM: the loss is a weighted mix of masked-LM losses and a bound on the likelihood; this module's recipe.
+- **[Scaling up Masked Diffusion Models on Text](https://arxiv.org/abs/2410.18514)** — Nie et al., 2024. Scaling laws for masked diffusion: about 16× the compute of an autoregressive model for the same loss.
+- **[Large Language Diffusion Models](https://arxiv.org/abs/2502.09992)** — Nie et al., 2025. LLaDA 8B: masked diffusion from scratch at Llama 3 8B scale; low-confidence remasking, block sampling.
+- **[Dream 7B: Diffusion Large Language Models](https://arxiv.org/abs/2508.15487)** — Ye et al., 2025. A diffusion LM initialized from an autoregressive model's weights (Qwen2.5-7B).
+- **[Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models](https://arxiv.org/abs/2503.09573)** — Arriola et al., 2025. BD3-LM: autoregressive over blocks, diffusion within each, with a KV cache.
+- **[Mercury: Ultra-Fast Language Models Based on Diffusion](https://arxiv.org/abs/2506.17298)** — Inception Labs, 2025. A commercial diffusion coder; over 1,000 tokens/s on an H100 by the vendor's measurement.
+- **[Seed Diffusion: A Large-Scale Diffusion Language Model with High-Speed Inference](https://arxiv.org/abs/2508.02193)** — ByteDance Seed, 2025. A diffusion code model reporting 2,146 tokens/s.
+
 ## Books
 
 For a second pass, or a different angle. Most are free to read online from their authors; each entry says so.

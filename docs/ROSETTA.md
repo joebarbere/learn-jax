@@ -6,11 +6,11 @@ Each operation the course introduces, written five ways: the formula (and how pa
 
 - **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add)
 - **Elementwise math:** [exp, log and powers](#exp-log-and-powers), [trig and sign functions](#trig-and-sign-functions), [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero), [clip, maximum and minimum (elementwise)](#clip-maximum-and-minimum-elementwise), [round to bfloat16](#round-to-bfloat16)
-- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution)
+- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation)
 - **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient)
 - **Random numbers:** [normal samples](#normal-samples), [uniform samples](#uniform-samples), [random integers](#random-integers), [categorical sampling](#categorical-sampling), [Bernoulli samples](#bernoulli-samples), [shuffle (random permutation)](#shuffle-random-permutation), [sample without replacement](#sample-without-replacement), [He (Kaiming) normal initialization](#he-kaiming-normal-initialization)
 - **Control flow and transforms:** [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap), [loop with carried state: lax.scan](#loop-with-carried-state-laxscan), [fixed and open-ended loops: fori_loop and while_loop](#fixed-and-open-ended-loops-foriloop-and-whileloop), [branches: lax.cond and lax.switch](#branches-laxcond-and-laxswitch)
-- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t)
+- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip)
 - **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz)
 - **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
@@ -1783,6 +1783,61 @@ def eigvalsh(A):
 - All three return eigenvalues in ascending order.
 - Eigenvectors are only defined up to sign, so different libraries (or GPUs) can return $v$ or $-v$; compare $Q\Lambda Q^\top$, not $Q$.
 
+### trace of a matrix
+
+*Module 09; also 43.*
+
+Add up the diagonal. It equals the sum of the eigenvalues, so it doesn't change when you rotate the matrix into another basis; for a confusion matrix it counts the correct answers.
+
+$$
+\mathrm{tr}(A) = \sum_{i=1}^{n} A_{ii} = \sum_{i=1}^{n} \lambda_i
+$$
+
+**In papers:** $\mathrm{tr}(AB) = \mathrm{tr}(BA)$
+
+**Shapes:** `(n, n) -> scalar`
+
+**JAX names:** `jax.numpy.trace`
+
+**Python**
+
+```python
+def trace(A):
+    return sum(A[i][i] for i in range(len(A)))
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def trace(A):
+    return np.trace(A)
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def trace(A):
+    return jnp.trace(A)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def trace(A):
+    return torch.trace(A)  # 2-D only; for a batch: torch.diagonal(A, dim1=-2, dim2=-1).sum(-1)
+```
+
+**Where they differ**
+
+- Batches of matrices: `jnp.trace(A, axis1=-2, axis2=-1)` gives one trace per matrix. PyTorch's `torch.trace` takes only a single 2-D matrix.
+- Papers use the trace to write sums compactly: the Frobenius inner product is $\langle A, B\rangle = \mathrm{tr}(A^\top B)$, and the KL divergence between two Gaussians contains $\mathrm{tr}(\Sigma_2^{-1}\Sigma_1)$.
+
 ### low-rank approximation (SVD)
 
 *Module 02; also 20.*
@@ -2076,6 +2131,89 @@ def tri_solve(L, b):
 
 - O(n²) per right-hand side, against O(n³) for a general solve; a unit diagonal (`unit_diagonal=True`) skips the division.
 - PyTorch says `upper=False` where JAX and SciPy say `lower=True`.
+
+### bilinear resize of a grid (position-embedding interpolation)
+
+*Module 43.*
+
+Stretch a g × g grid of vectors to g' × g': each new cell sits at a fractional position in the old grid and takes a weighted average of the four old cells around it, weights by distance. How a ViT's learned position embeddings are reused at a new image resolution.
+
+$$
+y_{i'j'} = \sum_{a,b \in \{0,1\}} w_a^{(i')}\, w_b^{(j')}\, x_{\lfloor u\rfloor + a,\ \lfloor v\rfloor + b},\quad u = \big(i' + \tfrac12\big)\tfrac{g}{g'} - \tfrac12,\ w_1 = u - \lfloor u\rfloor,\ w_0 = 1 - w_1
+$$
+
+**In papers:** $u$ is clamped to $[0, g-1]$ at the edges (the half-pixel convention of `jax.image.resize` and PyTorch's `align_corners=False`)
+
+**Shapes:** `grid (g, g, d), new size g' (upsampling) -> (g', g', d)`
+
+**JAX names:** `jax.image.resize`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def resize(grid, new):
+    g = len(grid)
+
+    def taps(i):
+        u = min(max((i + 0.5) * g / new - 0.5, 0.0), g - 1.0)
+        lo = min(int(math.floor(u)), g - 2)
+        return lo, u - lo
+
+    out = []
+    for i in range(new):
+        (r0, wr), row = taps(i), []
+        for j in range(new):
+            c0, wc = taps(j)
+            row.append([(1 - wr) * (1 - wc) * grid[r0][c0][k] + (1 - wr) * wc * grid[r0][c0 + 1][k]
+                        + wr * (1 - wc) * grid[r0 + 1][c0][k] + wr * wc * grid[r0 + 1][c0 + 1][k]
+                        for k in range(len(grid[0][0]))])
+        out.append(row)
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def resize(grid, new):
+    g = grid.shape[0]
+    u = np.clip((np.arange(new) + 0.5) * g / new - 0.5, 0, g - 1)
+    lo = np.minimum(np.floor(u).astype(int), g - 2)
+    w = u - lo
+    rows = grid[lo] * (1 - w)[:, None, None] + grid[lo + 1] * w[:, None, None]
+    return rows[:, lo] * (1 - w)[None, :, None] + rows[:, lo + 1] * w[None, :, None]
+```
+
+**JAX**
+
+```python
+import jax
+
+def resize(grid, new):
+    return jax.image.resize(grid, (new, new, grid.shape[-1]), "bilinear")
+```
+
+**PyTorch**
+
+```python
+import torch
+import torch.nn.functional as F
+
+def resize(grid, new):
+    x = grid.permute(2, 0, 1)[None]                          # (1, d, g, g): channels first
+    y = F.interpolate(x, size=(new, new), mode="bilinear", align_corners=False)
+    return y[0].permute(1, 2, 0)
+```
+
+**Where they differ**
+
+- PyTorch resizes the last two axes of an (N, C, H, W) tensor, so the grid is moved channels-first and back; JAX's `jax.image.resize` takes the full output shape and resizes every axis whose size changes.
+- For shrinking, `jax.image.resize` antialiases by default (a wider kernel) and PyTorch does not unless `antialias=True`; for enlarging, as here, they agree.
 
 ## Calculus and autodiff
 
@@ -4054,6 +4192,154 @@ def kd(student, ids, logp, T):
 
 - The teacher's log-probabilities are normalized over the whole vocabulary before the top-k cut; dividing them by T and renormalizing over the k kept tokens equals a softmax of the teacher's logits / T restricted to those tokens.
 - PyTorch's `F.kl_div(input, target)` takes the *student's* log-probabilities first and the teacher's probabilities second, and its default reduction averages over every element, not over positions: use `reduction='batchmean'`.
+
+### masked diffusion loss (MDLM)
+
+*Module 45.*
+
+Hide each token with probability t, ask the model to predict the hidden ones from everything it can see (both sides), and score only the hidden positions. Dividing by t makes it a bound on the negative log-likelihood: at a low masking rate each hidden token stands for many.
+
+$$
+\mathcal L = \mathbb{E}_{t}\, \frac{1}{t\,T} \sum_{i:\, z_i = \texttt{[MASK]}} -\log p_\theta(x_i \mid z),\quad z_i = \begin{cases}\texttt{[MASK]} & \text{with prob. } t\\ x_i & \text{otherwise}\end{cases}
+$$
+
+**In papers:** $\mathcal L_{\mathrm{NELBO}} = \mathbb{E}_q \int_0^1 \frac{\alpha'_t}{1-\alpha_t} \sum_\ell \log\langle x_\theta^\ell(z_t), x^\ell\rangle\, dt$ (Sahoo et al. 2024, eq. 11; $\alpha_t = 1 - t$ gives the weight $1/t$)
+
+**Shapes:** `logits (B, T, V), x (B, T), masked (B, T) bool, t (B,) -> scalar`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def mdlm(logits, x, masked, t):
+    total = 0.0
+    for row, xs, ms, tb in zip(logits, x, masked, t):
+        s = 0.0
+        for z, xi, m in zip(row, xs, ms):
+            if m:
+                mx = max(z)
+                lse = mx + math.log(sum(math.exp(zi - mx) for zi in z))
+                s += lse - z[xi]                              # -log softmax(z)[x_i]
+        total += s / (tb * len(xs))
+    return total / len(logits)
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def mdlm(logits, x, masked, t):
+    z = logits - logits.max(-1, keepdims=True)
+    logp = z - np.log(np.exp(z).sum(-1, keepdims=True))
+    nll = -np.take_along_axis(logp, x[..., None], -1)[..., 0]
+    return np.mean((nll * masked).sum(-1) / (t * x.shape[-1]))
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def mdlm(logits, x, masked, t):
+    nll = -jnp.take_along_axis(jax.nn.log_softmax(logits, -1), x[..., None], -1)[..., 0]
+    return jnp.mean(jnp.sum(nll * masked, -1) / (t * x.shape[-1]))
+```
+
+**PyTorch**
+
+```python
+import torch
+import torch.nn.functional as F
+
+def mdlm(logits, x, masked, t):
+    nll = F.cross_entropy(logits.transpose(1, 2), x, reduction="none")    # (B, T)
+    return ((nll * masked).sum(-1) / (t * x.shape[-1])).mean()
+```
+
+**Where they differ**
+
+- Divide by T (all positions), not by the number of masked ones: the 1/t weight already accounts for how many were hidden on average. Dividing by the masked count instead gives BERT's loss, which is not a likelihood bound.
+- PyTorch's `F.cross_entropy` wants the class axis second, so (B, T, V) logits are transposed to (B, V, T); JAX and NumPy index the last axis.
+
+### sigmoid image-text loss (SigLIP)
+
+*Module 43.*
+
+Score every image against every caption in the batch; each pair is its own yes/no question: matching pairs (the diagonal) should score high, all others low. A learned scale t and bias b map cosine similarity to a logit.
+
+$$
+\mathcal L = -\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{n} \log \sigma\big(z_{ij}\,(t\,\hat x_i \cdot \hat y_j + b)\big),\quad z_{ij} = \begin{cases}+1 & i = j\\ -1 & i \ne j\end{cases}
+$$
+
+**In papers:** $-\frac{1}{|\mathcal B|}\sum_{i=1}^{|\mathcal B|}\sum_{j=1}^{|\mathcal B|}\log\frac{1}{1+e^{z_{ij}(-t\mathbf x_i\cdot\mathbf y_j+b)}}$ (Zhai et al. 2023, eq. 2; $\mathbf x, \mathbf y$ already normalized; their $-t$ in the exponent is the same sign convention)
+
+**Shapes:** `img (n, d), txt (n, d) matching row by row, t, b scalars -> scalar`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def siglip(img, txt, t, b):
+    unit = lambda v: [a / math.sqrt(sum(x * x for x in v)) for a in v]
+    img, txt = [unit(v) for v in img], [unit(v) for v in txt]
+    total = 0.0
+    for i, x in enumerate(img):
+        for j, y in enumerate(txt):
+            logit = t * sum(a * c for a, c in zip(x, y)) + b
+            z = 1.0 if i == j else -1.0
+            total += math.log(1 + math.exp(-z * logit))      # -log sigmoid(z * logit)
+    return total / len(img)
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def siglip(img, txt, t, b):
+    img = img / np.linalg.norm(img, axis=1, keepdims=True)
+    txt = txt / np.linalg.norm(txt, axis=1, keepdims=True)
+    z = 2 * np.eye(len(img)) - 1
+    return np.logaddexp(0, -z * (t * img @ txt.T + b)).sum() / len(img)
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def siglip(img, txt, t, b):
+    img = img / jnp.linalg.norm(img, axis=1, keepdims=True)
+    txt = txt / jnp.linalg.norm(txt, axis=1, keepdims=True)
+    z = 2 * jnp.eye(len(img)) - 1
+    return -jax.nn.log_sigmoid(z * (t * img @ txt.T + b)).sum() / len(img)
+```
+
+**PyTorch**
+
+```python
+import torch
+import torch.nn.functional as F
+
+def siglip(img, txt, t, b):
+    img, txt = F.normalize(img, dim=1), F.normalize(txt, dim=1)
+    z = 2 * torch.eye(len(img), dtype=img.dtype) - 1
+    return -F.logsigmoid(z * (t * img @ txt.T + b)).sum() / len(img)
+```
+
+**Where they differ**
+
+- `log(1 + exp(−x))` overflows for very negative x; NumPy's `np.logaddexp(0, −x)`, JAX's `jax.nn.log_sigmoid` and PyTorch's `F.logsigmoid` are the stable forms.
+- SigLIP learns log t (initialized at log 10) and b (at −10), so the many negative pairs start with a small loss. The loss sums over j and averages over i, not a mean over all n² pairs.
 
 ## Optimization
 
@@ -8170,6 +8456,7 @@ Every JAX, optax and Flax name the lessons use for math, and the entry that expl
 | `jax.experimental.sparse.BCOO` | [BM25 scoring as a sparse matrix product](#bm25-scoring-as-a-sparse-matrix-product) |
 | `jax.grad` | [gradient](#gradient) |
 | `jax.hessian` | [Hessian](#hessian) |
+| `jax.image.resize` | [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation) |
 | `jax.jacfwd` | [Jacobian](#jacobian) |
 | `jax.jacobian` | [Jacobian](#jacobian) |
 | `jax.jvp` | [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode) |
@@ -8266,6 +8553,7 @@ Every JAX, optax and Flax name the lessons use for math, and the entry that expl
 | `jax.numpy.take_along_axis` | [cross-entropy from logits](#cross-entropy-from-logits) |
 | `jax.numpy.tanh` | [trig and sign functions](#trig-and-sign-functions) |
 | `jax.numpy.tile` | [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto) |
+| `jax.numpy.trace` | [trace of a matrix](#trace-of-a-matrix) |
 | `jax.numpy.tril` | [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices) |
 | `jax.numpy.where` | [boolean masks: where, any and all](#boolean-masks-where-any-and-all) |
 | `jax.ops.segment_sum` | [segment sum (group-by add)](#segment-sum-group-by-add) |

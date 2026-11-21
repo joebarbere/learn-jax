@@ -151,6 +151,11 @@ TERMS: list[Term] = [
          "The matrix of attention weights from each query to each key, the first thing to look at in a "
          "head.",
          "37", (), ""),
+    Term("attention sink", ("attention sinks", "sink token", "sinks", "StreamingLLM"),
+         "The first token(s) of a sequence, on which a trained model parks attention it doesn't need "
+         "(softmax weights must sum to 1). Dropping them from a sliding window breaks a pretrained model; "
+         "keeping four fixes it.",
+         "44", (), "Xiao et al., 2023"),
     Term("autoencoder", ("autoencoders", "encoder and decoder"),
          "A network trained to reconstruct its input through a narrow bottleneck, so the bottleneck learns "
          "a compressed code.",
@@ -323,7 +328,7 @@ TERMS: list[Term] = [
          "Contrastive Language–Image Pretraining: an image encoder and a text encoder trained so matching "
          "image–caption pairs have high cosine similarity. Enables zero-shot classification and guides "
          "image generation.",
-         "33", ("38",), "Radford et al., 2021"),
+         "33", ("38", "43"), "Radford et al., 2021"),
     Term("clipped objective", ("clipped_pg_loss", "clip ratio"),
          "PPO's trick: cap how far the probability ratio between new and old policy can move in one "
          "update, so a step can't change the policy too much.",
@@ -469,6 +474,10 @@ TERMS: list[Term] = [
          "Machine learning with neural networks of many layers, trained end to end by gradient descent on "
          "large data. It took off in 2012, when AlexNet won ImageNet on GPUs.",
          "00b", ("06", "08", "12", "22"), ""),
+    Term("DeepSeek Sparse Attention", ("DSA", "lightning indexer", "indexer_scores"),
+         "DeepSeek V3.2's attention: a small ReLU-scored indexer ranks every past token and each query reads "
+         "only the top k (2,048); the indexer is trained to match the main attention's weights.",
+         "44", (), "DeepSeek-AI, 2025"),
     Term("DeepSeek-V3", ("DeepSeek V3", "deepseek-v3-jax"),
          "DeepSeek's 2024 MoE LLM combining MLA, DeepSeekMoE, aux-loss-free balancing and MTP. The owner's "
          "deepseek-v3-jax replication is a recurring reference in this course.",
@@ -495,7 +504,7 @@ TERMS: list[Term] = [
     Term("diffusion model", ("diffusion", "diffusion models"),
          "Learn to reverse a process that gradually adds noise to data: a network predicts the noise at "
          "each step, and generation starts from pure noise and denoises step by step.",
-         "33", ("00b",), "Sohl-Dickstein et al., 2015; Ho et al., 2020"),
+         "33", ("00b", "45"), "Sohl-Dickstein et al., 2015; Ho et al., 2020"),
     Term("dilated convolution", ("dilated causal convolution",),
          "A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with "
          "dilations 1-2-4-8. WaveNet stacks them causally.",
@@ -727,6 +736,10 @@ TERMS: list[Term] = [
          "A model that learns a data distribution so it can produce new samples resembling the training "
          "data.",
          "33", (), ""),
+    Term("generative perplexity", ("gen_nll", "generative NLL"),
+         "A score for generated text: a separate autoregressive model's loss on it. Easy to game with dull, "
+         "repetitive text, so it is read alongside diversity measures such as entropy and repeated n-grams.",
+         "45", (), "Lou et al., 2024; Sahoo et al., 2024"),
     Term("gfx1102", ("gfx1100",),
          "The instruction-set name of the RX 7600 XT (Navi 33, RDNA3). JAX's ROCm plugin only accepts a "
          "fixed list of architectures, so the card is made to report gfx1100 (the RX 7900's) instead.",
@@ -1081,6 +1094,10 @@ TERMS: list[Term] = [
          "Keeping MoE experts evenly used. Classic MoE adds an auxiliary loss; DeepSeek-V3 instead nudges "
          "a per-expert bias in the router after each step (aux-loss-free).",
          "17", ("40",), "DeepSeek-AI, 2024 (V3)"),
+    Term("local-global attention", ("local:global", "interleaved local and global layers"),
+         "Mixing sliding-window layers with a few full-attention layers (Gemma 2 1 : 1, Gemma 3 5 : 1): most "
+         "of the KV-cache saving of a window, with a path for long-range information.",
+         "44", (), "Gemma Team, 2024"),
     Term("log-sum-exp", ("logsumexp", "log_softmax", "log-softmax"),
          "log(Σ exp xᵢ), computed safely by subtracting the max first so nothing overflows. It is the "
          "normalizer inside log-softmax and cross-entropy.",
@@ -1118,6 +1135,10 @@ TERMS: list[Term] = [
          "A sudden jump in training loss, often from a bad batch, too high a learning rate or a numerical "
          "problem. Triage: check data, gradient norm, learning rate, precision.",
          "11", (), ""),
+    Term("low-confidence remasking", ("confidence-based unmasking", "by_confidence"),
+         "LLaDA's sampling rule for diffusion LMs: at each step keep the proposals the model is surest of and "
+         "leave the rest masked for later.",
+         "45", (), "Nie et al., 2025"),
     Term("low-rank approximation", ("low-rank", "low rank"),
          "Keep only the top few singular values of a matrix and drop the rest; the best approximation of "
          "that rank. LoRA and MLA both rely on weight changes or activations being nearly low-rank.",
@@ -1137,7 +1158,13 @@ TERMS: list[Term] = [
     Term("masked language modeling", ("MLM", "masked language model", "mask_tokens", "[MASK]"),
          "BERT's training task: hide ~15% of tokens (80% replaced by [MASK], 10% random, 10% unchanged) "
          "and predict them from both sides.",
-         "32", (), "Devlin et al., 2018"),
+         "32", ("45",), "Devlin et al., 2018"),
+    Term("masked diffusion language model", ("MDLM", "masked diffusion", "diffusion language model",
+                                             "diffusion language models", "diffusion LM", "LLaDA"),
+         "A language model that generates by filling in blanks: trained to predict tokens hidden at every "
+         "masking rate (weighted by 1/t, a bound on the likelihood), it starts from an all-[MASK] passage "
+         "and reveals several tokens per step, in any order.",
+         "45", ("33",), "Sahoo et al., 2024; Nie et al., 2025"),
     Term("master weights", ("master weights in float32",),
          "The float32 copy of the parameters the optimizer updates. Tiny updates would be rounded away if "
          "added to bfloat16 weights.",
@@ -1201,6 +1228,10 @@ TERMS: list[Term] = [
          "Replace one big MLP with many expert MLPs and a router that sends each token to a few of them. "
          "Parameters grow without per-token compute growing.",
          "17", ("00b", "16", "19", "24", "40"), "Shazeer et al., 2017"),
+    Term("MoBA", ("mixture of block attention", "moba_mask"),
+         "Block-sparse attention where each query reads its own block plus the earlier blocks whose mean key "
+         "scores highest against it: mixture-of-experts routing over blocks of the context.",
+         "44", ("17",), "Lu et al., 2025"),
     Term("mode collapse", ("mode-collapses", "mode collapses"),
          "A GAN failure in which the generator produces only a few kinds of output, ignoring the variety "
          "of the data.",
@@ -1278,6 +1309,10 @@ TERMS: list[Term] = [
          "Not-a-Number: the result of invalid float math like 0/0 or inf − inf. One NaN poisons everything "
          "it touches, so catching its source is a key debugging skill.",
          "11", ("05", "09", "25", "35", "39"), ""),
+    Term("Native Sparse Attention", ("NSA",),
+         "DeepSeek's trainable sparse attention: compressed block summaries, a few selected blocks and a "
+         "sliding window, combined by a learned gate and laid out for GPU kernels.",
+         "44", (), "Yuan et al., 2025"),
     Term("nats", (),
          "Units of information: a nat uses the natural log, a bit uses log base 2 (1 nat ≈ 1.44 bits). "
          "Losses in JAX are usually in nats.",
@@ -1422,6 +1457,10 @@ TERMS: list[Term] = [
          "The probability that at least one of k sampled answers is correct; an upper bound for what "
          "voting or verification can reach.",
          "26", (), "Chen et al., 2021 (Codex)"),
+    Term("patch embedding", ("patchify", "patches"),
+         "A ViT's first layer: cut the image into p × p patches, flatten each, and multiply by one matrix (the "
+         "same as a p × p convolution with stride p). Each patch becomes a token.",
+         "43", (), "Dosovitskiy et al., 2020"),
     Term("per-example gradients", ("per-example gradient", "per_example_grads"),
          "A separate gradient for every example in a batch, obtained as `vmap(grad(loss))`. Used in "
          "differential privacy and data diagnostics.",
@@ -1453,6 +1492,10 @@ TERMS: list[Term] = [
          "Putting different layers on different devices and streaming microbatches through, like an "
          "assembly line. Startup and drain leave idle time, the bubble.",
          "24", (), "Huang et al., 2018 (GPipe)"),
+    Term("pixel shuffle", ("pixel_shuffle", "space-to-depth"),
+         "Merging each r × r neighbourhood of image tokens into one wider token: r² fewer tokens for the "
+         "language model to read. SmolVLM uses it to cut 1,024 patches to 64 tokens.",
+         "43", (), "Shi et al., 2016; Marafioti et al., 2025"),
     Term("PJRT", ("PJRT plugin", "PJRT ROCm plugin"),
          "The plugin interface between JAX and a hardware backend. On this machine the `jax-rocm` PJRT "
          "plugin is the bridge from JAX to the AMD GPU.",
@@ -1807,6 +1850,10 @@ TERMS: list[Term] = [
     Term("self-refinement", ("self-refine", "self-correction"),
          "Asking a model to critique and revise its own answer.",
          "26", (), "Madaan et al., 2023"),
+    Term("semi-autoregressive sampling", ("block diffusion", "BD3-LM", "block_order"),
+         "Generate in blocks left to right, filling each block by diffusion: a middle ground between "
+         "autoregressive and fully parallel decoding.",
+         "45", (), "Arriola et al., 2025; Nie et al., 2025"),
     Term("seq2seq", ("sequence to sequence", "sequence-to-sequence", "encoder–decoder"),
          "An encoder RNN reads the input into one fixed-size vector and a decoder RNN generates the output "
          "from it; the 2014 recipe for translation. That single vector is a bottleneck, which attention "
@@ -1832,6 +1879,10 @@ TERMS: list[Term] = [
          "What an agent keeps of the current conversation: the full history, a sliding window of recent "
          "turns, a running summary or a structured ledger.",
          "39", ("21",), ""),
+    Term("SigLIP", ("sigmoid loss", "siglip_loss", "SigLIP 2"),
+         "A CLIP-style image-text model trained with a sigmoid loss: each image-text pair in the batch is its "
+         "own yes/no question, with no softmax across the batch. The vision encoder of most open VLMs.",
+         "43", (), "Zhai et al., 2023"),
     Term("sigmoid", ("logistic function",),
          "σ(x) = 1/(1 + e⁻ˣ): squashes any number into (0, 1). The two-class special case of softmax.",
          "09", ("10", "33"), ""),
@@ -1845,7 +1896,7 @@ TERMS: list[Term] = [
     Term("sliding-window attention", ("sliding window",),
          "Each token attends only to the previous W tokens, so compute and the KV cache grow with W "
          "instead of the context length.",
-         "00b", (), "Beltagy, Peters, Cohan, 2020 (Longformer)"),
+         "44", ("00b",), "Beltagy, Peters, Cohan, 2020 (Longformer)"),
     Term("SmolLM2", ("SmolLM2-135M", "SmolLM2-360M", "SmolLM"),
          "Hugging Face's small open LLMs (135M–1.7B); the real pretrained weights the course loads for "
          "inference, LoRA, evaluation, RAG and agents.",
@@ -2113,6 +2164,14 @@ TERMS: list[Term] = [
          "Vector general-purpose registers: each thread's private fast storage. A SIMD's register file is "
          "shared by its resident waves, so more VGPRs per thread means fewer waves fit.",
          "23", (), ""),
+    Term("vision transformer", ("ViT", "ViTs", "vision transformers"),
+         "A Transformer encoder applied to an image cut into patches, one token per patch. Weaker than a CNN "
+         "on small datasets, stronger once pretrained on enough data.",
+         "43", ("12",), "Dosovitskiy et al., 2020"),
+    Term("vision-language model", ("VLM", "VLMs", "multimodal LLM", "projector", "connector", "LLaVA"),
+         "A language model that reads images: a vision encoder's patch tokens, mapped by a small projector "
+         "into the LLM's embedding space, are placed in the prompt like words (LLaVA's recipe).",
+         "43", ("33",), "Liu et al., 2023"),
     Term("VJP", ("vector-Jacobian product",),
          "Vector-Jacobian product: pull a weighting of the outputs back to the inputs, computed by reverse "
          "mode. `grad` is a VJP with the vector 1.",

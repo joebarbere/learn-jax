@@ -592,8 +592,7 @@ def _(mo):
     * Andrej Karpathy, [nanochat](https://github.com/karpathy/nanochat) — a full ChatGPT-style pipeline
       (tokenizer, pretraining, fine-tuning, RL) sized for one node and a few hundred dollars.
 
-    **Next:** Part 12 continues (planned): vision transformers to vision-language models, efficient and
-    sparse attention, and diffusion language models.
+    **Next:** Module 43, from pixels to words: vision transformers and vision-language models.
     """)
     return
 

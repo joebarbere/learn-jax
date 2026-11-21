@@ -1,5 +1,5 @@
 """Rosetta entries for Part 12, frontier architectures: LatentMoE and Engram's pieces (Module 40), linear
-attention and the delta rule (Module 41), distillation (Module 42)."""
+attention and the delta rule (Module 41), distillation (Module 42), SigLIP's loss (Module 43), masked diffusion (Module 45)."""
 import numpy as np
 
 from learnjax.rosetta.entry import Entry as E
@@ -65,11 +65,11 @@ ENTRIES: list[E] = [
             return torch.einsum("ne,nel->nl", gates, torch.einsum("nem,eml->nel", h, W2)) @ up
       """,
       einsum="z_{nl} = x_{nd} D_{dl};\\ y_{nd} = \\big(\\sum_e g_{ne}\\, E_e(z)_{nl}\\big) U_{ld}",
-      notes=("Dense compute, as in Module 17: unpicked experts run and are multiplied by 0. A real layer "
+      notes=(("Dense compute, as in Module 17: unpicked experts run and are multiplied by 0. A real layer "
              "dispatches each token only to its picked experts (`jax.lax.ragged_dot`, or an all-to-all across "
-             "devices) — that's where projecting down *before* dispatch saves bytes.",
-             "The up-projection is linear, so applying it once after the weighted sum equals applying it to every "
-             "expert's output: one ℓ×d matmul per token instead of k."),
+             "devices) — that's where projecting down *before* dispatch saves bytes."),
+             ("The up-projection is linear, so applying it once after the weighted sum equals applying it to every "
+             "expert's output: one ℓ×d matmul per token instead of k.")),
       module="40", also=("17", "24")),
     E("n-gram hash (multiplicative XOR)", "Neural network layers",
       "Turn the last n token ids into one table row: multiply each id by its own odd constant, XOR the products, "
@@ -120,12 +120,12 @@ ENTRIES: list[E] = [
             mix3 = torch.bitwise_xor(mix2, s2 * mult[2])
             return torch.stack([mix2 % p2, mix3 % p3], -1)
       """,
-      notes=("JAX uses 32-bit integers unless you turn on `jax_enable_x64`, so `id × multiplier` wraps around "
+      notes=(("JAX uses 32-bit integers unless you turn on `jax_enable_x64`, so `id × multiplier` wraps around "
              "at 2³¹ — fine for these small numbers, not for DeepSeek's 64-bit multipliers. Engram computes its "
              "hashes on the host in NumPy int64 (they depend only on the token ids), which is also what makes "
-             "the lookups prefetchable.",
-             "Python's `%` and NumPy's / PyTorch's `%` agree for non-negative numbers; for negative ones C-style "
-             "`torch.fmod` differs. The XOR of non-negative products stays non-negative."),
+             "the lookups prefetchable."),
+             ("Python's `%` and NumPy's / PyTorch's `%` agree for non-negative numbers; for negative ones C-style "
+             "`torch.fmod` differs. The XOR of non-negative products stays non-negative.")),
       module="40"),
     E("Engram context gate", "Attention and transformers",
       "Compare the looked-up memory with the current hidden state: if they agree (a large normalized dot "
@@ -175,10 +175,10 @@ ENTRIES: list[E] = [
             s = (F.rms_norm(h, (d,), gh, eps) * F.rms_norm(k, (d,), gk, eps)).sum(-1) / d ** 0.5
             return torch.sigmoid(s)[..., None] * v
       """,
-      notes=("DeepSeek's demo code passes the score through a signed square root, sign(s)·√|s|, before the "
-             "sigmoid; the paper's equation doesn't. This course follows the paper.",
-             "With hyper-connections (mHC), Engram has one key projection and one gate per residual branch and "
-             "a shared value projection; this is the single-branch form."),
+      notes=(("DeepSeek's demo code passes the score through a signed square root, sign(s)·√|s|, before the "
+             "sigmoid; the paper's equation doesn't. This course follows the paper."),
+             ("With hyper-connections (mHC), Engram has one key projection and one gate per residual branch and "
+             "a shared value projection; this is the single-branch form.")),
       module="40"),
     E("causal depthwise dilated convolution", "Neural network layers",
       "Each channel gets its own short filter that looks only backwards in time, skipping `dilation − 1` steps "
@@ -228,8 +228,8 @@ ENTRIES: list[E] = [
             return y[..., :T].transpose(1, 2)                         # keep the first T outputs: causal
       """,
       notes=("All three libraries compute cross-correlation (no kernel flip), so w[K−1] meets the current step.",
-             "PyTorch pads both ends; keeping the first T outputs throws away the ones that saw the future. JAX's "
-             "`padding=[(left, right)]` pads only the left."),
+             ("PyTorch pads both ends; keeping the first T outputs throws away the ones that saw the future. JAX's "
+             "`padding=[(left, right)]` pads only the left.")),
       module="40", also=("36",)),
 ]
 
@@ -296,11 +296,11 @@ ENTRIES += [
             return torch.stack(out)
       """,
       einsum=r"o_{te} = \sum_{s \le t} \Big(\prod_{s < m \le t} a_m\Big) (q_{td} k_{sd})\, v_{se}",
-      notes=("The recurrent and the parallel forms are the same function: the recurrence costs O(T·dk·dv) and "
+      notes=(("The recurrent and the parallel forms are the same function: the recurrence costs O(T·dk·dv) and "
              "O(dk·dv) memory, the parallel form O(T²·d) but is all matmuls. Mamba-2 and every modern linear "
-             "layer use chunks: parallel inside a chunk, recurrent between chunks.",
-             "Keep the decay in log space and build the mask from differences of a cumulative sum: multiplying "
-             "many a_t < 1 directly underflows."),
+             "layer use chunks: parallel inside a chunk, recurrent between chunks."),
+             ("Keep the decay in log space and build the mask from differences of a cumulative sum: multiplying "
+             "many a_t < 1 directly underflows.")),
       module="41", also=("36", "15")),
     E("gated delta rule", "Sequence and state-space models",
       "A fixed-size memory that overwrites instead of adding. Fade the memory, ask it what it currently stores "
@@ -354,12 +354,12 @@ ENTRIES += [
                 out.append(qt @ S)
             return torch.stack(out)
       """,
-      notes=("This is one step of gradient descent on the regression loss ½‖Sᵀk − v‖² with learning rate β: "
-             "the layer learns key→value pairs as it reads (Schlag et al. 2021: 'fast weights').",
-             "Unit-length keys keep (I − βkkᵀ) a contraction for β in (0, 1); without the normalization the "
-             "state can blow up.",
-             "Training runs it chunkwise: the writes inside a chunk solve a small lower-triangular system "
-             "(the WY / UT transform), so the work is matmuls (Module 41's models.py)."),
+      notes=(("This is one step of gradient descent on the regression loss ½‖Sᵀk − v‖² with learning rate β: "
+             "the layer learns key→value pairs as it reads (Schlag et al. 2021: 'fast weights')."),
+             ("Unit-length keys keep (I − βkkᵀ) a contraction for β in (0, 1); without the normalization the "
+             "state can blow up."),
+             ("Training runs it chunkwise: the writes inside a chunk solve a small lower-triangular system "
+             "(the WY / UT transform), so the work is matmuls (Module 41's models.py).")),
       module="41"),
 ]
 
@@ -403,8 +403,8 @@ ENTRIES += [
         def tri_solve(L, b):
             return torch.linalg.solve_triangular(L, b, upper=False)
       """,
-      notes=("O(n²) per right-hand side, against O(n³) for a general solve; a unit diagonal "
-             "(`unit_diagonal=True`) skips the division.",
+      notes=(("O(n²) per right-hand side, against O(n³) for a general solve; a unit diagonal "
+             "(`unit_diagonal=True`) skips the division."),
              "PyTorch says `upper=False` where JAX and SciPy say `lower=True`."),
       module="41", apis=("jax.scipy.linalg.solve_triangular",)),
 ]
@@ -463,11 +463,194 @@ ENTRIES += [
             logq = torch.gather(F.log_softmax(student / T, -1), -1, ids)
             return T * T * (p * (p.log() - logq)).sum(-1).mean()
       """,
-      notes=("The teacher's log-probabilities are normalized over the whole vocabulary before the top-k cut; "
+      notes=(("The teacher's log-probabilities are normalized over the whole vocabulary before the top-k cut; "
              "dividing them by T and renormalizing over the k kept tokens equals a softmax of the teacher's "
-             "logits / T restricted to those tokens.",
-             "PyTorch's `F.kl_div(input, target)` takes the *student's* log-probabilities first and the teacher's "
+             "logits / T restricted to those tokens."),
+             ("PyTorch's `F.kl_div(input, target)` takes the *student's* log-probabilities first and the teacher's "
              "probabilities second, and its default reduction averages over every element, not over positions: "
-             "use `reduction='batchmean'`."),
+             "use `reduction='batchmean'`.")),
       module="42", also=("26",)),
+]
+
+
+def _mdlm_inputs(r: np.random.Generator) -> dict:
+    B, T, V = 3, 6, 7
+    return {"logits": r.normal(size=(B, T, V)), "x": r.integers(0, V, (B, T)),
+            "masked": r.random((B, T)) < 0.5, "t": np.array([0.2, 0.5, 0.9])}
+
+
+ENTRIES += [
+    E("masked diffusion loss (MDLM)", "Probability and information",
+      "Hide each token with probability t, ask the model to predict the hidden ones from everything it can see "
+      "(both sides), and score only the hidden positions. Dividing by t makes it a bound on the negative "
+      "log-likelihood: at a low masking rate each hidden token stands for many.",
+      r"\mathcal L = \mathbb{E}_{t}\, \frac{1}{t\,T} \sum_{i:\, z_i = \texttt{[MASK]}} -\log p_\theta(x_i \mid z),"
+      r"\quad z_i = \begin{cases}\texttt{[MASK]} & \text{with prob. } t\\ x_i & \text{otherwise}\end{cases}",
+      r"$\mathcal L_{\mathrm{NELBO}} = \mathbb{E}_q \int_0^1 \frac{\alpha'_t}{1-\alpha_t} \sum_\ell "
+      r"\log\langle x_\theta^\ell(z_t), x^\ell\rangle\, dt$ (Sahoo et al. 2024, eq. 11; $\alpha_t = 1 - t$ gives "
+      r"the weight $1/t$)",
+      "logits (B, T, V), x (B, T), masked (B, T) bool, t (B,) -> scalar",
+      "mdlm(logits, x, masked, t)", _mdlm_inputs,
+      python="""
+        import math
+
+        def mdlm(logits, x, masked, t):
+            total = 0.0
+            for row, xs, ms, tb in zip(logits, x, masked, t):
+                s = 0.0
+                for z, xi, m in zip(row, xs, ms):
+                    if m:
+                        mx = max(z)
+                        lse = mx + math.log(sum(math.exp(zi - mx) for zi in z))
+                        s += lse - z[xi]                              # -log softmax(z)[x_i]
+                total += s / (tb * len(xs))
+            return total / len(logits)
+      """,
+      numpy="""
+        def mdlm(logits, x, masked, t):
+            z = logits - logits.max(-1, keepdims=True)
+            logp = z - np.log(np.exp(z).sum(-1, keepdims=True))
+            nll = -np.take_along_axis(logp, x[..., None], -1)[..., 0]
+            return np.mean((nll * masked).sum(-1) / (t * x.shape[-1]))
+      """,
+      jax="""
+        def mdlm(logits, x, masked, t):
+            nll = -jnp.take_along_axis(jax.nn.log_softmax(logits, -1), x[..., None], -1)[..., 0]
+            return jnp.mean(jnp.sum(nll * masked, -1) / (t * x.shape[-1]))
+      """,
+      torch="""
+        def mdlm(logits, x, masked, t):
+            nll = F.cross_entropy(logits.transpose(1, 2), x, reduction="none")    # (B, T)
+            return ((nll * masked).sum(-1) / (t * x.shape[-1])).mean()
+      """,
+      notes=(("Divide by T (all positions), not by the number of masked ones: the 1/t weight already accounts for "
+             "how many were hidden on average. Dividing by the masked count instead gives BERT's loss, which is "
+             "not a likelihood bound."),
+             ("PyTorch's `F.cross_entropy` wants the class axis second, so (B, T, V) logits are transposed to "
+             "(B, V, T); JAX and NumPy index the last axis.")),
+      module="45"),
+]
+
+
+def _siglip_inputs(r: np.random.Generator) -> dict:
+    n, d = 4, 6
+    return {"img": r.normal(size=(n, d)), "txt": r.normal(size=(n, d)), "t": 10.0, "b": -5.0}
+
+
+ENTRIES += [
+    E("sigmoid image-text loss (SigLIP)", "Probability and information",
+      "Score every image against every caption in the batch; each pair is its own yes/no question: matching "
+      "pairs (the diagonal) should score high, all others low. A learned scale t and bias b map cosine "
+      "similarity to a logit.",
+      r"\mathcal L = -\frac{1}{n}\sum_{i=1}^{n}\sum_{j=1}^{n} \log \sigma\big(z_{ij}\,(t\,\hat x_i \cdot \hat y_j + b)\big),"
+      r"\quad z_{ij} = \begin{cases}+1 & i = j\\ -1 & i \ne j\end{cases}",
+      r"$-\frac{1}{|\mathcal B|}\sum_{i=1}^{|\mathcal B|}\sum_{j=1}^{|\mathcal B|}\log\frac{1}{1+e^{z_{ij}(-t\mathbf x_i\cdot\mathbf y_j+b)}}$ "
+      r"(Zhai et al. 2023, eq. 2; $\mathbf x, \mathbf y$ already normalized; their $-t$ in the exponent is the "
+      r"same sign convention)",
+      "img (n, d), txt (n, d) matching row by row, t, b scalars -> scalar",
+      "siglip(img, txt, t, b)", _siglip_inputs,
+      python="""
+        import math
+
+        def siglip(img, txt, t, b):
+            unit = lambda v: [a / math.sqrt(sum(x * x for x in v)) for a in v]
+            img, txt = [unit(v) for v in img], [unit(v) for v in txt]
+            total = 0.0
+            for i, x in enumerate(img):
+                for j, y in enumerate(txt):
+                    logit = t * sum(a * c for a, c in zip(x, y)) + b
+                    z = 1.0 if i == j else -1.0
+                    total += math.log(1 + math.exp(-z * logit))      # -log sigmoid(z * logit)
+            return total / len(img)
+      """,
+      numpy="""
+        def siglip(img, txt, t, b):
+            img = img / np.linalg.norm(img, axis=1, keepdims=True)
+            txt = txt / np.linalg.norm(txt, axis=1, keepdims=True)
+            z = 2 * np.eye(len(img)) - 1
+            return np.logaddexp(0, -z * (t * img @ txt.T + b)).sum() / len(img)
+      """,
+      jax="""
+        def siglip(img, txt, t, b):
+            img = img / jnp.linalg.norm(img, axis=1, keepdims=True)
+            txt = txt / jnp.linalg.norm(txt, axis=1, keepdims=True)
+            z = 2 * jnp.eye(len(img)) - 1
+            return -jax.nn.log_sigmoid(z * (t * img @ txt.T + b)).sum() / len(img)
+      """,
+      torch="""
+        def siglip(img, txt, t, b):
+            img, txt = F.normalize(img, dim=1), F.normalize(txt, dim=1)
+            z = 2 * torch.eye(len(img), dtype=img.dtype) - 1
+            return -F.logsigmoid(z * (t * img @ txt.T + b)).sum() / len(img)
+      """,
+      notes=(("`log(1 + exp(−x))` overflows for very negative x; NumPy's `np.logaddexp(0, −x)`, JAX's "
+             "`jax.nn.log_sigmoid` and PyTorch's `F.logsigmoid` are the stable forms."),
+             ("SigLIP learns log t (initialized at log 10) and b (at −10), so the many negative pairs start with a "
+             "small loss. The loss sums over j and averages over i, not a mean over all n² pairs.")),
+      module="43"),
+]
+
+
+def _resize_inputs(r: np.random.Generator) -> dict:
+    return {"grid": r.normal(size=(3, 3, 2)), "new": 5}
+
+
+ENTRIES += [
+    E("bilinear resize of a grid (position-embedding interpolation)", "Linear algebra",
+      "Stretch a g × g grid of vectors to g' × g': each new cell sits at a fractional position in the old "
+      "grid and takes a weighted average of the four old cells around it, weights by distance. How a ViT's "
+      "learned position embeddings are reused at a new image resolution.",
+      r"y_{i'j'} = \sum_{a,b \in \{0,1\}} w_a^{(i')}\, w_b^{(j')}\, x_{\lfloor u\rfloor + a,\ \lfloor v\rfloor + b},\quad "
+      r"u = \big(i' + \tfrac12\big)\tfrac{g}{g'} - \tfrac12,\ w_1 = u - \lfloor u\rfloor,\ w_0 = 1 - w_1",
+      r"$u$ is clamped to $[0, g-1]$ at the edges (the half-pixel convention of `jax.image.resize` and "
+      r"PyTorch's `align_corners=False`)",
+      "grid (g, g, d), new size g' (upsampling) -> (g', g', d)",
+      "resize(grid, new)", _resize_inputs,
+      python="""
+        import math
+
+        def resize(grid, new):
+            g = len(grid)
+
+            def taps(i):
+                u = min(max((i + 0.5) * g / new - 0.5, 0.0), g - 1.0)
+                lo = min(int(math.floor(u)), g - 2)
+                return lo, u - lo
+
+            out = []
+            for i in range(new):
+                (r0, wr), row = taps(i), []
+                for j in range(new):
+                    c0, wc = taps(j)
+                    row.append([(1 - wr) * (1 - wc) * grid[r0][c0][k] + (1 - wr) * wc * grid[r0][c0 + 1][k]
+                                + wr * (1 - wc) * grid[r0 + 1][c0][k] + wr * wc * grid[r0 + 1][c0 + 1][k]
+                                for k in range(len(grid[0][0]))])
+                out.append(row)
+            return out
+      """,
+      numpy="""
+        def resize(grid, new):
+            g = grid.shape[0]
+            u = np.clip((np.arange(new) + 0.5) * g / new - 0.5, 0, g - 1)
+            lo = np.minimum(np.floor(u).astype(int), g - 2)
+            w = u - lo
+            rows = grid[lo] * (1 - w)[:, None, None] + grid[lo + 1] * w[:, None, None]
+            return rows[:, lo] * (1 - w)[None, :, None] + rows[:, lo + 1] * w[None, :, None]
+      """,
+      jax="""
+        def resize(grid, new):
+            return jax.image.resize(grid, (new, new, grid.shape[-1]), "bilinear")
+      """,
+      torch="""
+        def resize(grid, new):
+            x = grid.permute(2, 0, 1)[None]                          # (1, d, g, g): channels first
+            y = F.interpolate(x, size=(new, new), mode="bilinear", align_corners=False)
+            return y[0].permute(1, 2, 0)
+      """,
+      notes=(("PyTorch resizes the last two axes of an (N, C, H, W) tensor, so the grid is moved channels-first "
+             "and back; JAX's `jax.image.resize` takes the full output shape and resizes every axis whose "
+             "size changes."),
+             ("For shrinking, `jax.image.resize` antialiases by default (a wider kernel) and PyTorch does not unless "
+             "`antialias=True`; for enlarging, as here, they agree.")),
+      apis=("jax.image.resize",), module="43"),
 ]
