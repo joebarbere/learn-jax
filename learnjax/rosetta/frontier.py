@@ -1,5 +1,6 @@
 """Rosetta entries for Part 12, frontier architectures: LatentMoE and Engram's pieces (Module 40), linear
-attention and the delta rule (Module 41), distillation (Module 42), SigLIP's loss (Module 43), masked diffusion (Module 45)."""
+attention and the delta rule (Module 41), distillation (Module 42), SigLIP's loss (Module 43), masked diffusion (Module 45), and setting, merging and
+editing weights by hand (Module 46)."""
 import numpy as np
 
 from learnjax.rosetta.entry import Entry as E
@@ -653,4 +654,152 @@ ENTRIES += [
              ("For shrinking, `jax.image.resize` antialiases by default (a wider kernel) and PyTorch does not unless "
              "`antialias=True`; for enlarging, as here, they agree.")),
       apis=("jax.image.resize",), module="43"),
+]
+
+
+def _nb_inputs(r: np.random.Generator) -> dict:
+    return {"rates": r.uniform(0.05, 0.95, (3, 5)), "prior": r.dirichlet(np.ones(3))}
+
+
+def _ties_inputs(r: np.random.Generator) -> dict:
+    return {"taus": r.normal(size=(3, 40)), "density": 0.25, "lam": 1.0}
+
+
+def _rome_inputs(r: np.random.Generator) -> dict:
+    A = r.normal(size=(6, 6))
+    return {"W": r.normal(size=(6, 4)), "k": r.normal(size=6), "v": r.normal(size=4),
+            "C_inv": np.linalg.inv(A @ A.T / 6 + np.eye(6))}
+
+
+ENTRIES += [
+    E("naive Bayes readout for binary features", "Probability and information",
+      "Count how often each feature fires for each class, assume the features are independent given the class, "
+      "and the log-probability of each class becomes a linear layer: one weight per feature and class (the "
+      "log-odds of firing) plus a bias. Weights from counting, not from gradients.",
+      r"W_{fc} = \log r_{cf} - \log(1 - r_{cf}),\quad b_c = \sum_f \log(1 - r_{cf}) + \log \pi_c,"
+      r"\quad \log p(c \mid x) = x^\top W_{:,c} + b_c + \text{const}",
+      r"$\log P(c)\prod_f r_{cf}^{x_f}(1-r_{cf})^{1-x_f}$ (Bernoulli naive Bayes)",
+      "rates (C, F), prior (C,) -> {W: (F, C), b: (C,)}", "readout(rates, prior)", _nb_inputs,
+      python="""
+        import math
+
+        def readout(rates, prior):
+            C, F = len(rates), len(rates[0])
+            W = [[math.log(rates[c][f]) - math.log(1 - rates[c][f]) for c in range(C)] for f in range(F)]
+            b = [sum(math.log(1 - rates[c][f]) for f in range(F)) + math.log(prior[c]) for c in range(C)]
+            return {"W": W, "b": b}
+      """,
+      numpy="""
+        def readout(rates, prior):
+            return {"W": (np.log(rates) - np.log1p(-rates)).T, "b": np.log1p(-rates).sum(1) + np.log(prior)}
+      """,
+      jax="""
+        def readout(rates, prior):
+            return {"W": (jnp.log(rates) - jnp.log1p(-rates)).T, "b": jnp.log1p(-rates).sum(1) + jnp.log(prior)}
+      """,
+      torch="""
+        def readout(rates, prior):
+            return {"W": (torch.log(rates) - torch.log1p(-rates)).T, "b": torch.log1p(-rates).sum(1) + torch.log(prior)}
+      """,
+      notes=(("Smooth the counts first (add 1 to each count and 2 to each total): a rate of exactly 0 or 1 gives an "
+              "infinite weight."),
+             ("The same formula is the first layer of a 1990s OCR system and the readout Toumbourou's LLM-written "
+              "MNIST network ended up using (Module 46).")),
+      module="46"),
+    E("TIES merging of task vectors", "Optimization",
+      "Merge several fine-tunes of one model: keep only each task vector's biggest changes, let the tasks vote on "
+      "the sign of every weight, and average only the changes that agree with the vote. Small, conflicting "
+      "changes stop cancelling the important ones.",
+      r"\hat\tau_t = \mathrm{top}_k(\tau_t),\quad \gamma = \mathrm{sgn}\Big(\sum_t \hat\tau_t\Big),\quad "
+      r"\tau_m = \lambda\,\frac{\sum_t \hat\tau_t\,[\mathrm{sgn}\,\hat\tau_t = \gamma]}"
+      r"{\sum_t [\mathrm{sgn}\,\hat\tau_t = \gamma,\ \hat\tau_t \ne 0]}",
+      r"Trim, Elect Sign, Disjoint Merge (Yadav et al. 2023, Alg. 1); task vector $\tau_t = \theta_t - \theta_{\mathrm{pre}}$",
+      "taus (n, P), density, lam -> (P,)", "ties(taus, density, lam)", _ties_inputs,
+      python="""
+        def ties(taus, density, lam):
+            n, P = len(taus), len(taus[0])
+            k = max(1, round(density * P))
+            trimmed = []
+            for t in taus:
+                kth = sorted((abs(x) for x in t), reverse=True)[k - 1]
+                trimmed.append([x if abs(x) >= kth else 0.0 for x in t])
+            out = []
+            for j in range(P):
+                col = [trimmed[i][j] for i in range(n)]
+                s = sum(col)
+                sign = (s > 0) - (s < 0)
+                keep = [x for x in col if x != 0 and ((x > 0) - (x < 0)) == sign]
+                out.append(lam * sum(keep) / len(keep) if keep else 0.0)
+            return out
+      """,
+      numpy="""
+        def ties(taus, density, lam):
+            k = max(1, round(density * taus.shape[1]))
+            kth = -np.sort(-np.abs(taus), axis=1)[:, k - 1:k]
+            trimmed = np.where(np.abs(taus) >= kth, taus, 0.0)
+            agree = (np.sign(trimmed) == np.sign(trimmed.sum(0))) & (trimmed != 0)
+            n = agree.sum(0)
+            return lam * np.where(n > 0, (trimmed * agree).sum(0) / np.maximum(n, 1), 0.0)
+      """,
+      jax="""
+        def ties(taus, density, lam):
+            k = max(1, round(density * taus.shape[1]))
+            kth = -jnp.sort(-jnp.abs(taus), axis=1)[:, k - 1:k]
+            trimmed = jnp.where(jnp.abs(taus) >= kth, taus, 0.0)
+            agree = (jnp.sign(trimmed) == jnp.sign(trimmed.sum(0))) & (trimmed != 0)
+            n = agree.sum(0)
+            return lam * jnp.where(n > 0, (trimmed * agree).sum(0) / jnp.maximum(n, 1), 0.0)
+      """,
+      torch="""
+        def ties(taus, density, lam):
+            k = max(1, round(density * taus.shape[1]))
+            kth = torch.topk(taus.abs(), k, dim=1).values[:, -1:]
+            trimmed = torch.where(taus.abs() >= kth, taus, torch.zeros_like(taus))
+            agree = (torch.sign(trimmed) == torch.sign(trimmed.sum(0))) & (trimmed != 0)
+            n = agree.sum(0)
+            return lam * torch.where(n > 0, (trimmed * agree).sum(0) / n.clamp(min=1), torch.zeros_like(n, dtype=taus.dtype))
+      """,
+      notes=(("TIES keeps the top 20% by default. Tools like mergekit apply it tensor by tensor; the paper trims "
+              "each whole task vector at once. Module 46 does it tensor by tensor."),
+             ("Plain task arithmetic is the special case with no trimming and no vote: "
+              "$\\theta = \\theta_{\\mathrm{pre}} + \\lambda\\sum_t \\tau_t$. DARE (Yu et al. 2023) instead drops "
+              "a random fraction p of each task vector and rescales the rest by $1/(1-p)$.")),
+      module="46"),
+    E("rank-one edit of a weight matrix (ROME)", "Linear algebra",
+      "Make one input k produce a chosen output v by adding an outer product to W, the smallest change that "
+      "does it when 'small' is measured on the inputs the layer usually sees (their covariance C): inputs unlike "
+      "k barely move.",
+      r"W' = W + \frac{(C^{-1}k)\,(v - k^\top W)}{(C^{-1}k)^\top k},\qquad k^\top W' = v",
+      r"$\hat W = W + \Lambda (C^{-1}k_*)^\top$, $\Lambda = (v_* - W k_*) / ((C^{-1}k_*)^\top k_*)$ "
+      r"(Meng et al. 2022, eq. 2; their W acts on column vectors, $W k$, so the outer product is transposed)",
+      "W (d_in, d_out), k (d_in,), v (d_out,), C_inv (d_in, d_in) -> (d_in, d_out)", "edit(W, k, v, C_inv)",
+      _rome_inputs,
+      python="""
+        def edit(W, k, v, C_inv):
+            n, m = len(W), len(W[0])
+            u = [sum(C_inv[i][j] * k[j] for j in range(n)) for i in range(n)]
+            uk = sum(a * b for a, b in zip(u, k))
+            r = [v[j] - sum(k[i] * W[i][j] for i in range(n)) for j in range(m)]   # v − kᵀW
+            return [[W[i][j] + u[i] * r[j] / uk for j in range(m)] for i in range(n)]
+      """,
+      numpy="""
+        def edit(W, k, v, C_inv):
+            u = C_inv @ k
+            return W + np.outer(u, v - k @ W) / (u @ k)
+      """,
+      jax="""
+        def edit(W, k, v, C_inv):
+            u = C_inv @ k
+            return W + jnp.outer(u, v - k @ W) / (u @ k)
+      """,
+      torch="""
+        def edit(W, k, v, C_inv):
+            u = C_inv @ k
+            return W + torch.outer(u, v - k @ W) / (u @ k)
+      """,
+      notes=(("With C = I this is the plain minimum-norm rank-one fix. C (the covariance of the layer's inputs on "
+              "ordinary text) makes the change smallest where inputs usually lie, so unrelated facts move less."),
+             ("ROME picks k as the MLP's hidden activation at the subject's last token and finds v with a few gradient "
+              "steps on one vector; MEMIT spreads many such edits over several layers.")),
+      apis=("jax.numpy.outer",), module="46"),
 ]

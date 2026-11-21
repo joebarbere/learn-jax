@@ -1,6 +1,6 @@
 # Glossary
 
-591 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+597 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -93,6 +93,7 @@
 - **capstone** — The course's final project: specialize, evaluate and serve a model of your own, end to end, with optional cloud scale-up. *(Module 25.)*
 - **carry** — The state lax.scan passes from one step to the next (an RNN hidden state, a running sum, the train state). *(Module 08; also 05, 09, 10, 14, 24.)*
 - **causal mask** — Setting attention scores for future positions to −∞ before softmax, so each token sees only itself and the past. Required for next-token training. *(Module 15; also 32.)*
+- **causal tracing** — Finding where a model computes something by corrupting the input and restoring one layer's activations at a time: the layers whose restoration brings the answer back are where it lives. *(Module 46.)* Origin: Meng et al., 2022.
 - **chain of thought** — Having a model write out intermediate reasoning steps before its final answer, which improves accuracy on multi-step problems. *(Module 26.)* Origin: Wei et al., 2022.
 - **chain rule** — The derivative of a composition is the product of the derivatives of its parts. Backpropagation is the chain rule applied systematically over a computation graph. *(Module 03.)*
 - **channel** — One feature map in a convolutional layer, like the R, G, B of an image or one learned detector's output. *(Module 12; also 01.)*
@@ -398,6 +399,7 @@
 - **MoBA** — Block-sparse attention where each query reads its own block plus the earlier blocks whose mean key scores highest against it: mixture-of-experts routing over blocks of the context. *(Module 44; also 17.)* Origin: Lu et al., 2025.
 - **mode collapse** — A GAN failure in which the generator produces only a few kinds of output, ignoring the variety of the data. *(Module 33.)*
 - **model FLOPs utilization** — Achieved training FLOP/s (≈ 6 × parameters × tokens per second) divided by the GPU's peak. A single number for how well you use the hardware. *(Module 16; also 22, 25, 42.)* Origin: Chowdhery et al., 2022 (PaLM).
+- **model merging** — Combining fine-tunes of one base model by arithmetic on their weights, with no further training. TIES trims small changes and resolves sign conflicts; DARE drops most of each change at random and rescales. *(Module 46; also 20.)* Origin: Yadav et al., 2023; Yu et al., 2023.
 - **modern Hopfield network** — Hopfield networks with sharper energy functions that store exponentially many patterns; their update rule is softmax attention. *(Module 29.)* Origin: Ramsauer et al., 2020.
 - **momentum** — Keep a running average of past gradients and step along it, like a ball rolling downhill. It damps zig-zagging and speeds travel along consistent directions; Nesterov evaluates the gradient at the look-ahead point. *(Module 05; also 11.)* Origin: Polyak, 1964.
 - **Monte Carlo** — Estimating an expectation by averaging random samples. The error shrinks like 1/√n, so 100× more samples buys only 10× more accuracy. *(Module 04; also 34.)*
@@ -419,6 +421,7 @@
 ## N
 
 - **n-gram** — A run of n consecutive tokens; an n-gram model predicts from the previous n − 1. Also used to measure text overlap in evaluation and contamination checks. *(Module 14; also 21, 40.)* Origin: Shannon, 1948.
+- **naive Bayes** — A classifier that assumes features are independent given the class; for binary features its log-probabilities are a linear layer whose weights are log-odds counted from data, not trained. *(Module 46.)*
 - **NaN** — Not-a-Number: the result of invalid float math like 0/0 or inf − inf. One NaN poisons everything it touches, so catching its source is a key debugging skill. *(Module 11; also 05, 09, 25, 35, 39.)*
 - **Native Sparse Attention** — DeepSeek's trainable sparse attention: compressed block summaries, a few selected blocks and a sliding window, combined by a learned gate and laid out for GPU kernels. *(Module 44.)* Origin: Yuan et al., 2025.
 - **nats** — Units of information: a nat uses the natural log, a bit uses log base 2 (1 nat ≈ 1.44 bits). Losses in JAX are usually in nats. *(Module 04; also 14, 32, 33, 35, 37.)*
@@ -529,6 +532,7 @@
 
 - **random variable** — A quantity whose value is drawn from a probability distribution, like a die roll or the next token. *(Module 04.)*
 - **rank** — The number of independent directions a matrix can output: the count of its nonzero singular values. An (m, n) matrix written as A·B with inner size r has rank at most r. *(Module 02; also 05, 17, 20.)*
+- **RASP** — A small programming language whose select and aggregate operations are what attention can do; Tracr compiles RASP programs into real transformer weights. *(Module 46; also 37.)* Origin: Weiss et al., 2021; Lindner et al., 2023.
 - **RDNA3** — The AMD GPU architecture of the RX 7600 XT, with 32-thread wavefronts and compute units grouped into SIMDs. *(Module 23; also 22.)*
 - **ReAct** — Prompting a model to interleave reasoning (Thought), tool calls (Action) and their results (Observation). *(Module 39; also 26.)* Origin: Yao et al., 2022.
 - **reasoning model** — An LLM trained, typically with RL on verifiable rewards, to produce long chains of thought before answering. *(Module 26; also 27.)* Origin: DeepSeek-AI, 2025.
@@ -564,6 +568,7 @@
 - **RMSProp** — Divide each parameter's step by a running root-mean-square of its recent gradients, so steep directions take smaller steps and flat ones larger. *(Module 05.)* Origin: Hinton, 2012 (lecture).
 - **ROCm** — AMD's open GPU software stack: driver interface, the HIP runtime and tuned math libraries. It plays the role CUDA plays on NVIDIA cards, and in this course it lives only inside the container. *(Module 00; also 00b, 19, 22, 23, 27.)*
 - **rocprof** — AMD's command-line GPU profiler; it reports every kernel launch with its resources, which is how the Triton-GEMM failure is diagnosed. *(Module 22.)*
+- **ROME** — Rank-One Model Editing: rewrite one fact by changing one MLP output matrix so the subject's key produces a new value, sized by the covariance of the layer's usual inputs. MEMIT does thousands at once. *(Module 46.)* Origin: Meng et al., 2022.
 - **roofline** — A plot of achievable FLOP/s against arithmetic intensity: a sloped memory roof for low intensity and a flat compute roof for high. Tells you whether a kernel is memory- or compute-bound and how far from peak. *(Module 22; also 18.)* Origin: Williams, Waterman, Patterson, 2009.
 - **RoPE** — Rotary position embedding: rotate pairs of query and key dimensions by angles proportional to position, so their dot product depends only on relative position. The base sets the rotation frequencies. *(Module 17; also 16.)* Origin: Su et al., 2021.
 - **round-off error** — The error from storing a number with finite precision. It compounds in long sums and is worst in low-precision formats. *(Module 08; also 03, 18, 27.)*
@@ -637,7 +642,7 @@
 
 - **tanh** — A sigmoid-shaped nonlinearity with outputs in (−1, 1). Its flat tails cause vanishing gradients in deep or recurrent networks. *(Module 10; also 03, 06, 07, 11, 31.)*
 - **target network** — A slowly updated copy of the Q-network used to compute training targets, so the targets don't chase every update. *(Module 34.)* Origin: Mnih et al., 2015.
-- **task arithmetic** — Treating the weight change from fine-tuning as a vector you can add, subtract and scale to combine or remove skills. *(Module 20.)* Origin: Ilharco et al., 2022.
+- **task arithmetic** — Treating the weight change from fine-tuning as a vector you can add, subtract and scale to combine or remove skills. *(Module 20; also 46.)* Origin: Ilharco et al., 2022.
 - **temperature** — Divide logits by T before softmax: T < 1 sharpens the distribution toward the top choice, T > 1 flattens it, T → 0 is greedy decoding. *(Module 04; also 14, 16, 18, 19, 26, 42.)*
 - **temporal-difference learning** — Updating value estimates toward a target built from the next step's estimate, learning from incomplete episodes. TD-Gammon used it to play backgammon in 1992. *(Module 34.)* Origin: Sutton, 1988; Tesauro, 1992.
 - **tensor parallelism** — Splitting each weight matrix across devices (column- or row-wise) so each computes part of every layer, with collectives in between. *(Module 24.)* Origin: Shoeybi et al., 2019 (Megatron-LM).
@@ -702,6 +707,7 @@
 - **weight decay** — Shrinking every weight slightly toward zero each step, which discourages large weights and reduces overfitting. Decoupled from the gradient in AdamW. *(Module 05; also 11.)*
 - **weight sharing** — Using the same parameters at every position (convolution) or every time step (RNN), so the model generalizes across position with far fewer parameters. *(Module 12.)*
 - **weight tying** — Using the same matrix for the input embedding and the output projection to logits, saving V × d parameters. *(Module 16.)* Origin: Press & Wolf, 2016.
+- **weight-space programming** — An LLM reading and editing another network's raw weights by reasoning, with a few forward passes and no gradients (Takehi et al., 2026); later work had models edit their own weights. *(Module 46.)* Origin: Takehi et al., 2026.
 - **win rate** — The fraction of comparisons in which one model's answer is preferred over another's (by people, a judge or a reward model). *(Module 35.)*
 - **word analogy** — Solving "a is to b as c is to ?" by vector arithmetic b − a + c and finding the nearest word. *(Module 30.)* Origin: Mikolov et al., 2013.
 - **word2vec** — Mikolov's 2013 method for learning word embeddings by training a shallow model to predict context words; it showed vectors capture meaning (king − man + woman ≈ queen). *(Module 30; also 00b, 32.)* Origin: Mikolov et al., 2013.

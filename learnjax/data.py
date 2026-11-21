@@ -25,6 +25,8 @@ FASHION_FILES = {
 }
 FASHION_CLASSES = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
                    "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
+# The original MNIST digits (LeCun, Cortes & Burges), same idx files; Google's mirror (yann.lecun.com is often down)
+MNIST_URL = "https://storage.googleapis.com/cvdf-datasets/mnist/"
 SHAKESPEARE_URL = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
 
 
@@ -57,6 +59,19 @@ def fashion_mnist() -> dict[str, np.ndarray]:
     for key, name in FASHION_FILES.items():
         path = _download(FASHION_URL + name, CACHE / "fashion_mnist" / name)
         out[key] = _read_idx(path)
+    out["train_labels"] = out["train_labels"].astype(np.int32)
+    out["test_labels"] = out["test_labels"].astype(np.int32)
+    return out
+
+
+def mnist() -> dict[str, np.ndarray]:
+    """MNIST handwritten digits: 60k train / 10k test 28×28 grayscale images (uint8) and labels 0–9.
+
+    Same keys as fashion_mnist(). Module 46 sets a digit classifier's weights by hand.
+    """
+    out = {}
+    for key, name in FASHION_FILES.items():                        # same four idx file names
+        out[key] = _read_idx(_download(MNIST_URL + name, CACHE / "mnist" / name))
     out["train_labels"] = out["train_labels"].astype(np.int32)
     out["test_labels"] = out["test_labels"].astype(np.int32)
     return out

@@ -405,7 +405,7 @@ ENTRIES: list[E] = [
       notes=(("NumPy and JAX return $V^\\top$ (called `Vt` or `vh`), not $V$; PyTorch's `torch.linalg.svd` "
              "returns `Vh` too (the older `torch.svd` returned `V`)."),
              "LoRA (Module 20) is this idea trained instead of computed: a weight update kept at rank r."),
-      apis=("jax.numpy.linalg.svd",),
+      apis=("jax.numpy.linalg.svd", "jax.numpy.linalg.matrix_rank"),
       module="02", also=("20",)),
     # ---------------------------------------------------------------- Calculus and autodiff (Module 03)
     E("gradient", "Calculus and autodiff",

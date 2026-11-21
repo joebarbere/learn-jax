@@ -285,6 +285,10 @@ TERMS: list[Term] = [
          "Setting attention scores for future positions to −∞ before softmax, so each token sees only "
          "itself and the past. Required for next-token training.",
          "15", ("32",), ""),
+    Term("causal tracing", (),
+         "Finding where a model computes something by corrupting the input and restoring one layer's activations "
+         "at a time: the layers whose restoration brings the answer back are where it lives.",
+         "46", (), "Meng et al., 2022"),
     Term("chain of thought", ("chain-of-thought", "CoT"),
          "Having a model write out intermediate reasoning steps before its final answer, which improves "
          "accuracy on multi-step problems.",
@@ -1240,6 +1244,10 @@ TERMS: list[Term] = [
          "Achieved training FLOP/s (≈ 6 × parameters × tokens per second) divided by the GPU's peak. A "
          "single number for how well you use the hardware.",
          "16", ("22", "25", "42"), "Chowdhery et al., 2022 (PaLM)"),
+    Term("model merging", ("TIES", "TIES-Merging", "DARE", "mergekit"),
+         "Combining fine-tunes of one base model by arithmetic on their weights, with no further training. TIES "
+         "trims small changes and resolves sign conflicts; DARE drops most of each change at random and rescales.",
+         "46", ("20",), "Yadav et al., 2023; Yu et al., 2023"),
     Term("modern Hopfield network", ("modern Hopfield", "dense associative memory"),
          "Hopfield networks with sharper energy functions that store exponentially many patterns; their "
          "update rule is softmax attention.",
@@ -1305,6 +1313,10 @@ TERMS: list[Term] = [
          "A run of n consecutive tokens; an n-gram model predicts from the previous n − 1. Also used to "
          "measure text overlap in evaluation and contamination checks.",
          "14", ("21", "40"), "Shannon, 1948"),
+    Term("naive Bayes", ("log-odds readout",),
+         "A classifier that assumes features are independent given the class; for binary features its "
+         "log-probabilities are a linear layer whose weights are log-odds counted from data, not trained.",
+         "46", (), ""),
     Term("NaN", ("NaNs",),
          "Not-a-Number: the result of invalid float math like 0/0 or inf − inf. One NaN poisons everything "
          "it touches, so catching its source is a key debugging skill.",
@@ -1647,6 +1659,10 @@ TERMS: list[Term] = [
          "The number of independent directions a matrix can output: the count of its nonzero singular "
          "values. An (m, n) matrix written as A·B with inner size r has rank at most r.",
          "02", ("05", "17", "20"), ""),
+    Term("RASP", ("Tracr", "compiled transformer"),
+         "A small programming language whose select and aggregate operations are what attention can do; Tracr "
+         "compiles RASP programs into real transformer weights.",
+         "46", ("37",), "Weiss et al., 2021; Lindner et al., 2023"),
     Term("RDNA3", ("RDNA",),
          "The AMD GPU architecture of the RX 7600 XT, with 32-thread wavefronts and compute units grouped "
          "into SIMDs.",
@@ -1787,6 +1803,10 @@ TERMS: list[Term] = [
          "AMD's command-line GPU profiler; it reports every kernel launch with its resources, which is how "
          "the Triton-GEMM failure is diagnosed.",
          "22", (), ""),
+    Term("ROME", ("rank-one model editing", "knowledge editing", "MEMIT"),
+         "Rank-One Model Editing: rewrite one fact by changing one MLP output matrix so the subject's key produces "
+         "a new value, sized by the covariance of the layer's usual inputs. MEMIT does thousands at once.",
+         "46", (), "Meng et al., 2022"),
     Term("roofline", ("roofline model",),
          "A plot of achievable FLOP/s against arithmetic intensity: a sloped memory roof for low intensity "
          "and a flat compute roof for high. Tells you whether a kernel is memory- or compute-bound and how "
@@ -2023,7 +2043,7 @@ TERMS: list[Term] = [
     Term("task arithmetic", ("task vector", "task vectors"),
          "Treating the weight change from fine-tuning as a vector you can add, subtract and scale to "
          "combine or remove skills.",
-         "20", (), "Ilharco et al., 2022"),
+         "20", ("46",), "Ilharco et al., 2022"),
     Term("temperature", (),
          "Divide logits by T before softmax: T < 1 sharpens the distribution toward the top choice, T > 1 "
          "flattens it, T → 0 is greedy decoding.",
@@ -2215,6 +2235,10 @@ TERMS: list[Term] = [
          "Using the same matrix for the input embedding and the output projection to logits, saving V × d "
          "parameters.",
          "16", (), "Press & Wolf, 2016"),
+    Term("weight-space programming", ("WSP",),
+         "An LLM reading and editing another network's raw weights by reasoning, with a few forward passes and no "
+         "gradients (Takehi et al., 2026); later work had models edit their own weights.",
+         "46", (), "Takehi et al., 2026"),
     Term("win rate", ("win_rate", "pairwise accuracy", "pairwise_accuracy"),
          "The fraction of comparisons in which one model's answer is preferred over another's (by people, "
          "a judge or a reward model).",

@@ -546,7 +546,7 @@ def _(mo):
       why language is hard for diffusion, from a diffusion researcher, written before most of this module's
       papers (2023).
 
-    **Next:** Module 46 (planned): weights by hand, compiling, merging and editing networks.
+    **Next:** Module 46, weights by hand: compiling, merging and editing networks.
     """)
     return
 

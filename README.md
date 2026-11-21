@@ -68,7 +68,7 @@ and disk size are the same, since GGUF and weight files don't compress):
 | Qwen2.5-Coder-14B-Instruct Q4_K_M (the default served model) | 9.0 GB | Module 19 | `make llama-download` |
 | Qwen2.5-Coder-1.5B-Instruct Q4_K_M and Q8_0 | 1.1 + 1.9 GB | Module 19 (small/fast and quantization comparisons) | `make llama-download` |
 | Qwen2.5-1.5B-Instruct Q4_K_M | 1.1 GB | Module 27 (tool calling: the Coder models don't emit the tags LM Studio parses) | `make export-models` |
-| Hugging Face weights and tokenizers (GPT-2, SmolLM2-360M, …) and datasets (Fashion-MNIST, Tiny Shakespeare, the detective corpus, …) | ~2 GB | the lessons that use them | automatic, on first use |
+| Hugging Face weights and tokenizers (GPT-2, SmolLM2-360M, …) and datasets (MNIST, Fashion-MNIST, Tiny Shakespeare, the detective corpus, …) | ~2 GB | the lessons that use them | automatic, on first use |
 
 All four GGUF models are Apache-2.0, from Qwen's official GGUF repos on Hugging Face.
 
@@ -182,6 +182,7 @@ it's first taught; `make rosetta-browse` opens them all in one notebook, and the
 | 43 | From pixels to words: vision transformers and vision-language models (2020–2025) | ✅ |
 | 44 | Efficient and sparse attention: reading only part of the past (2019–2026) | ✅ |
 | 45 | Diffusion language models: writing a whole passage at once (2021–2026) | ✅ |
+| 46 | Weights by hand: compiling, merging and editing networks (1990s–2026) | ✅ |
 
 ✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 
@@ -211,6 +212,10 @@ creators for videos, posts and docs. Most of all:
   LatentMoE follows **Venmugil Elango et al.** (NVIDIA), [LatentMoE](https://arxiv.org/abs/2601.18089).
 - **Saurabh Alone**, ["Implementing LLaMA3 in 100 Lines of Pure Jax"](https://saurabhalone.com/blog/llama3-jax).
   Its RoPE explanation and two real KV-cache bugs became Module 17's exercises.
+- **Lex Toumbourou**, ["Weight-Space Programming builds neural networks like a 1990s researcher"](https://notesbylex.com/weight-space-programming-1990s)
+  and [its experiments](https://github.com/lextoumbourou/weight-space-programming-experiments) (MIT). Module 46's
+  hand-set CNN uses its architecture and protocol; section 5 discusses it with **Takehi, Teoh, Zhang and
+  Khattab**'s ["Sparks of Weight-Space Programming"](https://rikiyat.github.io/blog/weight-space-programming/) (MIT CSAIL).
 - **Models:** [SmolLM2](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) by Hugging Face (Apache-2.0)
   and [Qwen2.5-Coder](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF) by the Qwen Team (Apache-2.0),
   served with [llama.cpp](https://github.com/ggml-org/llama.cpp) by ggml-org (MIT);
@@ -220,6 +225,7 @@ creators for videos, posts and docs. Most of all:
 - **[LM Studio](https://lmstudio.ai/)** by Element Labs (Module 27), free for personal and internal business use
   under its [app terms](https://lmstudio.ai/app-terms). The course fetches it only inside a container build.
 - **Data:** [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) by Zalando Research (MIT);
+  [MNIST](https://doi.org/10.1109/5.726791) by LeCun, Cortes & Burges (CC BY-SA 3.0; downloaded from Google's mirror);
   [tiny Shakespeare](https://github.com/karpathy/char-rnn) from Andrej Karpathy's char-rnn; public-domain
   detective novels from Standard Ebooks and Project Gutenberg, via deepseek-v3-jax;
   [ARC](https://allenai.org/data/arc) by the Allen Institute for AI (CC BY-SA 4.0); 49,950 arXiv abstracts

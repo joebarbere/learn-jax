@@ -480,6 +480,18 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Mercury: Ultra-Fast Language Models Based on Diffusion](https://arxiv.org/abs/2506.17298)** — Inception Labs, 2025. A commercial diffusion coder; over 1,000 tokens/s on an H100 by the vendor's measurement.
 - **[Seed Diffusion: A Large-Scale Diffusion Language Model with High-Speed Inference](https://arxiv.org/abs/2508.02193)** — ByteDance Seed, 2025. A diffusion code model reporting 2,146 tokens/s.
 
+### 46 · Weights by hand: compiling, merging and editing networks (1990s–2026)
+
+- **[Thinking Like Transformers](https://arxiv.org/abs/2106.06981)** — Weiss, Goldberg, Yahav, 2021. RASP: attention as select-and-aggregate, a programming language for what a transformer can compute.
+- **[Tracr: Compiled Transformers as a Laboratory for Interpretability](https://arxiv.org/abs/2301.05062)** — Lindner et al., 2023. Compiles RASP programs into real transformer weights; section 2 by hand.
+- **[Locating and Editing Factual Associations in GPT](https://arxiv.org/abs/2202.05262)** — Meng, Bau, Andonian, Belinkov, 2022. ROME: causal tracing finds facts in early-middle MLPs; a rank-one edit rewrites one.
+- **[Mass-Editing Memory in a Transformer](https://arxiv.org/abs/2210.07229)** — Meng et al., 2022. MEMIT: thousands of edits at once, spread over several layers.
+- **[Editing Models with Task Arithmetic](https://arxiv.org/abs/2212.04089)** — Ilharco et al., 2022. Task vectors: add them to combine skills, subtract them to forget.
+- **[TIES-Merging: Resolving Interference When Merging Models](https://arxiv.org/abs/2306.01708)** — Yadav, Tam, Choshen, Raffel, Bansal, 2023. Trim, elect sign, disjoint merge: merging when task vectors conflict.
+- **[Language Models are Super Mario: Absorbing Abilities from Homologous Models as a Free Lunch](https://arxiv.org/abs/2311.03099)** — Yu et al., 2023. DARE: drop most of a task vector at random and rescale the rest.
+- **[Language Models Can Rewrite Their Own Weights](https://arxiv.org/abs/2611.21885)** — Fan et al., 2026. Qwen3.5-27B edits its own weights without gradients; its best edit is one uniform bias change.
+- **[WeightBench: Evaluating Language Models as Weight-Space Programmers](https://arxiv.org/abs/2611.18553)** — Marasini, Khadka, Rahimi, 2026. 42 read/fix/write tasks: frontier models score about half and can't yet patch an LM.
+
 ## Books
 
 For a second pass, or a different angle. Most are free to read online from their authors; each entry says so.

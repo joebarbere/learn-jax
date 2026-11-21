@@ -186,6 +186,13 @@ EVENTS = [
          "what": "A GPT model tuned with human feedback, released as a free chat app in November.",
          "why_it_mattered": "AI reached the public almost overnight.",
          "module": "35-rlhf-dpo", "url": W + "ChatGPT"},
+    {"year": 2022, "title": "Editing and merging weights directly", "who": "MIT & Northeastern (ROME); "
+         "University of Washington & others (task arithmetic)",
+         "what": "ROME found where GPT stores a fact and rewrote it with a rank-one change to one MLP matrix; task "
+              "arithmetic added and subtracted fine-tunes' weight changes to combine or remove skills.",
+         "why_it_mattered": "Weights became something you could edit on purpose without retraining; model merging "
+                            "(TIES, DARE, mergekit) followed.",
+         "module": "46-weights-by-hand", "url": "https://arxiv.org/abs/2202.05262"},
     {"year": 2023, "title": "Llama and the open-weights wave", "who": "Meta AI, then many others",
          "what": "Strong model weights released for researchers, then openly; local tools like llama.cpp follow.",
          "why_it_mattered": "Made running and fine-tuning LLMs on your own hardware normal.",
@@ -253,4 +260,9 @@ EVENTS = [
          "what": "A system combining neural perception with hyperdimensional (vector-symbolic) reasoning solves "
               "abstract-reasoning puzzles.", "why_it_mattered": "One modern bridge between symbolic and statistical AI.",
          "module": None, "url": W + "Hyperdimensional_computing"},
+    {"year": 2026, "title": "Weight-space programming", "who": "MIT CSAIL (Takehi, Teoh, Zhang, Khattab)",
+         "what": "An LLM given another network's raw weights and a few forward passes edits them by reasoning, with "
+              "no gradients: removing a looping direction lifted a 0.8B model's MATH-500 score from 7.9% to 48.1%.",
+         "why_it_mattered": "LLMs doing the hand-editing of Module 46; follow-ups had models edit their own weights.",
+         "module": "46-weights-by-hand", "url": "https://rikiyat.github.io/blog/weight-space-programming/"},
 ]

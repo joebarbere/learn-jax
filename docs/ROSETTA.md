@@ -6,12 +6,12 @@ Each operation the course introduces, written five ways: the formula (and how pa
 
 - **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add)
 - **Elementwise math:** [exp, log and powers](#exp-log-and-powers), [trig and sign functions](#trig-and-sign-functions), [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero), [clip, maximum and minimum (elementwise)](#clip-maximum-and-minimum-elementwise), [round to bfloat16](#round-to-bfloat16)
-- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation)
+- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation), [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome)
 - **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient)
 - **Random numbers:** [normal samples](#normal-samples), [uniform samples](#uniform-samples), [random integers](#random-integers), [categorical sampling](#categorical-sampling), [Bernoulli samples](#bernoulli-samples), [shuffle (random permutation)](#shuffle-random-permutation), [sample without replacement](#sample-without-replacement), [He (Kaiming) normal initialization](#he-kaiming-normal-initialization)
 - **Control flow and transforms:** [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap), [loop with carried state: lax.scan](#loop-with-carried-state-laxscan), [fixed and open-ended loops: fori_loop and while_loop](#fixed-and-open-ended-loops-foriloop-and-whileloop), [branches: lax.cond and lax.switch](#branches-laxcond-and-laxswitch)
-- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip)
-- **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz)
+- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip), [naive Bayes readout for binary features](#naive-bayes-readout-for-binary-features)
+- **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz), [TIES merging of task vectors](#ties-merging-of-task-vectors)
 - **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
 - **Sampling and inference:** [KV cache write](#kv-cache-write), [temperature and top-k filter](#temperature-and-top-k-filter), [top-p (nucleus) filter](#top-p-nucleus-filter), [int8 absmax quantization](#int8-absmax-quantization)
@@ -1852,7 +1852,7 @@ $$
 
 **Shapes:** `(m, n), k -> (m, n)`
 
-**JAX names:** `jax.numpy.linalg.svd`
+**JAX names:** `jax.numpy.linalg.svd`, `jax.numpy.linalg.matrix_rank`
 
 **Python**
 
@@ -2214,6 +2214,68 @@ def resize(grid, new):
 
 - PyTorch resizes the last two axes of an (N, C, H, W) tensor, so the grid is moved channels-first and back; JAX's `jax.image.resize` takes the full output shape and resizes every axis whose size changes.
 - For shrinking, `jax.image.resize` antialiases by default (a wider kernel) and PyTorch does not unless `antialias=True`; for enlarging, as here, they agree.
+
+### rank-one edit of a weight matrix (ROME)
+
+*Module 46.*
+
+Make one input k produce a chosen output v by adding an outer product to W, the smallest change that does it when 'small' is measured on the inputs the layer usually sees (their covariance C): inputs unlike k barely move.
+
+$$
+W' = W + \frac{(C^{-1}k)\,(v - k^\top W)}{(C^{-1}k)^\top k},\qquad k^\top W' = v
+$$
+
+**In papers:** $\hat W = W + \Lambda (C^{-1}k_*)^\top$, $\Lambda = (v_* - W k_*) / ((C^{-1}k_*)^\top k_*)$ (Meng et al. 2022, eq. 2; their W acts on column vectors, $W k$, so the outer product is transposed)
+
+**Shapes:** `W (d_in, d_out), k (d_in,), v (d_out,), C_inv (d_in, d_in) -> (d_in, d_out)`
+
+**JAX names:** `jax.numpy.outer`
+
+**Python**
+
+```python
+def edit(W, k, v, C_inv):
+    n, m = len(W), len(W[0])
+    u = [sum(C_inv[i][j] * k[j] for j in range(n)) for i in range(n)]
+    uk = sum(a * b for a, b in zip(u, k))
+    r = [v[j] - sum(k[i] * W[i][j] for i in range(n)) for j in range(m)]   # v − kᵀW
+    return [[W[i][j] + u[i] * r[j] / uk for j in range(m)] for i in range(n)]
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def edit(W, k, v, C_inv):
+    u = C_inv @ k
+    return W + np.outer(u, v - k @ W) / (u @ k)
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def edit(W, k, v, C_inv):
+    u = C_inv @ k
+    return W + jnp.outer(u, v - k @ W) / (u @ k)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def edit(W, k, v, C_inv):
+    u = C_inv @ k
+    return W + torch.outer(u, v - k @ W) / (u @ k)
+```
+
+**Where they differ**
+
+- With C = I this is the plain minimum-norm rank-one fix. C (the covariance of the layer's inputs on ordinary text) makes the change smallest where inputs usually lie, so unrelated facts move less.
+- ROME picks k as the MLP's hidden activation at the subject's last token and finds v with a few gradient steps on one vector; MEMIT spreads many such edits over several layers.
 
 ## Calculus and autodiff
 
@@ -4341,6 +4403,66 @@ def siglip(img, txt, t, b):
 - `log(1 + exp(−x))` overflows for very negative x; NumPy's `np.logaddexp(0, −x)`, JAX's `jax.nn.log_sigmoid` and PyTorch's `F.logsigmoid` are the stable forms.
 - SigLIP learns log t (initialized at log 10) and b (at −10), so the many negative pairs start with a small loss. The loss sums over j and averages over i, not a mean over all n² pairs.
 
+### naive Bayes readout for binary features
+
+*Module 46.*
+
+Count how often each feature fires for each class, assume the features are independent given the class, and the log-probability of each class becomes a linear layer: one weight per feature and class (the log-odds of firing) plus a bias. Weights from counting, not from gradients.
+
+$$
+W_{fc} = \log r_{cf} - \log(1 - r_{cf}),\quad b_c = \sum_f \log(1 - r_{cf}) + \log \pi_c,\quad \log p(c \mid x) = x^\top W_{:,c} + b_c + \text{const}
+$$
+
+**In papers:** $\log P(c)\prod_f r_{cf}^{x_f}(1-r_{cf})^{1-x_f}$ (Bernoulli naive Bayes)
+
+**Shapes:** `rates (C, F), prior (C,) -> {W: (F, C), b: (C,)}`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def readout(rates, prior):
+    C, F = len(rates), len(rates[0])
+    W = [[math.log(rates[c][f]) - math.log(1 - rates[c][f]) for c in range(C)] for f in range(F)]
+    b = [sum(math.log(1 - rates[c][f]) for f in range(F)) + math.log(prior[c]) for c in range(C)]
+    return {"W": W, "b": b}
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def readout(rates, prior):
+    return {"W": (np.log(rates) - np.log1p(-rates)).T, "b": np.log1p(-rates).sum(1) + np.log(prior)}
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def readout(rates, prior):
+    return {"W": (jnp.log(rates) - jnp.log1p(-rates)).T, "b": jnp.log1p(-rates).sum(1) + jnp.log(prior)}
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def readout(rates, prior):
+    return {"W": (torch.log(rates) - torch.log1p(-rates)).T, "b": torch.log1p(-rates).sum(1) + torch.log(prior)}
+```
+
+**Where they differ**
+
+- Smooth the counts first (add 1 to each count and 2 to each total): a rate of exactly 0 or 1 gives an infinite weight.
+- The same formula is the first layer of a 1990s OCR system and the readout Toumbourou's LLM-written MNIST network ended up using (Module 46).
+
 ## Optimization
 
 ### Adam update
@@ -4959,6 +5081,87 @@ def muon_step(G, lr=0.1, steps=5, a=3.4445, b=-4.7750, c=2.0315, eps=1e-8):
 - `torch.optim.Muon` exists (PyTorch 2.9+) but runs Newton–Schulz in bfloat16 and reads a weight as (d_out, d_in), so its shape factor uses the other axis; its numbers match this formula only to about 10%. The PyTorch tab is the float32 formula by hand.
 - optax treats axis 0 as the input (fan-in) axis, matching Flax's (d_in, d_out) kernels. Muon is for hidden 2-D weights only; embeddings, the output head, biases and norm gains stay on AdamW (Module 05 §11).
 - Module 05's `newton_schulz` exercise builds the orthogonalization step; try it before reading these tabs.
+
+### TIES merging of task vectors
+
+*Module 46.*
+
+Merge several fine-tunes of one model: keep only each task vector's biggest changes, let the tasks vote on the sign of every weight, and average only the changes that agree with the vote. Small, conflicting changes stop cancelling the important ones.
+
+$$
+\hat\tau_t = \mathrm{top}_k(\tau_t),\quad \gamma = \mathrm{sgn}\Big(\sum_t \hat\tau_t\Big),\quad \tau_m = \lambda\,\frac{\sum_t \hat\tau_t\,[\mathrm{sgn}\,\hat\tau_t = \gamma]}{\sum_t [\mathrm{sgn}\,\hat\tau_t = \gamma,\ \hat\tau_t \ne 0]}
+$$
+
+**In papers:** Trim, Elect Sign, Disjoint Merge (Yadav et al. 2023, Alg. 1); task vector $\tau_t = \theta_t - \theta_{\mathrm{pre}}$
+
+**Shapes:** `taus (n, P), density, lam -> (P,)`
+
+**Python**
+
+```python
+def ties(taus, density, lam):
+    n, P = len(taus), len(taus[0])
+    k = max(1, round(density * P))
+    trimmed = []
+    for t in taus:
+        kth = sorted((abs(x) for x in t), reverse=True)[k - 1]
+        trimmed.append([x if abs(x) >= kth else 0.0 for x in t])
+    out = []
+    for j in range(P):
+        col = [trimmed[i][j] for i in range(n)]
+        s = sum(col)
+        sign = (s > 0) - (s < 0)
+        keep = [x for x in col if x != 0 and ((x > 0) - (x < 0)) == sign]
+        out.append(lam * sum(keep) / len(keep) if keep else 0.0)
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def ties(taus, density, lam):
+    k = max(1, round(density * taus.shape[1]))
+    kth = -np.sort(-np.abs(taus), axis=1)[:, k - 1:k]
+    trimmed = np.where(np.abs(taus) >= kth, taus, 0.0)
+    agree = (np.sign(trimmed) == np.sign(trimmed.sum(0))) & (trimmed != 0)
+    n = agree.sum(0)
+    return lam * np.where(n > 0, (trimmed * agree).sum(0) / np.maximum(n, 1), 0.0)
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def ties(taus, density, lam):
+    k = max(1, round(density * taus.shape[1]))
+    kth = -jnp.sort(-jnp.abs(taus), axis=1)[:, k - 1:k]
+    trimmed = jnp.where(jnp.abs(taus) >= kth, taus, 0.0)
+    agree = (jnp.sign(trimmed) == jnp.sign(trimmed.sum(0))) & (trimmed != 0)
+    n = agree.sum(0)
+    return lam * jnp.where(n > 0, (trimmed * agree).sum(0) / jnp.maximum(n, 1), 0.0)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def ties(taus, density, lam):
+    k = max(1, round(density * taus.shape[1]))
+    kth = torch.topk(taus.abs(), k, dim=1).values[:, -1:]
+    trimmed = torch.where(taus.abs() >= kth, taus, torch.zeros_like(taus))
+    agree = (torch.sign(trimmed) == torch.sign(trimmed.sum(0))) & (trimmed != 0)
+    n = agree.sum(0)
+    return lam * torch.where(n > 0, (trimmed * agree).sum(0) / n.clamp(min=1), torch.zeros_like(n, dtype=taus.dtype))
+```
+
+**Where they differ**
+
+- TIES keeps the top 20% by default. Tools like mergekit apply it tensor by tensor; the paper trims each whole task vector at once. Module 46 does it tensor by tensor.
+- Plain task arithmetic is the special case with no trimming and no vote: $\theta = \theta_{\mathrm{pre}} + \lambda\sum_t \tau_t$. DARE (Yu et al. 2023) instead drops a random fraction p of each task vector and rescales the rest by $1/(1-p)$.
 
 ## Neural network layers
 
@@ -8518,6 +8721,7 @@ Every JAX, optax and Flax name the lessons use for math, and the entry that expl
 | `jax.numpy.linalg.eigh` | [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix) |
 | `jax.numpy.linalg.inv` | [solve a linear system](#solve-a-linear-system) |
 | `jax.numpy.linalg.lstsq` | [least squares](#least-squares) |
+| `jax.numpy.linalg.matrix_rank` | [low-rank approximation (SVD)](#low-rank-approximation-svd) |
 | `jax.numpy.linalg.norm` | [L2 norm](#l2-norm) |
 | `jax.numpy.linalg.solve` | [solve a linear system](#solve-a-linear-system) |
 | `jax.numpy.linalg.svd` | [low-rank approximation (SVD)](#low-rank-approximation-svd) |
@@ -8536,6 +8740,7 @@ Every JAX, optax and Flax name the lessons use for math, and the entry that expl
 | `jax.numpy.moveaxis` | [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes) |
 | `jax.numpy.ndarray.at` | [scatter-add (update at indices)](#scatter-add-update-at-indices) |
 | `jax.numpy.newaxis` | [broadcasting (outer sum)](#broadcasting-outer-sum) |
+| `jax.numpy.outer` | [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome) |
 | `jax.numpy.pad` | [pad and roll](#pad-and-roll) |
 | `jax.numpy.repeat` | [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto) |
 | `jax.numpy.roll` | [pad and roll](#pad-and-roll) |
