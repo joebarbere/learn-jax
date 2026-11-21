@@ -29,6 +29,15 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
 - **Cause:** ROCm supports gfx1102, but JAX's ROCm plugin only accepts a fixed list of architectures.
 - **Fix:** `HSA_OVERRIDE_GFX_VERSION=11.0.0`. The runtime then reports **gfx1100** (RX 7900); the instruction
   sets are close enough that the code runs. (`11.0.1` failed the same way.)
+- **Native gfx1102 wheels exist, but are slow at f32 (2026-11-21).** AMD's pip ROCm (`rocm-sdk-device-gfx1102`,
+  10.2) with JAX 0.12.1 runs without the override (`containers/Containerfile.next`), but a 4096² f32 matmul
+  takes 72 ms (1.9 TFLOP/s) instead of 16 ms (8.4). XLA on ROCm always calls hipBLASLt
+  (`--xla_gpu_enable_cublaslt=false`, autotune level 4 and Triton GEMMs changed nothing), and the gfx1102
+  hipBLASLt library ships one generic f32 kernel per layout where gfx1100 has tuned ones. HIP won't load
+  gfx1100 code objects on a card that reports gfx1102, so the fix is the same trick as before: install
+  `rocm-sdk-device-gfx1100` and set the override (8.4 TFLOP/s f32, 32.4 bf16, vs 8.0 and 28.3 in the AMD
+  image). The override and the device wheel must match: override with only the gfx1102 wheel fails with
+  `HipblasLt error 3` (no `TensileLibrary_lazy_gfx1100.dat`).
 - **Where:** Module 00 (shows the reported ISA), Containerfile.
 
 ### 2. The override has a cost: kernels are compiled for a bigger chip
