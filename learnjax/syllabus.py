@@ -66,6 +66,7 @@ MODULES = [
     (44, "44-sparse-attention", "Efficient and sparse attention: reading only part of the past (2019–2026)", 12),
     (45, "45-diffusion-lm", "Diffusion language models: writing a whole passage at once (2021–2026)", 12),
     (46, "46-weights-by-hand", "Weights by hand: compiling, merging and editing networks (1990s–2026)", 12),
+    (47, "47-reading-activations", "Reading activations: lenses, sparse autoencoders and steering (2020–2025)", 12),
 ]
 
 

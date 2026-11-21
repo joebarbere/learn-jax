@@ -1,6 +1,6 @@
 # Glossary
 
-597 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+605 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -21,6 +21,7 @@
 - **accumulation** — Summing many products into one result. Doing it in float32 even when inputs are bfloat16 (`preferred_element_type=float32`) avoids losing small terms. *(Module 08; also 23.)*
 - **accuracy** — The fraction of predictions that are exactly right. *(Module 09; also 10, 12, 15, 21, 26.)*
 - **activation function** — The elementwise nonlinear function between layers. Without it, stacked linear layers collapse into one linear map. *(Module 10; also 31.)*
+- **activation steering** — Change a model's behaviour at inference by adding a direction to its residual stream, usually the mean difference between activations on contrasting examples (CAA) or on one contrast pair (ActAdd). *(Module 47.)* Origin: Turner et al., 2023; Rimsky et al., 2023.
 - **activations** — The intermediate values a network computes in the forward pass. They must be stored for the backward pass, which often dominates training memory. *(Module 10; also 11, 17, 20, 25, 37.)*
 - **Adam** — Momentum plus RMSProp, with bias correction for the early steps. The default optimizer for deep learning. *(Module 05; also 09, 12, 14, 20, 24.)* Origin: Kingma & Ba, 2014.
 - **AdamW** — Adam with decoupled weight decay: shrink the weights directly each step instead of adding an L2 term to the loss, which Adam's per-parameter scaling would distort. The standard optimizer for transformers. *(Module 05; also 10, 16, 20, 22, 25.)* Origin: Loshchilov & Hutter, 2017.
@@ -48,6 +49,7 @@
 - **attention** — A soft dictionary lookup: each position scores every position it may see, softmaxes the scores into weights, and takes the weighted average of their values. Lets any token read from any other. *(Module 15; also 17, 23, 31, 36, 37.)* Origin: Bahdanau et al., 2014; Vaswani et al., 2017.
 - **attention pattern** — The matrix of attention weights from each query to each key, the first thing to look at in a head. *(Module 37.)*
 - **attention sink** — The first token(s) of a sequence, on which a trained model parks attention it doesn't need (softmax weights must sum to 1). Dropping them from a sliding window breaks a pretrained model; keeping four fixes it. *(Module 44.)* Origin: Xiao et al., 2023.
+- **auto-interpretability** — Using a language model to explain each SAE feature from its top-activating contexts, then scoring the explanation by how well it predicts where the feature fires on new text. *(Module 47.)* Origin: Bills et al., 2023; Paulo et al., 2024.
 - **autoencoder** — A network trained to reconstruct its input through a narrow bottleneck, so the bottleneck learns a compressed code. *(Module 33; also 37.)*
 - **automatic differentiation** — Computing exact derivatives of a program by applying the chain rule to each primitive operation it executes. Neither symbolic algebra nor finite differences. *(Module 03; also 00b.)* Origin: Baydin et al., 2015 (survey).
 - **autoregressive** — Generating one token at a time, each conditioned on all earlier ones, by feeding outputs back in as inputs. *(Module 18.)*
@@ -146,6 +148,7 @@
 - **DCGAN** — A convolutional GAN architecture with design rules that made GAN training stable enough for images. *(Module 33.)* Origin: Radford, Metz, Chintala, 2015.
 - **DDIM** — A deterministic diffusion sampler that skips steps, generating in tens instead of hundreds of steps from the same trained model. *(Module 33.)* Origin: Song, Meng, Ermon, 2020.
 - **DDPM** — Denoising Diffusion Probabilistic Models: the 2020 formulation that trains a network to predict the added noise with a simple squared-error loss. *(Module 33.)* Origin: Ho, Jain, Abbeel, 2020.
+- **dead latent** — An SAE unit that never fires on recent data and so never gets a gradient. TopK SAEs revive them with AuxK, an extra loss that asks the dead units to explain the remaining error. *(Module 47.)* Origin: Gao et al., 2024.
 - **decay mask** — The lower-triangular matrix of products a_{s+1}···a_t that turns decayed linear attention into masked attention, (QKᵀ ⊙ L)V. Built in log space from differences of a cumulative sum. *(Module 41; also 36.)* Origin: Dao & Gu, 2024.
 - **decode** — The second phase of generation: produce one token per step, each reading all the weights and the KV cache. Memory-bandwidth-bound. *(Module 18; also 17, 19, 41.)*
 - **decoder-only** — A transformer with only causally masked self-attention, trained to predict the next token. The architecture of GPT and nearly every modern LLM. *(Module 16.)*
@@ -160,6 +163,7 @@
 - **device** — A piece of hardware JAX can place arrays on and run computation on, such as `rocm:0` or the CPU. `jax.device_put` moves data there. *(Module 01; also 00, 08, 22, 24, 25.)*
 - **diffusion model** — Learn to reverse a process that gradually adds noise to data: a network predicts the noise at each step, and generation starts from pure noise and denoises step by step. *(Module 33; also 00b, 45.)* Origin: Sohl-Dickstein et al., 2015; Ho et al., 2020.
 - **dilated convolution** — A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with dilations 1-2-4-8. WaveNet stacks them causally. *(Module 12; also 40.)* Origin: van den Oord et al., 2016 (WaveNet).
+- **directional ablation** — Remove one direction from a model: project it out of the residual stream at every layer, or equivalently out of every matrix that writes to the stream (W − W u uᵀ). *(Module 47; also 46.)* Origin: Arditi et al., 2024.
 - **discounted return** — The total (usually discounted) reward from a point onward; what an RL agent maximizes. *(Module 34.)*
 - **discretization** — Converting a continuous-time state-space model into a step-by-step update with a step size Δ; zero-order hold assumes the input is constant within each step. *(Module 36.)*
 - **distillation** — Training a smaller student model on a larger teacher's outputs (or reasoning traces) so it inherits the teacher's ability. *(Module 26; also 12, 31, 42.)* Origin: Hinton, Vinyals, Dean, 2015.
@@ -220,6 +224,7 @@
 - **floating point** — Numbers stored as sign × mantissa × 2^exponent. Exponent bits set the range, mantissa bits the precision. *(Module 08.)*
 - **forward mode** — Autodiff that pushes derivatives forward alongside the values, one input direction per pass. Cheap when there are few inputs and many outputs. *(Module 03.)*
 - **forward process** — In diffusion, the fixed procedure that adds a scheduled amount of Gaussian noise to the data at each step until only noise remains. *(Module 33.)*
+- **fraction of variance unexplained** — Reconstruction error divided by the data's variance: 0 is perfect, 1 is no better than predicting the mean. The usual fidelity score for a sparse autoencoder, alongside the loss recovered when it is spliced in. *(Module 47.)*
 - **freezing** — Keeping some parameters fixed during training, either by differentiating only the trainable part or masking the optimizer. *(Module 20.)*
 - **FSDP** — Data parallelism with parameters and optimizer state sharded across devices and all-gathered just before use, so memory per device shrinks. *(Module 24; also 25.)* Origin: Rajbhandari et al., 2019 (ZeRO).
 - **functional state** — Keeping parameters, optimizer state and RNG keys as values passed into and returned from pure functions, instead of mutating objects. JAX's way of training. *(Module 07.)*
@@ -361,6 +366,7 @@
 - **log-sum-exp** — log(Σ exp xᵢ), computed safely by subtracting the max first so nothing overflows. It is the normalizer inside log-softmax and cross-entropy. *(Module 04; also 08, 11, 39.)*
 - **logistic regression** — A linear model followed by a sigmoid, giving the probability of the positive class; trained with binary cross-entropy. *(Module 09.)*
 - **logit** — An unnormalized score, one per class or token, that softmax turns into probabilities. Logits are log-probabilities up to a shared constant. *(Module 04; also 09, 11, 14, 18, 27.)*
+- **logit lens** — Decode a middle layer's residual stream with the model's own final norm and output head, to see what it would predict if it stopped there. The tuned lens first applies a learned affine map per layer. *(Module 47.)* Origin: nostalgebraist, 2020; Belrose et al., 2023.
 - **long-term memory** — Information an agent stores across sessions and retrieves when relevant, often with RAG over past episodes. *(Module 39.)*
 - **LoRA** — Fine-tuning by freezing the base weights W and learning a low-rank update B·A (rank r) added to them, scaled by α/r. B starts at zero, so training starts from the base model, and only a tiny adapter is trained and shipped. *(Module 20; also 02, 26, 27, 35.)* Origin: Hu et al., 2021.
 - **loss** — A single number measuring how wrong the model is on data; training adjusts parameters to make it small. *(Module 05; also 04, 10, 11, 14, 16.)*
@@ -379,6 +385,7 @@
 - **mantissa** — The bits of a float that hold its significant digits. bfloat16 keeps only 7 (about 2–3 decimal digits). *(Module 08.)*
 - **masked diffusion language model** — A language model that generates by filling in blanks: trained to predict tokens hidden at every masking rate (weighted by 1/t, a bound on the likelihood), it starts from an all-[MASK] passage and reveals several tokens per step, in any order. *(Module 45; also 33.)* Origin: Sahoo et al., 2024; Nie et al., 2025.
 - **masked language modeling** — BERT's training task: hide ~15% of tokens (80% replaced by [MASK], 10% random, 10% unchanged) and predict them from both sides. *(Module 32; also 45.)* Origin: Devlin et al., 2018.
+- **massive activations** — A few residual-stream values thousands of times larger than the rest, on sink tokens like the first one; they act as fixed biases, and SAE training leaves those tokens out. *(Module 47; also 44.)* Origin: Sun et al., 2024.
 - **master weights** — The float32 copy of the parameters the optimizer updates. Tiny updates would be rounded away if added to bfloat16 weights. *(Module 08.)*
 - **matrix** — A 2-D array, best understood as a linear transformation of space: each column says where a basis vector lands. A neural-network layer is mostly a matrix. *(Module 02; also 00, 05, 07, 12, 22.)*
 - **matrix multiplication** — Combining two matrices so the result applies one transformation after the other (right to left). Order matters. It is the operation GPUs are built to do fast. *(Module 02; also 08, 18, 22, 23, 24.)*
@@ -484,6 +491,7 @@
 - **pipeline parallelism** — Putting different layers on different devices and streaming microbatches through, like an assembly line. Startup and drain leave idle time, the bubble. *(Module 24.)* Origin: Huang et al., 2018 (GPipe).
 - **pixel shuffle** — Merging each r × r neighbourhood of image tokens into one wider token: r² fewer tokens for the language model to read. SmolVLM uses it to cut 1,024 patches to 64 tokens. *(Module 43.)* Origin: Shi et al., 2016; Marafioti et al., 2025.
 - **PJRT** — The plugin interface between JAX and a hardware backend. On this machine the `jax-rocm` PJRT plugin is the bridge from JAX to the AMD GPU. *(Module 00.)*
+- **Platonic representation hypothesis** — The claim that different models trained on different data converge on similar representations, measured by how often two models agree on each input's nearest neighbours. *(Module 47.)* Origin: Huh et al., 2024.
 - **policy** — In RL, the rule (here the model's token distribution) that maps a state to actions. Fine-tuning an LLM with RL treats the model as the policy. *(Module 34; also 20, 26, 35, 39.)*
 - **policy gradient** — Improve a policy by raising the log-probability of actions in proportion to how much better than expected they turned out (the advantage). *(Module 34; also 26.)* Origin: Williams, 1992 (REINFORCE).
 - **polysemantic** — A neuron that responds to several unrelated features, a consequence of superposition. *(Module 37.)*
@@ -551,7 +559,7 @@
 - **repetition penalty** — Lowering the logits of tokens already generated to discourage loops. *(Module 18.)* Origin: Keskar et al., 2019.
 - **reranker** — A second stage that rescores the top candidates from a fast retriever with a slower, more accurate model. *(Module 38.)*
 - **residual connection** — Adding a block's input to its output, x + f(x). Gradients get a direct path back through the network, which is what makes very deep networks trainable. *(Module 11; also 31.)* Origin: He et al., 2015.
-- **residual stream** — The vector each token carries through the network; every attention and MLP block reads from it and adds its output back. A useful mental model for interpretability. *(Module 16; also 37.)* Origin: Elhage et al., 2021.
+- **residual stream** — The vector each token carries through the network; every attention and MLP block reads from it and adds its output back. A useful mental model for interpretability. *(Module 16; also 37, 47.)* Origin: Elhage et al., 2021.
 - **ResNet** — The 2015 deep convolutional network built from residual blocks, which made 100+ layer networks trainable. *(Module 11.)* Origin: He et al., 2015.
 - **retrieval-augmented generation** — Retrieve relevant documents for a question and put them in the prompt, so the model answers from sources instead of memory alone. *(Module 38; also 32, 39.)* Origin: Lewis et al., 2020.
 - **reverse mode** — Autodiff that runs forward, then sweeps backwards from the output, getting the gradient for all inputs in one pass. Ideal for one scalar loss and millions of parameters, which is why training uses it. *(Module 03; also 08.)*
@@ -607,7 +615,7 @@
 - **softmax** — Exponentiate a vector of logits and divide by the total, turning arbitrary scores into a probability distribution. Large logits dominate. *(Module 04; also 08, 15, 18, 22, 23.)*
 - **softmax regression** — Logistic regression for many classes: one linear score per class, then softmax and cross-entropy. *(Module 09; also 10.)*
 - **sparse activation** — Only part of the model runs per token (the chosen experts), so active parameters are far fewer than total parameters. *(Module 17.)*
-- **sparse autoencoder** — An autoencoder with a sparsity penalty trained on a model's activations, to pull superposed features apart into separate, more interpretable units. *(Module 37.)* Origin: Bricken et al., 2023.
+- **sparse autoencoder** — An autoencoder with a sparsity penalty trained on a model's activations, to pull superposed features apart into separate, more interpretable units. *(Module 37; also 47.)* Origin: Bricken et al., 2023.
 - **sparse retrieval** — Search by exact word overlap, using sparse vectors with one dimension per vocabulary word (TF-IDF, BM25). *(Module 38.)*
 - **sparse upcycling** — Turn a trained dense model into a mixture of experts by copying its feed-forward block into every expert, adding a fresh router, and training on. *(Module 42; also 17.)* Origin: Komatsuzaki et al., 2022.
 - **sparsity** — Having many parameters but using only a few for each input: an MoE's unpicked experts, an Engram table's unread rows. Capacity grows without per-token compute growing. *(Module 40; also 17.)*
@@ -628,7 +636,7 @@
 - **structured pruning** — Make a trained model smaller by removing whole pieces — layers, attention heads, feed-forward neurons, embedding channels — chosen by an importance score, then retrain briefly (ideally by distillation). *(Module 42.)* Origin: Muralidharan et al., 2024 (Minitron).
 - **subsampling** — Randomly dropping very frequent words (the, of) from training pairs so rarer words get more updates. *(Module 30.)* Origin: Mikolov et al., 2013.
 - **subword** — A token that is part of a word: common words stay whole while rare ones split into pieces, balancing vocabulary size and sequence length. *(Module 13.)*
-- **superposition** — Networks representing more features than they have dimensions by overlapping them in nearly orthogonal directions, which works when features are sparse. *(Module 37.)* Origin: Elhage et al., 2022.
+- **superposition** — Networks representing more features than they have dimensions by overlapping them in nearly orthogonal directions, which works when features are sparse. *(Module 37; also 47.)* Origin: Elhage et al., 2022.
 - **supervised fine-tuning** — The first post-training step: fine-tune on demonstration responses by ordinary next-token prediction. *(Module 35; also 25, 26.)* Origin: Ouyang et al., 2022.
 - **surprise** — −log p of an outcome: rare events are very surprising, certain ones not at all. Entropy is the expected surprise. *(Module 04; also 21.)* Origin: Shannon, 1948.
 - **SVD** — Any matrix factors as rotate, scale along axes, rotate: A = U Σ Vᵀ. The scale factors (singular values) rank the directions by importance. *(Module 02; also 05, 30.)*

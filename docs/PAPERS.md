@@ -492,6 +492,22 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Language Models Can Rewrite Their Own Weights](https://arxiv.org/abs/2611.21885)** — Fan et al., 2026. Qwen3.5-27B edits its own weights without gradients; its best edit is one uniform bias change.
 - **[WeightBench: Evaluating Language Models as Weight-Space Programmers](https://arxiv.org/abs/2611.18553)** — Marasini, Khadka, Rahimi, 2026. 42 read/fix/write tasks: frontier models score about half and can't yet patch an LM.
 
+### 47 · Reading activations: lenses, sparse autoencoders and steering (2020–2025)
+
+- **[interpreting GPT: the logit lens](https://www.lesswrong.com/posts/AcKRB8wDpdaN6v6ru/interpreting-gpt-the-logit-lens)** — nostalgebraist, 2020. Decode every layer with the output head and watch the prediction form.
+- **[Eliciting Latent Predictions from Transformers with the Tuned Lens](https://arxiv.org/abs/2303.08112)** — Belrose et al., 2023. One learned affine map per layer fixes the logit lens's early-layer gibberish.
+- **[Massive Activations in Large Language Models](https://arxiv.org/abs/2402.17762)** — Sun, Chen, Kolter, Liu, 2024. A few huge activations act as fixed biases (attention sinks): why section 2 drops those tokens.
+- **[Towards Monosemanticity: Decomposing Language Models With Dictionary Learning](https://transformer-circuits.pub/2023/monosemantic-features)** — Bricken et al., 2023. A ReLU + L1 sparse autoencoder turns polysemantic neurons into readable features.
+- **[Sparse Autoencoders Find Highly Interpretable Features in Language Models](https://arxiv.org/abs/2309.08600)** — Cunningham et al., 2023. The same idea in parallel, on Pythia's residual stream.
+- **[Scaling and evaluating sparse autoencoders](https://arxiv.org/abs/2406.04093)** — Gao et al., 2024. TopK SAEs, AuxK for dead latents, and scaling laws: the SAE section 2 trains.
+- **[Gemma Scope: Open Sparse Autoencoders Everywhere All At Once on Gemma 2](https://arxiv.org/abs/2408.05147)** — Lieberum et al., 2024. JumpReLU SAEs on every layer of Gemma 2, released for anyone to read.
+- **[Automatically Interpreting Millions of Features in Large Language Models](https://arxiv.org/abs/2410.13928)** — Paulo et al., 2024. An LLM explains each feature; detection and fuzzing scores check the explanations.
+- **[Steering Language Models With Activation Engineering](https://arxiv.org/abs/2308.10248)** — Turner et al., 2023. ActAdd: one contrast pair ("Love" − "Hate") added to the residual stream steers generation.
+- **[Steering Llama 2 via Contrastive Activation Addition](https://arxiv.org/abs/2312.06681)** — Rimsky et al., 2023. CAA: average the difference over hundreds of pairs for a cleaner direction.
+- **[Refusal in Language Models Is Mediated by a Single Direction](https://arxiv.org/abs/2406.11717)** — Arditi et al., 2024. Directional ablation and weight orthogonalization: the same edit as section 5, applied to refusal.
+- **[The Platonic Representation Hypothesis](https://arxiv.org/abs/2405.07987)** — Huh, Cheung, Wang, Isola, 2024. Different models converge on similar representations; mutual nearest neighbours measure it.
+- **[Harnessing the Universal Geometry of Embeddings](https://arxiv.org/abs/2505.12540)** — Jha, Zhang, Shmatikov, Morris, 2025. vec2vec: translate between embedding spaces with no paired data at all.
+
 ## Books
 
 For a second pass, or a different angle. Most are free to read online from their authors; each entry says so.

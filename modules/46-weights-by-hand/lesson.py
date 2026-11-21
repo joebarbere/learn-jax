@@ -710,7 +710,7 @@ def _(mo):
     * Charles Goddard et al., [mergekit](https://github.com/arcee-ai/mergekit) — the merging toolkit behind
       most merged open models (task arithmetic, TIES, DARE and more).
 
-    **Next:** Module 47 (planned): reading activations, with lenses, sparse autoencoders and steering.
+    **Next:** Module 47, reading activations: lenses, sparse autoencoders and steering.
     """)
     return
 

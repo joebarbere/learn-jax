@@ -6,19 +6,19 @@ Each operation the course introduces, written five ways: the formula (and how pa
 
 - **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add)
 - **Elementwise math:** [exp, log and powers](#exp-log-and-powers), [trig and sign functions](#trig-and-sign-functions), [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero), [clip, maximum and minimum (elementwise)](#clip-maximum-and-minimum-elementwise), [round to bfloat16](#round-to-bfloat16)
-- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation), [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome)
+- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation), [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome), [directional ablation of a weight matrix](#directional-ablation-of-a-weight-matrix)
 - **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient)
 - **Random numbers:** [normal samples](#normal-samples), [uniform samples](#uniform-samples), [random integers](#random-integers), [categorical sampling](#categorical-sampling), [Bernoulli samples](#bernoulli-samples), [shuffle (random permutation)](#shuffle-random-permutation), [sample without replacement](#sample-without-replacement), [He (Kaiming) normal initialization](#he-kaiming-normal-initialization)
 - **Control flow and transforms:** [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap), [loop with carried state: lax.scan](#loop-with-carried-state-laxscan), [fixed and open-ended loops: fori_loop and while_loop](#fixed-and-open-ended-loops-foriloop-and-whileloop), [branches: lax.cond and lax.switch](#branches-laxcond-and-laxswitch)
 - **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip), [naive Bayes readout for binary features](#naive-bayes-readout-for-binary-features)
 - **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz), [TIES merging of task vectors](#ties-merging-of-task-vectors)
-- **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution)
+- **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution), [TopK sparse code](#topk-sparse-code)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
 - **Sampling and inference:** [KV cache write](#kv-cache-write), [temperature and top-k filter](#temperature-and-top-k-filter), [top-p (nucleus) filter](#top-p-nucleus-filter), [int8 absmax quantization](#int8-absmax-quantization)
 - **Sequence and state-space models:** [LSTM cell](#lstm-cell), [linear recurrence as a parallel scan](#linear-recurrence-as-a-parallel-scan), [long convolution via FFT](#long-convolution-via-fft), [decayed linear attention (recurrent form)](#decayed-linear-attention-recurrent-form), [gated delta rule](#gated-delta-rule)
 - **Generative models:** [VAE reparameterization and Gaussian KL](#vae-reparameterization-and-gaussian-kl), [diffusion forward noising](#diffusion-forward-noising), [contrastive (CLIP / InfoNCE) loss](#contrastive-clip--infonce-loss)
 - **Reinforcement learning and preferences:** [GRPO group-relative advantage](#grpo-group-relative-advantage), [DQN target and Huber loss](#dqn-target-and-huber-loss), [PUCT score (AlphaZero search)](#puct-score-alphazero-search), [Bradley–Terry reward-model loss](#bradleyterry-reward-model-loss), [DPO loss](#dpo-loss)
-- **Retrieval and evaluation:** [BM25 scoring as a sparse matrix product](#bm25-scoring-as-a-sparse-matrix-product), [reciprocal rank fusion](#reciprocal-rank-fusion), [MRR and nDCG@k](#mrr-and-ndcgk)
+- **Retrieval and evaluation:** [BM25 scoring as a sparse matrix product](#bm25-scoring-as-a-sparse-matrix-product), [reciprocal rank fusion](#reciprocal-rank-fusion), [MRR and nDCG@k](#mrr-and-ndcgk), [fraction of variance unexplained](#fraction-of-variance-unexplained), [mutual nearest-neighbour alignment](#mutual-nearest-neighbour-alignment)
 
 ## Reading paper notation
 
@@ -2276,6 +2276,63 @@ def edit(W, k, v, C_inv):
 
 - With C = I this is the plain minimum-norm rank-one fix. C (the covariance of the layer's inputs on ordinary text) makes the change smallest where inputs usually lie, so unrelated facts move less.
 - ROME picks k as the MLP's hidden activation at the subject's last token and finds v with a few gradient steps on one vector; MEMIT spreads many such edits over several layers.
+
+### directional ablation of a weight matrix
+
+*Module 47; also 46.*
+
+Stop a matrix from writing anything along direction u: subtract, from each of its outputs, that output's component along u. alpha = 1 removes it, alpha = 2 flips it, alpha = 0 leaves it alone.
+
+$$
+W' = W - \alpha\,(W u)\,u^\top,\qquad (xW')\cdot u = (1-\alpha)\,(xW)\cdot u \quad (\lVert u \rVert = 1)
+$$
+
+**In papers:** $W'_{out} = W_{out} - \hat r \hat r^\top W_{out}$ (Arditi et al. 2024; their W acts on column vectors)
+
+**Shapes:** `W (d_in, d), u (d,), alpha: float -> (d_in, d)`
+
+**Python**
+
+```python
+def ablate(W, u, alpha):
+    out = []
+    for row in W:
+        c = sum(a * b for a, b in zip(row, u))                 # this row's component along u
+        out.append([a - alpha * c * b for a, b in zip(row, u)])
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def ablate(W, u, alpha):
+    return W - alpha * np.outer(W @ u, u)
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def ablate(W, u, alpha):
+    return W - alpha * jnp.outer(W @ u, u)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def ablate(W, u, alpha):
+    return W - alpha * torch.outer(W @ u, u)
+```
+
+**Where they differ**
+
+- Apply it to every matrix that writes to the residual stream (embeddings, attention outputs, MLP down-projections) and the stream never contains u: the same as projecting u out of the activations after every write, but with no runtime hook.
+- With tied embeddings, untie the output head first, or the edit changes the unembedding too.
 
 ## Calculus and autodiff
 
@@ -6535,6 +6592,67 @@ def dwconv(x, w, dil):
 - All three libraries compute cross-correlation (no kernel flip), so w[K−1] meets the current step.
 - PyTorch pads both ends; keeping the first T outputs throws away the ones that saw the future. JAX's `padding=[(left, right)]` pads only the left.
 
+### TopK sparse code
+
+*Module 47.*
+
+A sparse autoencoder's code: of all its latent units, keep only the k that respond most to this input (after a ReLU) and silence the rest. Sparsity is set exactly by k, not tuned with a penalty.
+
+$$
+z = \operatorname{TopK}_k\big(\mathrm{ReLU}((x - b_{dec}) W_{enc} + b_{enc})\big),\quad \hat x = z W_{dec} + b_{dec}
+$$
+
+**In papers:** $z = \mathrm{TopK}(W_{enc}(x - b_{pre}))$ (Gao et al. 2024, eq. 3; ReLU after TopK, same result)
+
+**Shapes:** `pre (N, F), k: int -> (N, F)`
+
+**Python**
+
+```python
+def topk(pre, k):
+    out = []
+    for row in pre:
+        kth = sorted(row, reverse=True)[k - 1]
+        out.append([max(v, 0.0) if v >= kth else 0.0 for v in row])
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def topk(pre, k):
+    kth = -np.sort(-pre, axis=-1)[..., k - 1:k]              # the k-th largest per row
+    return np.where(pre >= kth, np.maximum(pre, 0), 0.0)
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def topk(pre, k):
+    kth = jax.lax.top_k(pre, k)[0][..., -1:]
+    return jnp.where(pre >= kth, jax.nn.relu(pre), 0.0)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def topk(pre, k):
+    kth = torch.topk(pre, k, dim=-1).values[..., -1:]
+    return torch.where(pre >= kth, torch.relu(pre), torch.zeros_like(pre))
+```
+
+**Where they differ**
+
+- A threshold mask (keep values ≥ the k-th largest) instead of scattering top_k's indices: the same code unless two values tie, and gradients flow through the kept entries as usual.
+- The older recipe is a plain ReLU plus an L1 penalty on z; the penalty also shrinks the kept values, which TopK avoids.
+
 ## Attention and transformers
 
 ### scaled dot-product attention (causal)
@@ -8635,6 +8753,136 @@ def rank_metrics(ranked, relevant, k):
 - Use 1-based ranks: a 0-based rank makes the top hit $1/\log_2 1 = 1/0$.
 - `where` evaluates both branches, so divide by a safe rank (`maximum(rank, 1)`) even for misses, or you get inf/NaN warnings (and NaN gradients in JAX).
 - NumPy and JAX take `argmax` of a bool array; `torch.argmax` raises on bool, so cast to int first.
+
+### fraction of variance unexplained
+
+*Module 47.*
+
+How much of the data's spread a reconstruction misses: squared error divided by the squared distance to the mean. 0 is perfect; 1 is no better than predicting the average every time.
+
+$$
+\mathrm{FVU} = \frac{\sum_n \lVert x_n - \hat x_n \rVert^2}{\sum_n \lVert x_n - \bar x \rVert^2}
+$$
+
+**In papers:** $1 - R^2$, 'normalized MSE' (Gao et al. 2024)
+
+**Shapes:** `x (N, d), x_hat (N, d) -> ()`
+
+**Python**
+
+```python
+def fvu(x, x_hat):
+    n, d = len(x), len(x[0])
+    mean = [sum(r[j] for r in x) / n for j in range(d)]
+    err = sum((a - b) ** 2 for r, h in zip(x, x_hat) for a, b in zip(r, h))
+    var = sum((a - m) ** 2 for r in x for a, m in zip(r, mean))
+    return err / var
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def fvu(x, x_hat):
+    return ((x - x_hat) ** 2).sum() / ((x - x.mean(0)) ** 2).sum()
+```
+
+**JAX**
+
+```python
+def fvu(x, x_hat):
+    return ((x - x_hat) ** 2).sum() / ((x - x.mean(0)) ** 2).sum()
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def fvu(x, x_hat):
+    return ((x - x_hat) ** 2).sum() / ((x - x.mean(0)) ** 2).sum()
+```
+
+**Where they differ**
+
+- FVU alone can flatter an SAE: a few huge-norm tokens dominate the variance, so explaining them makes FVU small while ordinary tokens are reconstructed badly. Module 47 drops them first.
+
+### mutual nearest-neighbour alignment
+
+*Module 47.*
+
+Do two models agree about which inputs are alike? For each input, list its k nearest neighbours in each model's space and count how many the two lists share; average the overlap. It ignores scale and rotation, and works across different widths.
+
+$$
+m_{kNN}(X, Y) = \frac{1}{N}\sum_i \frac{\lvert \mathcal N_k^X(i) \cap \mathcal N_k^Y(i)\rvert}{k}
+$$
+
+**In papers:** $m_{NN}$ (Huh et al. 2024, eq. 2)
+
+**Shapes:** `X (N, d1), Y (N, d2), k: int -> ()`
+
+**Python**
+
+```python
+def mknn(X, Y, k):
+    def nbrs(A):
+        unit = [[a / sum(b * b for b in r) ** 0.5 for a in r] for r in A]
+        out = []
+        for i, r in enumerate(unit):
+            sims = [(sum(a * b for a, b in zip(r, s)), j) for j, s in enumerate(unit) if j != i]
+            out.append({j for _, j in sorted(sims, reverse=True)[:k]})
+        return out
+    return sum(len(a & b) for a, b in zip(nbrs(X), nbrs(Y))) / (k * len(X))
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def mknn(X, Y, k):
+    def nbrs(A):
+        A = A / np.linalg.norm(A, axis=1, keepdims=True)
+        S = A @ A.T
+        np.fill_diagonal(S, -np.inf)
+        return np.argsort(-S, axis=1)[:, :k]
+    a, b = nbrs(X), nbrs(Y)
+    return (a[:, :, None] == b[:, None, :]).any(-1).sum() / (k * len(X))
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def mknn(X, Y, k):
+    def nbrs(A):
+        A = A / jnp.linalg.norm(A, axis=1, keepdims=True)
+        S = jnp.where(jnp.eye(len(A), dtype=bool), -jnp.inf, A @ A.T)
+        return jax.lax.top_k(S, k)[1]
+    a, b = nbrs(X), nbrs(Y)
+    return (a[:, :, None] == b[:, None, :]).any(-1).sum() / (k * len(X))
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def mknn(X, Y, k):
+    def nbrs(A):
+        A = A / A.norm(dim=1, keepdim=True)
+        S = (A @ A.T).fill_diagonal_(-float("inf"))
+        return S.topk(k, dim=1).indices
+    a, b = nbrs(X), nbrs(Y)
+    return (a[:, :, None] == b[:, None, :]).any(-1).sum() / (k * len(X))
+```
+
+**Where they differ**
+
+- Chance is k/(N−1). Module 47 measures it between SmolLM2-135M and SmolLM2-360M layer by layer, against a shuffled pairing.
 
 ## Index by JAX name
 

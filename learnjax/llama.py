@@ -140,7 +140,8 @@ def init_cache(cfg: Config, batch: int, max_len: int | None = None):
     return {"k": jnp.zeros(shape, cfg.dtype), "v": jnp.zeros(shape, cfg.dtype)}
 
 
-def _layer(cfg: Config, x, lp, positions, cache_kv, pos):
+def attn_block(cfg: Config, x, lp, positions, cache_kv=None, pos=0):
+    """The attention half of a layer: what it adds to the residual stream (B, T, d), and the updated cache."""
     B, T, _ = x.shape
     H, KV, hd = cfg.n_heads, cfg.n_kv_heads, cfg.head_dim
     h = rms_norm(x, lp["attn_norm"], cfg.norm_eps)
@@ -163,10 +164,19 @@ def _layer(cfg: Config, x, lp, positions, cache_kv, pos):
     scores = jnp.where(mask, scores, -jnp.inf)
     weights = jax.nn.softmax(scores, axis=-1).astype(x.dtype)
     out = jnp.einsum("bgrts,bsgd->btgrd", weights, vals).reshape(B, T, H * hd)
-    x = x + out @ lp["wo"]
+    return out @ lp["wo"], cache_kv
+
+
+def mlp_block(cfg: Config, x, lp):
+    """The MLP half of a layer (SwiGLU): what it adds to the residual stream."""
     h = rms_norm(x, lp["mlp_norm"], cfg.norm_eps)
-    x = x + (jax.nn.silu(h @ lp["w_gate"]) * (h @ lp["w_up"])) @ lp["w_down"]
-    return x, cache_kv
+    return (jax.nn.silu(h @ lp["w_gate"]) * (h @ lp["w_up"])) @ lp["w_down"]
+
+
+def _layer(cfg: Config, x, lp, positions, cache_kv, pos):
+    a, cache_kv = attn_block(cfg, x, lp, positions, cache_kv, pos)
+    x = x + a
+    return x + mlp_block(cfg, x, lp), cache_kv
 
 
 def forward(params, tokens, cfg: Config, cache=None, pos=0):

@@ -46,6 +46,11 @@ TERMS: list[Term] = [
          "The elementwise nonlinear function between layers. Without it, stacked linear layers collapse "
          "into one linear map.",
          "10", ("31",), ""),
+    Term("activation steering", ("steering", "steering vector", "steering vectors", "CAA", "ActAdd",
+                                 "activation addition", "contrastive activation addition"),
+         "Change a model's behaviour at inference by adding a direction to its residual stream, usually the "
+         "mean difference between activations on contrasting examples (CAA) or on one contrast pair (ActAdd).",
+         "47", (), "Turner et al., 2023; Rimsky et al., 2023"),
     Term("activations", ("activation memory",),
          "The intermediate values a network computes in the forward pass. They must be stored for the "
          "backward pass, which often dominates training memory.",
@@ -156,6 +161,10 @@ TERMS: list[Term] = [
          "(softmax weights must sum to 1). Dropping them from a sliding window breaks a pretrained model; "
          "keeping four fixes it.",
          "44", (), "Xiao et al., 2023"),
+    Term("auto-interpretability", ("auto-interp", "autointerp", "detection scoring"),
+         "Using a language model to explain each SAE feature from its top-activating contexts, then scoring "
+         "the explanation by how well it predicts where the feature fires on new text.",
+         "47", (), "Bills et al., 2023; Paulo et al., 2024"),
     Term("autoencoder", ("autoencoders", "encoder and decoder"),
          "A network trained to reconstruct its input through a narrow bottleneck, so the bottleneck learns "
          "a compressed code.",
@@ -466,6 +475,10 @@ TERMS: list[Term] = [
          "Denoising Diffusion Probabilistic Models: the 2020 formulation that trains a network to predict "
          "the added noise with a simple squared-error loss.",
          "33", (), "Ho, Jain, Abbeel, 2020"),
+    Term("dead latent", ("dead latents", "dead features", "AuxK"),
+         "An SAE unit that never fires on recent data and so never gets a gradient. TopK SAEs revive them with "
+         "AuxK, an extra loss that asks the dead units to explain the remaining error.",
+         "47", (), "Gao et al., 2024"),
     Term("decode", ("decode phase", "generation phase"),
          "The second phase of generation: produce one token per step, each reading all the weights and the "
          "KV cache. Memory-bandwidth-bound.",
@@ -513,6 +526,10 @@ TERMS: list[Term] = [
          "A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with "
          "dilations 1-2-4-8. WaveNet stacks them causally.",
          "12", ("40",), "van den Oord et al., 2016 (WaveNet)"),
+    Term("directional ablation", ("weight orthogonalization", "abliteration", "ablate_direction"),
+         "Remove one direction from a model: project it out of the residual stream at every layer, or "
+         "equivalently out of every matrix that writes to the stream (W − W u uᵀ).",
+         "47", ("46",), "Arditi et al., 2024"),
     Term("discounted return", ("discount factor", "discounted sum"),
          "The total (usually discounted) reward from a point onward; what an RL agent maximizes.",
          "34", (), ""),
@@ -702,6 +719,11 @@ TERMS: list[Term] = [
          "In diffusion, the fixed procedure that adds a scheduled amount of Gaussian noise to the data at "
          "each step until only noise remains.",
          "33", (), ""),
+    Term("fraction of variance unexplained", ("FVU", "normalized MSE"),
+         "Reconstruction error divided by the data's variance: 0 is perfect, 1 is no better than predicting the "
+         "mean. The usual fidelity score for a sparse autoencoder, alongside the loss recovered when it is "
+         "spliced in.",
+         "47", (), ""),
     Term("freezing", ("freeze_mask",),
          "Keeping some parameters fixed during training, either by differentiating only the trainable part "
          "or masking the optimizer.",
@@ -1114,6 +1136,11 @@ TERMS: list[Term] = [
          "An unnormalized score, one per class or token, that softmax turns into probabilities. Logits are "
          "log-probabilities up to a shared constant.",
          "04", ("09", "11", "14", "18", "27"), ""),
+    Term("logit lens", ("logit-lens", "tuned lens"),
+         "Decode a middle layer's residual stream with the model's own final norm and output head, to see "
+         "what it would predict if it stopped there. The tuned lens first applies a learned affine map per "
+         "layer.",
+         "47", (), "nostalgebraist, 2020; Belrose et al., 2023"),
     Term("long-term memory", ("episodic memory", "episodic log"),
          "Information an agent stores across sessions and retrieves when relevant, often with RAG over "
          "past episodes.",
@@ -1169,6 +1196,10 @@ TERMS: list[Term] = [
          "masking rate (weighted by 1/t, a bound on the likelihood), it starts from an all-[MASK] passage "
          "and reveals several tokens per step, in any order.",
          "45", ("33",), "Sahoo et al., 2024; Nie et al., 2025"),
+    Term("massive activations", ("massive activation", "outlier activations", "outlier tokens"),
+         "A few residual-stream values thousands of times larger than the rest, on sink tokens like the first "
+         "one; they act as fixed biases, and SAE training leaves those tokens out.",
+         "47", ("44",), "Sun et al., 2024"),
     Term("master weights", ("master weights in float32",),
          "The float32 copy of the parameters the optimizer updates. Tiny updates would be rounded away if "
          "added to bfloat16 weights.",
@@ -1512,6 +1543,11 @@ TERMS: list[Term] = [
          "The plugin interface between JAX and a hardware backend. On this machine the `jax-rocm` PJRT "
          "plugin is the bridge from JAX to the AMD GPU.",
          "00", (), ""),
+    Term("Platonic representation hypothesis", ("mutual nearest neighbours", "mutual kNN", "representation alignment",
+                                                "vec2vec"),
+         "The claim that different models trained on different data converge on similar representations, "
+         "measured by how often two models agree on each input's nearest neighbours.",
+         "47", (), "Huh et al., 2024"),
     Term("policy", ("policies",),
          "In RL, the rule (here the model's token distribution) that maps a state to actions. Fine-tuning "
          "an LLM with RL treats the model as the policy.",
@@ -1736,7 +1772,7 @@ TERMS: list[Term] = [
     Term("residual stream", (),
          "The vector each token carries through the network; every attention and MLP block reads from it "
          "and adds its output back. A useful mental model for interpretability.",
-         "16", ("37",), "Elhage et al., 2021"),
+         "16", ("37", "47"), "Elhage et al., 2021"),
     Term("ResNet", (),
          "The 2015 deep convolutional network built from residual blocks, which made 100+ layer networks "
          "trainable.",
@@ -1940,7 +1976,7 @@ TERMS: list[Term] = [
     Term("sparse autoencoder", ("sparse autoencoders", "SAE", "SAEs"),
          "An autoencoder with a sparsity penalty trained on a model's activations, to pull superposed "
          "features apart into separate, more interpretable units.",
-         "37", (), "Bricken et al., 2023"),
+         "37", ("47",), "Bricken et al., 2023"),
     Term("sparse retrieval", ("lexical search", "keyword search"),
          "Search by exact word overlap, using sparse vectors with one dimension per vocabulary word "
          "(TF-IDF, BM25).",
@@ -2008,7 +2044,7 @@ TERMS: list[Term] = [
     Term("superposition", (),
          "Networks representing more features than they have dimensions by overlapping them in nearly "
          "orthogonal directions, which works when features are sparse.",
-         "37", (), "Elhage et al., 2022"),
+         "37", ("47",), "Elhage et al., 2022"),
     Term("supervised fine-tuning", ("SFT",),
          "The first post-training step: fine-tune on demonstration responses by ordinary next-token "
          "prediction.",

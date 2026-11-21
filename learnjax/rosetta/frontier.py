@@ -803,3 +803,170 @@ ENTRIES += [
               "steps on one vector; MEMIT spreads many such edits over several layers.")),
       apis=("jax.numpy.outer",), module="46"),
 ]
+
+
+def _topk_inputs(r: np.random.Generator) -> dict:
+    return {"pre": r.normal(size=(4, 12)), "k": 3}
+
+
+def _fvu_inputs(r: np.random.Generator) -> dict:
+    x = r.normal(size=(20, 5)) * 2 + 1
+    return {"x": x, "x_hat": x + 0.3 * r.normal(size=x.shape)}
+
+
+def _ablate_inputs(r: np.random.Generator) -> dict:
+    u = r.normal(size=5)
+    return {"W": r.normal(size=(7, 5)), "u": u / np.linalg.norm(u), "alpha": 1.0}
+
+
+def _knn_inputs(r: np.random.Generator) -> dict:
+    X = r.normal(size=(30, 6))
+    return {"X": X, "Y": X @ r.normal(size=(6, 4)) + 0.5 * r.normal(size=(30, 4)), "k": 4}
+
+
+ENTRIES += [
+    E("TopK sparse code", "Neural network layers",
+      "A sparse autoencoder's code: of all its latent units, keep only the k that respond most to this input "
+      "(after a ReLU) and silence the rest. Sparsity is set exactly by k, not tuned with a penalty.",
+      r"z = \operatorname{TopK}_k\big(\mathrm{ReLU}((x - b_{dec}) W_{enc} + b_{enc})\big),\quad "
+      r"\hat x = z W_{dec} + b_{dec}",
+      r"$z = \mathrm{TopK}(W_{enc}(x - b_{pre}))$ (Gao et al. 2024, eq. 3; ReLU after TopK, same result)",
+      "pre (N, F), k: int -> (N, F)", "topk(pre, k)", _topk_inputs,
+      python="""
+        def topk(pre, k):
+            out = []
+            for row in pre:
+                kth = sorted(row, reverse=True)[k - 1]
+                out.append([max(v, 0.0) if v >= kth else 0.0 for v in row])
+            return out
+      """,
+      numpy="""
+        def topk(pre, k):
+            kth = -np.sort(-pre, axis=-1)[..., k - 1:k]              # the k-th largest per row
+            return np.where(pre >= kth, np.maximum(pre, 0), 0.0)
+      """,
+      jax="""
+        def topk(pre, k):
+            kth = jax.lax.top_k(pre, k)[0][..., -1:]
+            return jnp.where(pre >= kth, jax.nn.relu(pre), 0.0)
+      """,
+      torch="""
+        def topk(pre, k):
+            kth = torch.topk(pre, k, dim=-1).values[..., -1:]
+            return torch.where(pre >= kth, torch.relu(pre), torch.zeros_like(pre))
+      """,
+      notes=(("A threshold mask (keep values ≥ the k-th largest) instead of scattering top_k's indices: the same "
+             "code unless two values tie, and gradients flow through the kept entries as usual."),
+             ("The older recipe is a plain ReLU plus an L1 penalty on z; the penalty also shrinks the kept values, "
+             "which TopK avoids.")),
+      module="47"),
+    E("fraction of variance unexplained", "Retrieval and evaluation",
+      "How much of the data's spread a reconstruction misses: squared error divided by the squared distance "
+      "to the mean. 0 is perfect; 1 is no better than predicting the average every time.",
+      r"\mathrm{FVU} = \frac{\sum_n \lVert x_n - \hat x_n \rVert^2}{\sum_n \lVert x_n - \bar x \rVert^2}",
+      r"$1 - R^2$, 'normalized MSE' (Gao et al. 2024)",
+      "x (N, d), x_hat (N, d) -> ()", "fvu(x, x_hat)", _fvu_inputs,
+      python="""
+        def fvu(x, x_hat):
+            n, d = len(x), len(x[0])
+            mean = [sum(r[j] for r in x) / n for j in range(d)]
+            err = sum((a - b) ** 2 for r, h in zip(x, x_hat) for a, b in zip(r, h))
+            var = sum((a - m) ** 2 for r in x for a, m in zip(r, mean))
+            return err / var
+      """,
+      numpy="""
+        def fvu(x, x_hat):
+            return ((x - x_hat) ** 2).sum() / ((x - x.mean(0)) ** 2).sum()
+      """,
+      jax="""
+        def fvu(x, x_hat):
+            return ((x - x_hat) ** 2).sum() / ((x - x.mean(0)) ** 2).sum()
+      """,
+      torch="""
+        def fvu(x, x_hat):
+            return ((x - x_hat) ** 2).sum() / ((x - x.mean(0)) ** 2).sum()
+      """,
+      notes=(("FVU alone can flatter an SAE: a few huge-norm tokens dominate the variance, so explaining them makes "
+             "FVU small while ordinary tokens are reconstructed badly. Module 47 drops them first."),),
+      module="47"),
+    E("directional ablation of a weight matrix", "Linear algebra",
+      "Stop a matrix from writing anything along direction u: subtract, from each of its outputs, that output's "
+      "component along u. alpha = 1 removes it, alpha = 2 flips it, alpha = 0 leaves it alone.",
+      r"W' = W - \alpha\,(W u)\,u^\top,\qquad (xW')\cdot u = (1-\alpha)\,(xW)\cdot u \quad (\lVert u \rVert = 1)",
+      r"$W'_{out} = W_{out} - \hat r \hat r^\top W_{out}$ (Arditi et al. 2024; their W acts on column vectors)",
+      "W (d_in, d), u (d,), alpha: float -> (d_in, d)", "ablate(W, u, alpha)", _ablate_inputs,
+      python="""
+        def ablate(W, u, alpha):
+            out = []
+            for row in W:
+                c = sum(a * b for a, b in zip(row, u))                 # this row's component along u
+                out.append([a - alpha * c * b for a, b in zip(row, u)])
+            return out
+      """,
+      numpy="""
+        def ablate(W, u, alpha):
+            return W - alpha * np.outer(W @ u, u)
+      """,
+      jax="""
+        def ablate(W, u, alpha):
+            return W - alpha * jnp.outer(W @ u, u)
+      """,
+      torch="""
+        def ablate(W, u, alpha):
+            return W - alpha * torch.outer(W @ u, u)
+      """,
+      notes=(("Apply it to every matrix that writes to the residual stream (embeddings, attention outputs, MLP "
+             "down-projections) and the stream never contains u: the same as projecting u out of the activations "
+             "after every write, but with no runtime hook."),
+             "With tied embeddings, untie the output head first, or the edit changes the unembedding too."),
+      module="47", also=("46",)),
+    E("mutual nearest-neighbour alignment", "Retrieval and evaluation",
+      "Do two models agree about which inputs are alike? For each input, list its k nearest neighbours in each "
+      "model's space and count how many the two lists share; average the overlap. It ignores scale and rotation, "
+      "and works across different widths.",
+      r"m_{kNN}(X, Y) = \frac{1}{N}\sum_i \frac{\lvert \mathcal N_k^X(i) \cap \mathcal N_k^Y(i)\rvert}{k}",
+      r"$m_{NN}$ (Huh et al. 2024, eq. 2)",
+      "X (N, d1), Y (N, d2), k: int -> ()", "mknn(X, Y, k)", _knn_inputs,
+      python="""
+        def mknn(X, Y, k):
+            def nbrs(A):
+                unit = [[a / sum(b * b for b in r) ** 0.5 for a in r] for r in A]
+                out = []
+                for i, r in enumerate(unit):
+                    sims = [(sum(a * b for a, b in zip(r, s)), j) for j, s in enumerate(unit) if j != i]
+                    out.append({j for _, j in sorted(sims, reverse=True)[:k]})
+                return out
+            return sum(len(a & b) for a, b in zip(nbrs(X), nbrs(Y))) / (k * len(X))
+      """,
+      numpy="""
+        def mknn(X, Y, k):
+            def nbrs(A):
+                A = A / np.linalg.norm(A, axis=1, keepdims=True)
+                S = A @ A.T
+                np.fill_diagonal(S, -np.inf)
+                return np.argsort(-S, axis=1)[:, :k]
+            a, b = nbrs(X), nbrs(Y)
+            return (a[:, :, None] == b[:, None, :]).any(-1).sum() / (k * len(X))
+      """,
+      jax="""
+        def mknn(X, Y, k):
+            def nbrs(A):
+                A = A / jnp.linalg.norm(A, axis=1, keepdims=True)
+                S = jnp.where(jnp.eye(len(A), dtype=bool), -jnp.inf, A @ A.T)
+                return jax.lax.top_k(S, k)[1]
+            a, b = nbrs(X), nbrs(Y)
+            return (a[:, :, None] == b[:, None, :]).any(-1).sum() / (k * len(X))
+      """,
+      torch="""
+        def mknn(X, Y, k):
+            def nbrs(A):
+                A = A / A.norm(dim=1, keepdim=True)
+                S = (A @ A.T).fill_diagonal_(-float("inf"))
+                return S.topk(k, dim=1).indices
+            a, b = nbrs(X), nbrs(Y)
+            return (a[:, :, None] == b[:, None, :]).any(-1).sum() / (k * len(X))
+      """,
+      notes=(("Chance is k/(N−1). Module 47 measures it between SmolLM2-135M and SmolLM2-360M layer by layer, "
+             "against a shuffled pairing."),),
+      module="47"),
+]

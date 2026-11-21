@@ -5,6 +5,7 @@
 import json
 import re
 import sys
+import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from difflib import SequenceMatcher
@@ -22,10 +23,15 @@ def main() -> int:
     papers = {p.url: p for ps in PAPERS.values() for p in ps}
     ids = {u.rsplit("/", 1)[1]: p for u, p in papers.items() if "arxiv.org/abs/" in u}
     bad = 0
-    q = "https://export.arxiv.org/api/query?max_results=200&id_list=" + ",".join(ids)
-    feed = ET.fromstring(urllib.request.urlopen(urllib.request.Request(q, headers=UA), timeout=60).read())
     ns = {"a": "http://www.w3.org/2005/Atom"}
-    for e in feed.findall("a:entry", ns):
+    entries, keys = [], list(ids)
+    for i in range(0, len(keys), 100):                  # the API returns at most max_results per query
+        if i:
+            time.sleep(3)                               # arXiv asks for one request every 3 s
+        q = "https://export.arxiv.org/api/query?max_results=100&id_list=" + ",".join(keys[i:i + 100])
+        feed = ET.fromstring(urllib.request.urlopen(urllib.request.Request(q, headers=UA), timeout=60).read())
+        entries += feed.findall("a:entry", ns)
+    for e in entries:
         aid = re.sub(r"v\d+$", "", e.find("a:id", ns).text.rsplit("/", 1)[1])
         title = " ".join(e.find("a:title", ns).text.split())
         p = ids.pop(aid, None)

@@ -201,6 +201,14 @@ EVENTS = [
          "what": "A selective state-space model that processes long sequences in linear time.",
          "why_it_mattered": "The first serious challenger to attention in years.",
          "module": "36-mamba-ssm", "url": W + "Mamba_(deep_learning_architecture)"},
+    {"year": 2024, "title": "Sparse autoencoders read a production model", "who": "Anthropic (Scaling "
+         "Monosemanticity); OpenAI; Google DeepMind (Gemma Scope)",
+         "what": "Sparse autoencoders trained on a large model's activations found millions of readable features "
+              "(the Golden Gate Bridge, code bugs, deception) and could steer the model by turning one up.",
+         "why_it_mattered": "Interpretability moved from toy models to frontier ones; reading and steering "
+                            "activations became everyday tools.",
+         "module": "47-reading-activations",
+         "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/"},
     {"year": 2024, "title": "Nobel Prizes for AI", "who": "Physics: John Hopfield, Geoffrey Hinton; Chemistry: "
          "David Baker, Demis Hassabis, John Jumper",
          "what": "Physics for foundational work on neural networks; Chemistry for protein design and structure prediction.",

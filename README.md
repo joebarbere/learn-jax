@@ -183,6 +183,7 @@ it's first taught; `make rosetta-browse` opens them all in one notebook, and the
 | 44 | Efficient and sparse attention: reading only part of the past (2019–2026) | ✅ |
 | 45 | Diffusion language models: writing a whole passage at once (2021–2026) | ✅ |
 | 46 | Weights by hand: compiling, merging and editing networks (1990s–2026) | ✅ |
+| 47 | Reading activations: lenses, sparse autoencoders and steering (2020–2025) | ✅ |
 
 ✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 
