@@ -1,5 +1,7 @@
-# Course dependencies, top-level pins. JAX itself (0.11.1, ROCm 10.1 plugin) comes from the base image and is
-# held in place. After editing, run `make lock` (writes requirements.lock) and `make build`.
+# Course dependencies, top-level pins, including JAX and its ROCm 10 wheels (gfx1100 kernels, run on our gfx1102 via
+# HSA_OVERRIDE_GFX_VERSION=11.0.0: gfx1102's own f32 GEMM kernels are ~4.5x slower; docs/ROCM_GOTCHAS.md #1).
+# After editing, run `make lock` (writes requirements.lock) and `make build`.
+jax[rocm10-device-gfx1100]==0.12.1
 marimo==0.25.2
 flax==0.12.12
 optax==0.2.9

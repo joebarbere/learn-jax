@@ -26,7 +26,7 @@ if [[ -z "${AWS_PROFILE:-}" ]]; then
   [[ -n "$p" ]] && export AWS_PROFILE="$p"
 fi
 export AWS_REGION="${AWS_REGION:-us-east-1}" AWS_PAGER=""
-JAX_VERSION="${JAX_VERSION:-0.11.1}"   # match the course container
+JAX_VERSION="${JAX_VERSION:-0.12.1}"   # match the course container
 UV_VERSION="${UV_VERSION:-0.13.6}"     # match containers/lock.sh
 TIMEOUT_S="${TIMEOUT_S:-3000}"
 

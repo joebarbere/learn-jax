@@ -14,7 +14,7 @@ The course image (`containers/Containerfile`) sets three variables. Most of this
 
 | Variable | Value | Why |
 |---|---|---|
-| `HSA_OVERRIDE_GFX_VERSION` | `11.0.0` | JAX's ROCm plugin doesn't accept gfx1102; pretend to be gfx1100 ([1](#1-jax-doesnt-see-the-gpu-no-supported-devices-found)) |
+| `HSA_OVERRIDE_GFX_VERSION` | `11.0.0` | Use the tuned gfx1100 kernels on our gfx1102 (gfx1102's own f32 GEMMs are 4.5× slower; before JAX 0.12 the plugin rejected gfx1102 outright); pretend to be gfx1100 ([1](#1-jax-doesnt-see-the-gpu-no-supported-devices-found)) |
 | `XLA_FLAGS` | `--xla_gpu_enable_triton_gemm=false` | Triton matmul fusions can exceed this chip's limits and hang the GPU ([3](#3-the-gpu-hangs-mid-training-invalid_dispatch_parameters)) |
 | `XLA_PYTHON_CLIENT_PREALLOCATE` | `false` | Don't grab 75% of VRAM per process; notebooks share the card ([6](#6-a-second-notebook-runs-out-of-memory)) |
 
@@ -30,14 +30,15 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
 - **Fix:** `HSA_OVERRIDE_GFX_VERSION=11.0.0`. The runtime then reports **gfx1100** (RX 7900); the instruction
   sets are close enough that the code runs. (`11.0.1` failed the same way.)
 - **Native gfx1102 wheels exist, but are slow at f32 (2026-11-21).** AMD's pip ROCm (`rocm-sdk-device-gfx1102`,
-  10.2) with JAX 0.12.1 runs without the override (`containers/Containerfile.next`), but a 4096² f32 matmul
+  10.2) with JAX 0.12.1 runs without the override, but a 4096² f32 matmul
   takes 72 ms (1.9 TFLOP/s) instead of 16 ms (8.4). XLA on ROCm always calls hipBLASLt
   (`--xla_gpu_enable_cublaslt=false`, autotune level 4 and Triton GEMMs changed nothing), and the gfx1102
   hipBLASLt library ships one generic f32 kernel per layout where gfx1100 has tuned ones. HIP won't load
   gfx1100 code objects on a card that reports gfx1102, so the fix is the same trick as before: install
   `rocm-sdk-device-gfx1100` and set the override (8.4 TFLOP/s f32, 32.4 bf16, vs 8.0 and 28.3 in the AMD
   image). The override and the device wheel must match: override with only the gfx1102 wheel fails with
-  `HipblasLt error 3` (no `TensileLibrary_lazy_gfx1100.dat`).
+  `HipblasLt error 3` (no `TensileLibrary_lazy_gfx1100.dat`). The course image has used this setup since
+  2026-11-21 (before: AMD's `rocm/jax` 10.1 / JAX 0.11.1 image, 19 GB; now 6 GB).
 - **Where:** Module 00 (shows the reported ISA), Containerfile.
 
 ### 2. The override has a cost: kernels are compiled for a bigger chip
@@ -186,7 +187,7 @@ PyTorch's ROCm build, llama.cpp and LM Studio need **none** of these: they suppo
 - **Fix:** split scoring and top-k into two jitted functions. (Module 38; again in Module 42, a SmolLM2-360M forward pass + `top_k` over its 49,152-way output.)
 
 ### 20c. Pinned host memory works (good news)
-- JAX 0.11.1 on ROCm 10.1 exposes `['device', 'pinned_host']` as the RX 7600 XT's memory kinds, and
+- JAX 0.11.1 on ROCm 10.1 (and 0.12.1 on 10.2) exposes `['device', 'pinned_host']` as the RX 7600 XT's memory kinds, and
   `jax.device_put(x, jax.sharding.SingleDeviceSharding(dev, memory_kind="pinned_host"))` works. Module 40
   keeps an Engram table in host RAM and prefetches its rows: within 1–2% of a GPU-resident table for a
   forward pass of 32 × 256 tokens. Gathers from a big f32 table under `jit` + `scan` + `grad` didn't hit

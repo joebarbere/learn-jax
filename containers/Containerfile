@@ -1,24 +1,37 @@
-# learn-jax course image: JAX on ROCm for the RX 7600 XT (gfx1102), plus marimo and the course libraries.
-FROM docker.io/rocm/jax:rocm10.1.0_ubuntu24.04_py3.12_jax_release_0.11.1
+# learn-jax course image: JAX 0.12.1 on ROCm 10.2 for the RX 7600 XT (gfx1102), plus marimo and the course libraries.
+# Plain Ubuntu + uv + AMD's pip ROCm wheels ("TheRock"), every package locked with hashes (containers/lock.sh).
+# Until 2026-11-21 this was AMD's rocm/jax 10.1 / JAX 0.11.1 image (19 GB, vs 6 GB now); see docs/ROCM_GOTCHAS.md #1.
+FROM docker.io/library/ubuntu:24.04
 
 # uv, pinned (keep in step with UV_VERSION in lock.sh)
 COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /usr/local/bin/uv
-# requirements.lock = every package this image adds, pinned (containers/lock.sh). --no-deps: nothing unlisted
-# is resolved, and the base image's JAX, ROCm plugin and rocm-sdk wheels can't move.
-COPY requirements.lock /tmp/requirements.lock
-RUN uv pip install --system --no-cache --no-deps -r /tmp/requirements.lock \
- && uv pip check --system \
- && ln -sf "$(command -v python3)" /usr/local/bin/python
 
-# --- The three settings this GPU needs (see modules/00-environment) ---
-# gfx1102: ROCm 10.1 supports it, but the JAX ROCm plugin rejects it, so present it as gfx1100.
+# Python 3.12 managed by uv (no system Python packages to collide with), in a venv that is first on PATH.
+ENV UV_PYTHON_INSTALL_DIR=/opt/python VIRTUAL_ENV=/opt/venv PATH=/opt/venv/bin:$PATH
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libnuma1 libdrm2 libelf1 \
+ && rm -rf /var/lib/apt/lists/* \
+ && uv venv --python 3.12 /opt/venv
+
+# Everything pinned with hashes (containers/lock.sh). AMD's index serves ROCm 10's wheels; the lock's hashes
+# keep same-named placeholder packages on PyPI out.
+COPY requirements.lock /tmp/requirements.lock
+# --no-deps: the lock is complete, and re-resolving would trip over the override (gymnax's jax<0.12 cap, see
+# overrides.txt). `uv pip check` must report nothing except that one known conflict.
+RUN uv pip install --no-cache --no-deps --require-hashes --index-strategy unsafe-best-match -r /tmp/requirements.lock \
+ && { uv pip check > /tmp/check.txt 2>&1 || true; } \
+ && ! grep -i "conflict\|missing\|requires\|incompatible" /tmp/check.txt | grep -v -i gymnax \
+ && ln -sf /opt/venv/bin/python /usr/local/bin/python && ln -sf /opt/venv/bin/python /usr/local/bin/python3
+
+# --- GPU settings. The lock installs gfx1100 (RX 7900) kernels, and the override makes our gfx1102 (RX 7600 XT,
+#     same RDNA3 ISA) use them. AMD's gfx1102 wheel works without the override, but its hipBLASLt GEMM tuning
+#     is poor: f32 4096² matmul 1.9 vs 8.4 TFLOP/s, bf16 28.3 vs 32.4 (2026-11-21, docs/ROCM_GOTCHAS.md).
+#     The override and the device wheel must match: override + gfx1102-only wheel fails ("HipblasLt error 3").
+#     The Triton GEMM hang is XLA's, so keep that off until retested.
 ENV HSA_OVERRIDE_GFX_VERSION=11.0.0
-# XLA's Triton GEMM fusions exceed Navi 33 dispatch limits on larger models and hang the GPU.
 ENV XLA_FLAGS=--xla_gpu_enable_triton_gemm=false
-# Several notebooks may share the 16 GB card: allocate on demand instead of grabbing 75% up front.
 ENV XLA_PYTHON_CLIENT_PREALLOCATE=false
 
-# Course plumbing
+# Course plumbing (same as Containerfile)
 ENV PYTHONPATH=/course \
     HF_HOME=/cache/hf \
     LEARNJAX_CACHE=/cache/learnjax \

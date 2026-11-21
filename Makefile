@@ -13,7 +13,7 @@ help: ## Show this help
 build: ## Build the course image (JAX + ROCm + marimo)
 	podman build -t learn-jax -f containers/Containerfile containers
 
-lock: ## Re-resolve the images' pinned dependencies (containers/requirements*.lock) with uv, inside the base images
+lock: ## Re-resolve the images' pinned dependencies (containers/requirements*.lock) with uv
 	containers/lock.sh
 
 build-torch: ## Build the PyTorch side-by-side image

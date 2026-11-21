@@ -16,7 +16,7 @@ You need Linux with the in-kernel `amdgpu` driver (any recent distro), podman, a
 other distros, add your user to the `render` and `video` groups.
 
 ```bash
-make build          # JAX image: rocm/jax (ROCm 10.1, JAX 0.11.1) + marimo, Flax, Optax (~9 GB download, ~19 GB on disk)
+make build          # JAX image: JAX 0.12.1 + ROCm 10.2 pip wheels + marimo, Flax, Optax (~6 GB on disk)
 make up             # marimo on http://127.0.0.1:2718 — `make url` prints the link with its token
 make progress       # the syllabus, with ✓ for modules whose exercises pass
 make help           # everything else
@@ -41,7 +41,7 @@ automatically once it's up.
 
 ### Disk space
 
-**What you're getting into.** The minimum is the JAX image: about **9 GB to download, 19 GB on disk**, plus a
+**What you're getting into.** The minimum is the JAX image: about **6 GB on disk** (ROCm alone is 4 GB of it), plus a
 couple of GB of datasets and weights that lessons fetch into the `learn-jax-cache` volume as you go. Everything
 else is optional and per-module. Taking the whole course with every extra is roughly **50 GB to download and
 100 GB on disk**. Download sizes are compressed (what actually crosses the network), and disk sizes are after
@@ -53,7 +53,7 @@ from the lockfiles or pulled by pinned digest. Your data lives elsewhere (the `l
 
 | image | download | on disk | needed for | remove | restore |
 |---|---|---|---|---|---|
-| `localhost/learn-jax` | ~9 GB (8.3 GB `rocm/jax` base + packages) | ~19 GB | everything | — | `make build` |
+| `localhost/learn-jax` | ~2 GB (Ubuntu base + pip wheels: JAX, ROCm, packages) | ~6 GB | everything | — | `make build` |
 | `localhost/learn-jax-torch` (+ its `rocm/pytorch` base) | ~12 GB (11.8 GB base + packages) | ~26 GB | PyTorch side-by-side notebooks, `make export-models`' check | `podman rmi localhost/learn-jax-torch docker.io/rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.14.0` | `make build-torch` |
 | llama.cpp `server-rocm` | 7.7 GB | 23 GB | `BACKEND=rocm` in Module 19 | `podman rmi ghcr.io/ggml-org/llama.cpp:server-rocm-b12375` | automatic on next `BACKEND=rocm make llama-up` |
 | llama.cpp `server-vulkan`, `full-vulkan` | 0.3 + 1.1 GB | 0.9 + 2.7 GB | Module 19 (default), Module 27's GGUF conversion | — | automatic on next use |

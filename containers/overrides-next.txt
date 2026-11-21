@@ -1,3 +1,0 @@
-# Overrides for the experimental lock (lock-next.sh). Each one says why; remove it when upstream catches up.
-# gymnax 1.0.1 (2026-10-18) declares jax<0.12, released before JAX 0.12 existed. Module 34 tests whether it works.
-jax[rocm10-device-gfx1100]==0.12.1   # keep the extra: an override replaces the whole requirement

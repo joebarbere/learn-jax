@@ -12,7 +12,7 @@ image="${IMAGE:-localhost/learn-jax}"
 # A course image that isn't built (or was removed to save disk space): say how to get it back.
 if ! podman image exists "$image"; then
   case "$image" in
-    localhost/learn-jax) hint="make build   (~19 GB; downloads the rocm/jax base if it's gone)" ;;
+    localhost/learn-jax) hint="make build   (~6 GB: Ubuntu + JAX and ROCm from pip)" ;;
     localhost/learn-jax-torch) hint="make build-torch   (~26 GB, mostly the rocm/pytorch base; only the PyTorch side-by-side notebooks need it)" ;;
     localhost/learn-jax-book) hint="make book-image   (~1.4 GB)" ;;
     *) hint="podman pull $image" ;;

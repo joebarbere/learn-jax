@@ -4,7 +4,12 @@
 #   containers/requirements[-torch|-book].txt   what you ask for (top-level pins, edited by hand)
 #   containers/requirements[-torch|-book].lock  everything the image adds, pinned (generated: don't edit)
 #
-# Why not `uv pip compile`? The base images ship packages PyPI doesn't have (the ROCm JAX plugin,
+# The JAX image (lock_jax) has no base image to resolve against: JAX, its ROCm plugin and ROCm itself are pip
+# packages, so it is a plain `uv pip compile` with hashes. ROCm 10's wheels live only on AMD's index; PyPI has
+# empty placeholder packages with the same names (rocm, rocm-sdk-device-*), so uv must look at AMD's index first
+# (unsafe-best-match) and the lock pins every file by hash. overrides.txt lifts stale upper bounds.
+#
+# The torch and book images: why not `uv pip compile`? Their base images ship packages PyPI doesn't have (the ROCm JAX plugin,
 # torch 2.14.0+rocm10.1.0, the rocm-sdk wheels), so a resolver working from PyPI alone would pick the CUDA
 # torch and its nvidia-* dependencies. Instead, this resolves *inside the real base image*: it installs the
 # requirements with uv while every preinstalled package is held at its exact version, and records the
@@ -34,8 +39,17 @@ lock_one() {  # lock_one <name> <Containerfile> <requirements.txt> <requirements
   echo "[$name] wrote containers/$out"
 }
 
+lock_jax() {  # runs uv on the host: it only resolves versions, nothing is installed
+  echo "[jax] resolving requirements.txt (PyPI + AMD's ROCm index)"
+  uv pip compile requirements.txt -o requirements.lock --quiet --override overrides.txt \
+    --extra-index-url https://stable.repo.amd.com/rocm/whl-next/ --python-version 3.12 \
+    --python-platform x86_64-manylinux_2_28 --index-strategy unsafe-best-match --generate-hashes --emit-index-url \
+    ${UV_EXCLUDE_NEWER:+--exclude-newer "$UV_EXCLUDE_NEWER"}
+  echo "[jax] wrote containers/requirements.lock ($(grep -c '^[a-z]' requirements.lock) packages)"
+}
+
 case "${1:-all}" in
-  jax|all) lock_one jax Containerfile requirements.txt requirements.lock ;;&
+  jax|all) lock_jax ;;&
   torch|all) lock_one torch Containerfile.torch requirements-torch.txt requirements-torch.lock ;;&
   book|all) lock_one book Containerfile.book requirements-book.txt requirements-book.lock ;;
   jax|torch) ;;
