@@ -3,8 +3,12 @@ and sparse autoencoders. Used by Module 47 (reading activations) and Module 48 (
 
 Conventions. The residual stream after block ℓ is h_ℓ (ℓ = 1..L); h_0 is the token embedding. `forward` can
 collect every h_ℓ as one stacked array (L+1, B, T, d) and can apply `edit(ℓ, x) -> x` to each h_ℓ as it is
-produced, so the layers above see the edited stream. ℓ is a traced integer inside `lax.scan`, so edits use
+produced, so the layers above see the edited stream. ℓ is a traced integer inside the layer scan, so edits use
 `jnp.where(ℓ == k, …)` rather than Python `if`.
+
+`forward` is a thin layer over jaxprobe (https://github.com/joebarbere/jaxprobe): `llama.py` marks the stream
+with taps, and `forward` turns `edit` / `collect` into jaxprobe patches and captures. For anything it doesn't
+cover, use jaxprobe directly: `jaxprobe.run(llama.forward, params, tokens, cfg, capture="layers.attn_out")`.
 
     from learnjax import interp, llama
     params, cfg, tok = llama.load(llama.SMOLLM_135M)
@@ -19,6 +23,7 @@ from __future__ import annotations
 
 import jax
 import jax.numpy as jnp
+import jaxprobe as jp
 
 from learnjax import llama
 
@@ -44,33 +49,22 @@ def forward(params, cfg, tokens, edit=None, edit_mid=None, collect=(), upto: int
     """
     if collect is True:
         collect = ("resid",)
-    B, T = tokens.shape
-    positions = jnp.broadcast_to(jnp.arange(T), (B, T))
-    n = cfg.n_layers if upto is None else upto
-    layers = params["layers"] if upto is None else jax.tree.map(lambda a: a[:upto], params["layers"])
-    x = params["embed"][tokens]
+    patch = {}
     if edit is not None:
-        x = edit(jnp.int32(0), x)
-
-    def body(x, inp):
-        lp, i = inp
-        x = x + llama.attn_block(cfg, x, lp, positions)[0]
-        if edit_mid is not None:
-            x = edit_mid(i + 1, x)
-        mid = x
-        m = llama.mlp_block(cfg, x, lp)
-        x = x + m
-        if edit is not None:
-            x = edit(i + 1, x)
-        keep = {"resid": x, "mid": mid, "mlp_out": m}
-        return x, {k: keep[k] for k in collect}
-
-    x_last, ys = jax.lax.scan(body, x, (layers, jnp.arange(n, dtype=jnp.int32)))
-    out = dict(ys)
+        patch["embed"] = lambda x: edit(jnp.int32(0), x)
+        patch["layers.resid"] = lambda x: edit(jp.index() + 1, x)
+    if edit_mid is not None:
+        patch["layers.mid"] = lambda x: edit_mid(jp.index() + 1, x)
+    names = {"resid": ["embed", "layers.resid"], "mid": ["layers.mid"], "mlp_out": ["layers.mlp_out"]}
+    capture = [n for c in collect for n in names[c]]
+    if upto is not None:
+        params = dict(params, layers=jax.tree.map(lambda a: a[:upto], params["layers"]))
+    x, acts = jp.run(llama.trunk, params, tokens, cfg, capture=capture, patch=patch)
+    out = {c: acts[names[c][-1]] for c in collect}
     if "resid" in collect:
-        out["resid"] = jnp.concatenate([x[None], ys["resid"]])
+        out["resid"] = jnp.concatenate([acts["embed"][None], acts["layers.resid"]])
     if upto is None:
-        out["logits"] = unembed(params, cfg, x_last)
+        out["logits"] = unembed(params, cfg, x[0])
     return out
 
 

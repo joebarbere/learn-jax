@@ -1162,6 +1162,7 @@ jax==0.12.1 \
     #   chex
     #   flax
     #   gymnax
+    #   jaxprobe
     #   mctx
     #   optax
     #   orbax-checkpoint
@@ -1203,6 +1204,9 @@ jaxlib==0.12.1 \
     #   jax
     #   mctx
     #   optax
+jaxprobe @ https://github.com/joebarbere/jaxprobe/releases/download/v0.1.0/jaxprobe-0.1.0-py3-none-any.whl \
+    --hash=sha256:43e706adb17cd70b6a3fb1ffa4f1a946cd46cd61dc7b86b685bf6849002558a2
+    # via -r requirements.txt
 jedi==0.20.1 \
     --hash=sha256:0fb16d86c4a4c73c37ba518c77419975e30fcc620658a8d14fbb5720cdd34142 \
     --hash=sha256:2f71208c3f9c1bca057c0e90d3f272aba44ace88fc4067d7587e9e069331b7e5

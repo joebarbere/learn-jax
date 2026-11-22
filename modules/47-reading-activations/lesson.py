@@ -837,6 +837,10 @@ def _(mo):
       loading SAEs; its file layout is what Gemma Scope and others publish in.
     * Arditi et al., [Refusal in LLMs is mediated by a single direction](https://www.lesswrong.com/posts/jGuXSZgv6qfdhMCuJ/refusal-in-llms-is-mediated-by-a-single-direction)
       — section 5's projection applied to refusal, and what it means for open-weights safety.
+    * [jaxprobe](https://github.com/joebarbere/jaxprobe) — this course's own interpretability library, grown out of
+      this module. `learnjax/llama.py` marks its forward pass with jaxprobe taps, and `interp.forward` is a thin
+      layer over `jaxprobe.run`. Use the library directly to capture or patch any tap, e.g. each layer's
+      attention output. It also has BatchTopK and JumpReLU SAEs.
 
     **Next:** Module 48 (planned): tracing a circuit, from a prompt's features to its answer.
     """)

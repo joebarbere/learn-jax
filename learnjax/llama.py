@@ -10,6 +10,14 @@ you wrote in Module 17 (RMSNorm, RoPE, grouped-query attention, SwiGLU), loaded 
 
 Layers are stacked along a leading axis and run with `lax.scan`, so a 32-layer model compiles once per
 shape instead of 32 times. Checked against Hugging Face transformers by tools/check_llama.py.
+
+The forward pass is marked with jaxprobe taps (https://github.com/joebarbere/jaxprobe), so Modules 47 and 48 can
+read and edit the residual stream without a second copy of the model. Outside `jaxprobe.run` the taps do nothing:
+    embed              h_0, the token embeddings                       (B, T, d)
+    layers.attn_out    what each layer's attention adds                 (L, B, T, d) when captured
+    layers.mid         the stream between attention and MLP
+    layers.mlp_out     what each layer's MLP adds
+    layers.resid       h_ℓ, the stream after layer ℓ = 1..L
 """
 from __future__ import annotations
 
@@ -19,6 +27,7 @@ from pathlib import Path
 
 import jax
 import jax.numpy as jnp
+import jaxprobe as jp
 
 SMOLLM_135M = "HuggingFaceTB/SmolLM2-135M"
 SMOLLM_360M = "HuggingFaceTB/SmolLM2-360M-Instruct"
@@ -175,15 +184,15 @@ def mlp_block(cfg: Config, x, lp):
 
 def _layer(cfg: Config, x, lp, positions, cache_kv, pos):
     a, cache_kv = attn_block(cfg, x, lp, positions, cache_kv, pos)
-    x = x + a
-    return x + mlp_block(cfg, x, lp), cache_kv
+    x = jp.tap("mid", x + jp.tap("attn_out", a))
+    return jp.tap("resid", x + jp.tap("mlp_out", mlp_block(cfg, x, lp))), cache_kv
 
 
-def forward(params, tokens, cfg: Config, cache=None, pos=0):
-    """tokens [B, T] → (logits [B, T, V] float32, cache). With a cache, `pos` is where this chunk starts."""
+def trunk(params, tokens, cfg: Config, cache=None, pos=0):
+    """The residual stream after the last layer, before the final norm: (h_L [B, T, d], cache)."""
     B, T = tokens.shape
     positions = jnp.broadcast_to(pos + jnp.arange(T), (B, T))
-    x = params["embed"][tokens]
+    x = jp.tap("embed", params["embed"][tokens])
 
     def body(x, layer):
         lp, ckv = layer
@@ -191,11 +200,15 @@ def forward(params, tokens, cfg: Config, cache=None, pos=0):
         return x, ckv
 
     if cache is None:
-        x, _ = jax.lax.scan(lambda x, lp: (_layer(cfg, x, lp, positions, None, pos)[0], None), x, params["layers"])
-        new_cache = None
-    else:
-        x, (k, v) = jax.lax.scan(body, x, (params["layers"], (cache["k"], cache["v"])))
-        new_cache = {"k": k, "v": v}
+        x, _ = jp.scan(lambda x, lp: (_layer(cfg, x, lp, positions, None, pos)[0], None), x, params["layers"])
+        return x, None
+    x, (k, v) = jp.scan(body, x, (params["layers"], (cache["k"], cache["v"])))
+    return x, {"k": k, "v": v}
+
+
+def forward(params, tokens, cfg: Config, cache=None, pos=0):
+    """tokens [B, T] → (logits [B, T, V] float32, cache). With a cache, `pos` is where this chunk starts."""
+    x, new_cache = trunk(params, tokens, cfg, cache, pos)
     x = rms_norm(x, params["final_norm"], cfg.norm_eps)
     head = params["embed"].T if cfg.tied else params["head"]
     return (x @ head).astype(jnp.float32), new_cache
