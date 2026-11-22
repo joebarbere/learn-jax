@@ -1103,3 +1103,85 @@ ENTRIES += [
              "Influence decides what to keep: prune features until the kept ones carry, say, 80% of the total."),
       module="48"),
 ]
+
+
+def _refusal_inputs(r: np.random.Generator) -> dict:
+    return {"logits": r.normal(size=(4, 11)) * 2, "ids": np.array([2, 7, 9])}
+
+
+def _dim_inputs(r: np.random.Generator) -> dict:
+    return {"harmful": r.normal(size=(3, 6, 5)) + 0.5, "harmless": r.normal(size=(3, 8, 5))}
+
+
+ENTRIES += [
+    E("refusal score", "Probability and information",
+      "How likely is the model to start its answer with a refusal? Add up the probability of the tokens that "
+      "begin refusals (\"I\", \"Sorry\", \"As\") at the first answer position and turn it into log-odds: positive "
+      "means a refusal is more likely than not, and the scale doesn't saturate the way a probability does.",
+      r"p = \sum_{t \in \mathcal R} \mathrm{softmax}(z)_t,\qquad s = \log p - \log(1 - p)",
+      r"$\log \frac{P_{\text{refusal}}}{1 - P_{\text{refusal}}}$ (Arditi et al. 2024, App. D; their $\mathcal R$ is a "
+      r"hand-picked set of first tokens per model)",
+      "logits (N, V), ids (k,) -> (N,)", "refusal_score(logits, ids)", _refusal_inputs,
+      python="""
+        import math
+
+        def refusal_score(logits, ids):
+            out = []
+            for z in logits:
+                m = max(z)
+                e = [math.exp(v - m) for v in z]
+                p = sum(e[i] for i in ids) / sum(e)
+                out.append(math.log(p + 1e-8) - math.log(1 - p + 1e-8))
+            return out
+      """,
+      numpy="""
+        def refusal_score(logits, ids):
+            z = logits - logits.max(-1, keepdims=True)
+            q = np.exp(z) / np.exp(z).sum(-1, keepdims=True)
+            p = q[:, ids].sum(-1)
+            return np.log(p + 1e-8) - np.log(1 - p + 1e-8)
+      """,
+      jax="""
+        def refusal_score(logits, ids):
+            p = jax.nn.softmax(logits, -1)[:, ids].sum(-1)
+            return jnp.log(p + 1e-8) - jnp.log(1 - p + 1e-8)
+      """,
+      torch="""
+        def refusal_score(logits, ids):
+            p = torch.softmax(logits, -1)[:, ids].sum(-1)
+            return torch.log(p + 1e-8) - torch.log(1 - p + 1e-8)
+      """,
+      notes=("Compute the softmax in float32: in bf16, p near 1 rounds to exactly 1 and log(1 − p) blows up.",
+             ("It reads one position, so it's cheap enough to score 150 candidate directions; check what it misses by "
+              "generating full answers for the one you pick.")),
+      module="50"),
+    E("difference-in-means direction", "Arrays and reductions",
+      "Collect the residual stream on prompts with a behaviour and prompts without it; the direction from the "
+      "second average to the first is the cheapest guess at where the behaviour lives. One per layer.",
+      r"r^{(\ell)} = \frac{1}{\lvert H\rvert}\sum_{x \in H} h^{(\ell)}(x) - \frac{1}{\lvert B\rvert}\sum_{x \in B} h^{(\ell)}(x)",
+      r"$r_i^{(l)} = \mu_i^{(l)} - \nu_i^{(l)}$ (Arditi et al. 2024, eq. 3; $i$ is a token position)",
+      "harmful (L, N_h, d), harmless (L, N_b, d) -> (L, d)", "diff_in_means(harmful, harmless)", _dim_inputs,
+      python="""
+        def diff_in_means(harmful, harmless):
+            def mean(rows):
+                return [sum(c) / len(rows) for c in zip(*rows)]
+            return [[a - b for a, b in zip(mean(h), mean(n))] for h, n in zip(harmful, harmless)]
+      """,
+      numpy="""
+        def diff_in_means(harmful, harmless):
+            return harmful.mean(1) - harmless.mean(1)
+      """,
+      jax="""
+        def diff_in_means(harmful, harmless):
+            return harmful.mean(1) - harmless.mean(1)
+      """,
+      torch="""
+        def diff_in_means(harmful, harmless):
+            return harmful.mean(1) - harmless.mean(1)
+      """,
+      notes=(("Average in float32: the residual stream of a bf16 model has a few large dimensions, and a bf16 sum "
+              "of hundreds of rows loses the small differences that make up the direction."),
+             ("The two sets can differ in more than the behaviour (length, topic); Arditi et al. use the last few "
+              "template tokens after the request, so the content itself is out of view.")),
+      module="50", also=("47",)),
+]

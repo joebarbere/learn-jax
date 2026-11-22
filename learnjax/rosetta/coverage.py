@@ -29,7 +29,8 @@ _GROUPS: dict[str, str] = {
     "devices, compilation and debugging": """jax.jit jax.device_put jax.devices jax.block_until_ready jax.make_jaxpr
         jax.debug.print jax.config jax.config.update jax.debug_nans jax.default_matmul_precision
         jax.default_backend jax.eval_shape jax.live_arrays jax.checkpoint jax.__version__ jax.device_count
-        jax.local_device_count jax.local_devices jax.process_count jax.process_index""",
+        jax.local_device_count jax.local_devices jax.process_count jax.process_index jax.default_device jax.device_get""",
+    "indexing and membership (picking elements, not computing)": "jax.lax.dynamic_index_in_dim jax.numpy.isin",
     "profiling and kernels": """jax.profiler.ProfileData jax.profiler.ProfileData.from_file
         jax.profiler.StepTraceAnnotation jax.profiler.trace jax.experimental.pallas""",
     "random keys (how JAX threads randomness, not a distribution)": """jax.random.key jax.random.split

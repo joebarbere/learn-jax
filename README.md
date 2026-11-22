@@ -185,6 +185,7 @@ it's first taught; `make rosetta-browse` opens them all in one notebook, and the
 | 46 | Weights by hand: compiling, merging and editing networks (1990s–2026) | ✅ |
 | 47 | Reading activations: lenses, sparse autoencoders and steering (2020–2025) | ✅ |
 | 48 | Tracing a circuit: patching, transcoders and attribution graphs (2022–2025) | ✅ |
+| 50 | Uncensored models: removing refusals from the data and from the weights (2023–2024) | ✅ |
 
 ✅ = written and verified. Part 10 retells the field's history by rebuilding its milestones; each module says which earlier module to take first.
 
@@ -222,7 +223,7 @@ creators for videos, posts and docs. Most of all:
   and [Qwen2.5-Coder](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct-GGUF) by the Qwen Team (Apache-2.0),
   served with [llama.cpp](https://github.com/ggml-org/llama.cpp) by ggml-org (MIT);
   [Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) by the Qwen Team (Apache-2.0) for
-  Module 27's tool-calling demo; [SigLIP-B/16-224](https://huggingface.co/google/siglip-base-patch16-224) by
+  Module 27's tool-calling demo and Module 50's refusal direction; [SigLIP-B/16-224](https://huggingface.co/google/siglip-base-patch16-224) by
   Google (Apache-2.0), loaded into JAX in Module 43.
 - **[LM Studio](https://lmstudio.ai/)** by Element Labs (Module 27), free for personal and internal business use
   under its [app terms](https://lmstudio.ai/app-terms). The course fetches it only inside a container build.
@@ -233,7 +234,11 @@ creators for videos, posts and docs. Most of all:
   [ARC](https://allenai.org/data/arc) by the Allen Institute for AI (CC BY-SA 4.0); 49,950 arXiv abstracts
   from the [aws-ai](https://github.com/joebarbere/aws-ai) `local-kb` benchmark (Module 38);
   [COCO 2017](https://cocodataset.org/) validation images and captions by the COCO Consortium (annotations
-  CC BY 4.0; images from Flickr under their owners' terms), Module 43.
+  CC BY 4.0; images from Flickr under their owners' terms), Module 43;
+  [Evol-Instruct 70k](https://huggingface.co/datasets/WizardLMTeam/WizardLM_evol_instruct_70k) by the WizardLM
+  team (MIT) and **Eric Hartford**'s [filtered copy and filter script](https://huggingface.co/datasets/QuixiAI/WizardLM_alpaca_evol_instruct_70k_unfiltered)
+  (Apache-2.0), [XSTest](https://github.com/paul-rottger/xstest) by Röttger et al. (CC BY 4.0) and
+  [AdvBench](https://github.com/llm-attacks/llm-attacks) by Zou et al. (MIT), Module 50.
 - **Papers:** the 90-plus seminal papers are credited to their authors in every lesson and in docs/PAPERS.md.
 
 ## License

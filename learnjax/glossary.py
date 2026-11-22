@@ -541,7 +541,7 @@ TERMS: list[Term] = [
     Term("directional ablation", ("weight orthogonalization", "abliteration", "ablate_direction"),
          "Remove one direction from a model: project it out of the residual stream at every layer, or "
          "equivalently out of every matrix that writes to the stream (W − W u uᵀ).",
-         "47", ("46",), "Arditi et al., 2024"),
+         "47", ("46", "50"), "Arditi et al., 2024"),
     Term("discounted return", ("discount factor", "discounted sum"),
          "The total (usually discounted) reward from a point onward; what an RL agent maximizes.",
          "34", (), ""),
@@ -976,7 +976,7 @@ TERMS: list[Term] = [
     Term("instruction tuning", ("instruct model", "instruction-tuned", "Instruct"),
          'Fine-tuning a base model on instruction–response examples so it follows requests; "-Instruct" '
          "models have had it.",
-         "20", ("21",), "Wei et al., 2021; Ouyang et al., 2022"),
+         "20", ("21", "50"), "Wei et al., 2021; Ouyang et al., 2022"),
     Term("interpret mode", ("interpret=True",),
          "Running a Pallas kernel as ordinary JAX on the CPU, for debugging before it touches the GPU.",
          "23", (), ""),
@@ -2080,7 +2080,7 @@ TERMS: list[Term] = [
     Term("supervised fine-tuning", ("SFT",),
          "The first post-training step: fine-tune on demonstration responses by ordinary next-token "
          "prediction.",
-         "35", ("25", "26"), "Ouyang et al., 2022"),
+         "35", ("25", "26", "50"), "Ouyang et al., 2022"),
     Term("surprise", ("surprisal", "self-information"),
          "−log p of an outcome: rare events are very surprising, certain ones not at all. Entropy is the "
          "expected surprise.",
@@ -2459,6 +2459,26 @@ TERMS: list[Term] = [
          "A way to scale initialization and learning rates with width so the best hyperparameters found on a "
          "narrow model still work on a wide one.",
          "42", (), "Yang et al., 2022"),
+    Term("refusal direction", ("refusal vector", "refusal_score", "refusal score"),
+         "A single direction in a chat model's residual stream that mediates refusal: the mean activation on "
+         "harmful requests minus the mean on harmless ones. Removing it stops refusals; adding it causes them.",
+         "50", ("47",), "Arditi et al., 2024"),
+    Term("over-refusal", ("exaggerated safety", "false refusal", "over-refuse"),
+         "Refusing a safe request because it looks like an unsafe one (\"How do I kill a Python process?\"). "
+         "XSTest measures it next to refusal of really unsafe prompts.",
+         "50", (), "Röttger et al., 2023 (XSTest)"),
+    Term("uncensored model", ("uncensored", "abliterated model", "abliterated"),
+         "An open-weights model with its refusals removed, either by fine-tuning on data with the refusals "
+         "filtered out or by editing the refusal direction out of the weights.",
+         "50", (), "Hartford, 2023; Arditi et al., 2024"),
+    Term("composable alignment", (),
+         "Hartford's argument for uncensored base models: ship the model without built-in refusals and let "
+         "each deployer add the alignment layer they need (a fine-tune, a system prompt, a steering vector).",
+         "50", (), "Hartford, 2023"),
+    Term("response masking", ("loss masking", "response_mask", "prompt masking"),
+         "In instruction fine-tuning, counting the loss only on the response tokens, so the model learns to "
+         "answer instructions rather than to write them.",
+         "50", ("35",), "Taori et al., 2023 (Alpaca)"),
 ]
 
 

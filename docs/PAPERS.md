@@ -522,6 +522,17 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Circuit Tracing: Revealing Computational Graphs in Language Models](https://transformer-circuits.pub/2025/attribution-graphs/methods.html)** — Ameisen et al., 2025. Attribution graphs: a frozen linear replacement model, error nodes, pruning by influence.
 - **[On the Biology of a Large Language Model](https://transformer-circuits.pub/2025/attribution-graphs/biology.html)** — Lindsey et al., 2025. Attribution graphs on Claude 3.5 Haiku: two-hop reasoning, planning, and their limits.
 
+### 50 · Uncensored models: removing refusals from the data and from the weights (2023–2024)
+
+- **[Uncensored Models](https://erichartford.com/uncensored-models)** — Hartford, 2023. The data route: drop refusals from an instruction set, fine-tune a base model the same way as before.
+- **[Alpaca: A Strong, Replicable Instruction-Following Model](https://crfm.stanford.edu/2023/03/13/alpaca.html)** — Taori et al., 2023. Instruction tuning on answers written by an OpenAI model; the prompt template WizardLM and Hartford reused.
+- **[WizardLM: Empowering Large Language Models to Follow Complex Instructions](https://arxiv.org/abs/2304.12244)** — Xu et al., 2023. Evol-Instruct: ChatGPT rewrites instructions harder, then answers them (with refusals).
+- **[Universal and Transferable Adversarial Attacks on Aligned Language Models](https://arxiv.org/abs/2307.15043)** — Zou et al., 2023. AdvBench, the harmful instructions this module uses to find the refusal direction.
+- **[XSTest: A Test Suite for Identifying Exaggerated Safety Behaviours in Large Language Models](https://arxiv.org/abs/2308.01263)** — Röttger et al., 2023. Safe prompts that look unsafe, with unsafe contrasts: over-refusal and refusal measured together.
+- **[Fine-tuning Aligned Language Models Compromises Safety, Even When Users Do Not Intend To!](https://arxiv.org/abs/2310.03693)** — Qi et al., 2023. A few fine-tuning examples, even benign ones, undo much of a model's refusal.
+- **[LoRA Fine-tuning Efficiently Undoes Safety Training in Llama 2-Chat 70B](https://arxiv.org/abs/2310.20624)** — Lermen, Rogers-Smith, Ladish, 2023. The data route at its cheapest: a LoRA on one GPU removes refusal.
+- **[Refusal in Language Models Is Mediated by a Single Direction](https://arxiv.org/abs/2406.11717)** — Arditi et al., 2024. The weight route: a difference-in-means direction, chosen by bypass/induce/KL, projected out of the weights.
+
 ## Books
 
 For a second pass, or a different angle. Most are free to read online from their authors; each entry says so.

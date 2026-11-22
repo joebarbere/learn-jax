@@ -201,6 +201,18 @@ EVENTS = [
          "what": "A selective state-space model that processes long sequences in linear time.",
          "why_it_mattered": "The first serious challenger to attention in years.",
          "module": "36-mamba-ssm", "url": W + "Mamba_(deep_learning_architecture)"},
+    {"year": 2023, "title": "Uncensored models", "who": "Eric Hartford, and many fine-tuners after him",
+         "what": "Filter the refusals out of an instruction dataset (WizardLM's 70,000 ChatGPT answers lost 21%) and "
+              "fine-tune a base model on what is left.",
+         "why_it_mattered": "Made the case that alignment could be a layer added on top of an open model, not "
+                            "built into it, and started the trade in uncensored open weights.",
+         "module": "50-uncensored-models", "url": "https://erichartford.com/uncensored-models"},
+    {"year": 2024, "title": "Refusal is one direction", "who": "Arditi, Obeso, Syed, Paleka, Panickssery, Gurnee, "
+         "Nanda",
+         "what": "In 13 open chat models, refusal runs through a single residual-stream direction; projecting it out "
+              "of the weights removes refusal in minutes, with no training (soon called abliteration).",
+         "why_it_mattered": "Showed how thin a chat model's safety training can be once its weights are public.",
+         "module": "50-uncensored-models", "url": "https://arxiv.org/abs/2406.11717"},
     {"year": 2024, "title": "Sparse autoencoders read a production model", "who": "Anthropic (Scaling "
          "Monosemanticity); OpenAI; Google DeepMind (Gemma Scope)",
          "what": "Sparse autoencoders trained on a large model's activations found millions of readable features "

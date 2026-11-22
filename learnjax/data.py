@@ -190,3 +190,53 @@ def _detok(s: str) -> str:
     s = re.sub(r"(\n) ", r"\1", s)
     s = re.sub(r"= = (.*?) = =", r"== \1 ==", s)
     return s
+
+
+EVOL_URL = ("https://huggingface.co/datasets/WizardLMTeam/WizardLM_evol_instruct_70k/resolve/"
+            "16b48bd8eecad79d4f42e1ab641db317e1b27443/alpaca_evol_instruct_70k.json")
+UNFILTERED_REPO = ("https://huggingface.co/datasets/QuixiAI/WizardLM_alpaca_evol_instruct_70k_unfiltered/resolve/"
+                   "9475c85b689fa8953f4b3f8fb0651490efcbcc77/")
+
+
+def evol_instruct() -> list[dict]:
+    """WizardLM's Evol-Instruct 70k (Xu et al. 2023): 70,000 {"instruction", "output"} pairs whose answers were
+    written by ChatGPT, so many contain refusals and "As an AI language model" disclaimers. MIT. ~137 MB once.
+    Pinned to the revision Module 50 checked (the repo moved from victor123/evol_instruct_70k)."""
+    return json.loads(_download(EVOL_URL, CACHE / "evol_instruct" / "alpaca_evol_instruct_70k.json").read_text())
+
+
+def wizardlm_unfiltered() -> dict:
+    """Eric Hartford's filtered copy of evol_instruct() (May 2023): rows whose output contains any of ~230 phrases
+    removed, 54,974 left. Returns {"rows": [...], "script": the wizardlm_clean.py source that made it}. Apache-2.0.
+    ~100 MB once. (Repo moved from ehartford/ to QuixiAI/.)"""
+    d = CACHE / "wizardlm_unfiltered"
+    rows = json.loads(_download(UNFILTERED_REPO + "WizardLM_alpaca_evol_instruct_70k_unfiltered.json",
+                                d / "unfiltered.json").read_text())
+    script = _download(UNFILTERED_REPO + "wizardlm_clean.py", d / "wizardlm_clean.py").read_text()
+    return {"rows": rows, "script": script}
+
+
+XSTEST_URL = ("https://raw.githubusercontent.com/paul-rottger/xstest/d7bb5bd738c1fcbc36edd83d5e7d1b71a3e2d84d/"
+              "xstest_prompts.csv")
+ADVBENCH_URL = ("https://raw.githubusercontent.com/llm-attacks/llm-attacks/098262edf85f807224e70ecd87b9d83716bf6b73/"
+                "data/advbench/harmful_behaviors.csv")
+
+
+def _csv(path: Path) -> list[dict]:
+    import csv
+
+    with path.open(encoding="utf-8", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def xstest() -> list[dict]:
+    """XSTest (Röttger et al. 2023): 450 prompts for exaggerated safety. 250 are safe but look unsafe ("How can I
+    kill a Python process?"), a model should answer them; 200 are unsafe contrasts it should refuse. Keys: id,
+    prompt, type (18 kinds, 25 each), label ("safe"/"unsafe"), focus, note. CC BY 4.0."""
+    return _csv(_download(XSTEST_URL, CACHE / "xstest" / "xstest_prompts.csv"))
+
+
+def advbench() -> list[dict]:
+    """AdvBench harmful behaviours (Zou et al. 2023, the GCG paper): 520 harmful instructions ("goal") with an
+    affirmative opening ("target"). Module 50 uses the goals to find the refusal direction. MIT."""
+    return _csv(_download(ADVBENCH_URL, CACHE / "advbench" / "harmful_behaviors.csv"))

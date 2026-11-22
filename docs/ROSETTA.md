@@ -4,13 +4,13 @@
 
 Each operation the course introduces, written five ways: the formula (and how papers write it), plain Python loops (the formula read literally), NumPy, JAX and PyTorch. Every version is run on the same inputs and checked to agree (`tests/test_rosetta.py`). In the lessons each entry appears as tabs where the operation is first taught.
 
-- **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add)
+- **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add), [difference-in-means direction](#difference-in-means-direction)
 - **Elementwise math:** [exp, log and powers](#exp-log-and-powers), [trig and sign functions](#trig-and-sign-functions), [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero), [clip, maximum and minimum (elementwise)](#clip-maximum-and-minimum-elementwise), [round to bfloat16](#round-to-bfloat16)
 - **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation), [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome), [directional ablation of a weight matrix](#directional-ablation-of-a-weight-matrix), [total influence in a graph](#total-influence-in-a-graph)
 - **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient), [attribution patching](#attribution-patching)
 - **Random numbers:** [normal samples](#normal-samples), [uniform samples](#uniform-samples), [random integers](#random-integers), [categorical sampling](#categorical-sampling), [Bernoulli samples](#bernoulli-samples), [shuffle (random permutation)](#shuffle-random-permutation), [sample without replacement](#sample-without-replacement), [He (Kaiming) normal initialization](#he-kaiming-normal-initialization)
 - **Control flow and transforms:** [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap), [loop with carried state: lax.scan](#loop-with-carried-state-laxscan), [fixed and open-ended loops: fori_loop and while_loop](#fixed-and-open-ended-loops-foriloop-and-whileloop), [branches: lax.cond and lax.switch](#branches-laxcond-and-laxswitch)
-- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip), [naive Bayes readout for binary features](#naive-bayes-readout-for-binary-features)
+- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip), [naive Bayes readout for binary features](#naive-bayes-readout-for-binary-features), [refusal score](#refusal-score)
 - **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz), [TIES merging of task vectors](#ties-merging-of-task-vectors)
 - **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution), [TopK sparse code](#topk-sparse-code)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
@@ -1102,6 +1102,59 @@ def segment_sum(data, ids, num_segments):
 
 - Pass `num_segments` as a Python int: without it JAX infers `max(ids) + 1`, which needs concrete values and fails under `jit`.
 - Empty groups (3 here) come out as zeros.
+
+### difference-in-means direction
+
+*Module 50; also 47.*
+
+Collect the residual stream on prompts with a behaviour and prompts without it; the direction from the second average to the first is the cheapest guess at where the behaviour lives. One per layer.
+
+$$
+r^{(\ell)} = \frac{1}{\lvert H\rvert}\sum_{x \in H} h^{(\ell)}(x) - \frac{1}{\lvert B\rvert}\sum_{x \in B} h^{(\ell)}(x)
+$$
+
+**In papers:** $r_i^{(l)} = \mu_i^{(l)} - \nu_i^{(l)}$ (Arditi et al. 2024, eq. 3; $i$ is a token position)
+
+**Shapes:** `harmful (L, N_h, d), harmless (L, N_b, d) -> (L, d)`
+
+**Python**
+
+```python
+def diff_in_means(harmful, harmless):
+    def mean(rows):
+        return [sum(c) / len(rows) for c in zip(*rows)]
+    return [[a - b for a, b in zip(mean(h), mean(n))] for h, n in zip(harmful, harmless)]
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def diff_in_means(harmful, harmless):
+    return harmful.mean(1) - harmless.mean(1)
+```
+
+**JAX**
+
+```python
+def diff_in_means(harmful, harmless):
+    return harmful.mean(1) - harmless.mean(1)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def diff_in_means(harmful, harmless):
+    return harmful.mean(1) - harmless.mean(1)
+```
+
+**Where they differ**
+
+- Average in float32: the residual stream of a bf16 model has a few large dimensions, and a bf16 sum of hundreds of rows loses the small differences that make up the direction.
+- The two sets can differ in more than the behaviour (length, topic); Arditi et al. use the last few template tokens after the request, so the content itself is out of view.
 
 ## Elementwise math
 
@@ -4645,6 +4698,75 @@ def readout(rates, prior):
 
 - Smooth the counts first (add 1 to each count and 2 to each total): a rate of exactly 0 or 1 gives an infinite weight.
 - The same formula is the first layer of a 1990s OCR system and the readout Toumbourou's LLM-written MNIST network ended up using (Module 46).
+
+### refusal score
+
+*Module 50.*
+
+How likely is the model to start its answer with a refusal? Add up the probability of the tokens that begin refusals ("I", "Sorry", "As") at the first answer position and turn it into log-odds: positive means a refusal is more likely than not, and the scale doesn't saturate the way a probability does.
+
+$$
+p = \sum_{t \in \mathcal R} \mathrm{softmax}(z)_t,\qquad s = \log p - \log(1 - p)
+$$
+
+**In papers:** $\log \frac{P_{\text{refusal}}}{1 - P_{\text{refusal}}}$ (Arditi et al. 2024, App. D; their $\mathcal R$ is a hand-picked set of first tokens per model)
+
+**Shapes:** `logits (N, V), ids (k,) -> (N,)`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def refusal_score(logits, ids):
+    out = []
+    for z in logits:
+        m = max(z)
+        e = [math.exp(v - m) for v in z]
+        p = sum(e[i] for i in ids) / sum(e)
+        out.append(math.log(p + 1e-8) - math.log(1 - p + 1e-8))
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def refusal_score(logits, ids):
+    z = logits - logits.max(-1, keepdims=True)
+    q = np.exp(z) / np.exp(z).sum(-1, keepdims=True)
+    p = q[:, ids].sum(-1)
+    return np.log(p + 1e-8) - np.log(1 - p + 1e-8)
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def refusal_score(logits, ids):
+    p = jax.nn.softmax(logits, -1)[:, ids].sum(-1)
+    return jnp.log(p + 1e-8) - jnp.log(1 - p + 1e-8)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def refusal_score(logits, ids):
+    p = torch.softmax(logits, -1)[:, ids].sum(-1)
+    return torch.log(p + 1e-8) - torch.log(1 - p + 1e-8)
+```
+
+**Where they differ**
+
+- Compute the softmax in float32: in bf16, p near 1 rounds to exactly 1 and log(1 − p) blows up.
+- It reads one position, so it's cheap enough to score 150 candidate directions; check what it misses by generating full answers for the one you pick.
 
 ## Optimization
 

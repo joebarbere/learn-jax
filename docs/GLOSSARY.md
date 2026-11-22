@@ -1,6 +1,6 @@
 # Glossary
 
-615 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+620 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -119,6 +119,7 @@
 - **communication-to-compute ratio** — In data parallelism, time spent all-reducing gradients divided by time spent computing. Model size cancels, so it depends on tokens per device per step and on the hardware's FLOP/s-to-bandwidth ratio. *(Module 25; also 24.)*
 - **compilation cache** — Storing compiled XLA programs on disk so a restarted process skips recompiling them. *(Module 16.)*
 - **compile time** — The one-off cost of tracing and compiling a jitted function, separate from the per-call run time. Unrolled Python loops make it grow with the loop length. *(Module 06.)*
+- **composable alignment** — Hartford's argument for uncensored base models: ship the model without built-in refusals and let each deployer add the alignment layer they need (a fine-tune, a system prompt, a steering vector). *(Module 50.)* Origin: Hartford, 2023.
 - **computation graph** — A record of a computation as nodes (operations) and edges (values). Autodiff walks it backwards to compute gradients; JAX's jaxpr is such a graph. *(Module 03.)*
 - **compute unit** — AMD's basic GPU building block (like an NVIDIA SM): it runs workgroups and has its own LDS. The RX 7600 XT has 32. *(Module 23.)*
 - **compute-bound** — When the GPU's arithmetic units are the bottleneck: the work does many FLOPs per byte moved. Large matmuls are compute-bound. *(Module 10; also 19.)*
@@ -166,7 +167,7 @@
 - **device** — A piece of hardware JAX can place arrays on and run computation on, such as `rocm:0` or the CPU. `jax.device_put` moves data there. *(Module 01; also 00, 08, 22, 24, 25.)*
 - **diffusion model** — Learn to reverse a process that gradually adds noise to data: a network predicts the noise at each step, and generation starts from pure noise and denoises step by step. *(Module 33; also 00b, 45.)* Origin: Sohl-Dickstein et al., 2015; Ho et al., 2020.
 - **dilated convolution** — A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with dilations 1-2-4-8. WaveNet stacks them causally. *(Module 12; also 40.)* Origin: van den Oord et al., 2016 (WaveNet).
-- **directional ablation** — Remove one direction from a model: project it out of the residual stream at every layer, or equivalently out of every matrix that writes to the stream (W − W u uᵀ). *(Module 47; also 46.)* Origin: Arditi et al., 2024.
+- **directional ablation** — Remove one direction from a model: project it out of the residual stream at every layer, or equivalently out of every matrix that writes to the stream (W − W u uᵀ). *(Module 47; also 46, 50.)* Origin: Arditi et al., 2024.
 - **discounted return** — The total (usually discounted) reward from a point onward; what an RL agent maximizes. *(Module 34.)*
 - **discretization** — Converting a continuous-time state-space model into a step-by-step update with a step size Δ; zero-order hold assumes the input is constant within each step. *(Module 36.)*
 - **distillation** — Training a smaller student model on a larger teacher's outputs (or reasoning traces) so it inherits the teacher's ability. *(Module 26; also 12, 31, 42.)* Origin: Hinton, Vinyals, Dean, 2015.
@@ -307,7 +308,7 @@
 - **InfoNCE** — A contrastive loss: treat each matching pair in a batch as the right answer of a softmax classification against all the other items in the batch (the in-batch negatives). *(Module 33; also 38.)* Origin: van den Oord et al., 2018.
 - **information retrieval** — Finding the documents most relevant to a query from a large collection. *(Module 38.)*
 - **initialization** — Choosing a network's starting weights. Scale them so signals neither explode nor vanish layer to layer. *(Module 11; also 05, 07, 10, 16, 20.)*
-- **instruction tuning** — Fine-tuning a base model on instruction–response examples so it follows requests; "-Instruct" models have had it. *(Module 20; also 21.)* Origin: Wei et al., 2021; Ouyang et al., 2022.
+- **instruction tuning** — Fine-tuning a base model on instruction–response examples so it follows requests; "-Instruct" models have had it. *(Module 20; also 21, 50.)* Origin: Wei et al., 2021; Ouyang et al., 2022.
 - **interpret mode** — Running a Pallas kernel as ordinary JAX on the CPU, for debugging before it touches the GPU. *(Module 23.)*
 - **intrinsic dimension** — The finding that fine-tuning can succeed within a very low-dimensional subspace of the weights, which is why LoRA works. *(Module 20.)* Origin: Aghajanyan et al., 2020.
 - **IVF** — Inverted-file vector index: cluster the vectors (k-means) and search only the few clusters nearest the query. *(Module 38.)* Origin: Jégou, Douze, Schmid, 2011.
@@ -466,6 +467,7 @@
 - **orchestrator-workers** — A workflow in which one model breaks the task into sub-tasks at run time, worker calls do them, and the results are combined. *(Module 39.)* Origin: Anthropic, 2024.
 - **orthogonal matrix** — A matrix whose columns are perpendicular unit vectors; it rotates or reflects without stretching. Gram–Schmidt builds one from any set of vectors. *(Module 02.)*
 - **Othello-GPT** — A GPT trained only on legal Othello move sequences, which nonetheless develops an internal board representation detectable with probes. *(Module 37.)* Origin: Li et al., 2022; Nanda et al., 2023.
+- **over-refusal** — Refusing a safe request because it looks like an unsafe one ("How do I kill a Python process?"). XSTest measures it next to refusal of really unsafe prompts. *(Module 50.)* Origin: Röttger et al., 2023 (XSTest).
 - **overfit one batch** — A debugging check: a correct model and training loop should drive the loss to near zero on one small batch. If it can't, there's a bug. *(Module 11.)*
 - **overfitting** — Fitting the training data so closely, noise included, that performance on new data gets worse. The gap between training and validation loss shows it. *(Module 09; also 10, 11, 35.)*
 - **overhead-bound** — When a program's time goes to Python, dispatch and kernel-launch overhead rather than arithmetic or memory. Small models on a big GPU are usually overhead-bound; jit and scan fix it. *(Module 10.)*
@@ -558,6 +560,7 @@
 - **recurrent neural network** — A network that reads a sequence one step at a time, updating a hidden state from the previous state and the current input with the same weights at every step. *(Module 31; also 08, 36.)* Origin: Elman, 1990.
 - **reduce-scatter** — Sum across devices, but each device keeps only its own slice of the result; an all-reduce is a reduce-scatter plus an all-gather. *(Module 24; also 25.)*
 - **reduction** — An operation that collapses an axis into one value per remaining position: sum, mean, max, argmax. *(Module 01; also 08, 24.)*
+- **refusal direction** — A single direction in a chat model's residual stream that mediates refusal: the mean activation on harmful requests minus the mean on harmless ones. Removing it stops refusals; adding it causes them. *(Module 50; also 47.)* Origin: Arditi et al., 2024.
 - **regularization** — Anything that discourages fitting noise and so improves generalization: weight decay, dropout, data augmentation, early stopping. *(Module 11; also 05, 09.)*
 - **reinforcement learning** — Learning to act by trial and error: an agent observes the state of an environment, takes actions, and adjusts its policy to maximize total reward. *(Module 34; also 25, 26, 35, 39.)*
 - **relative position bias** — A learned number per attention head and distance bucket, added to the attention scores: T5's position scheme. *(Module 17; also 32, 00b.)* Origin: Raffel et al., 2019.
@@ -569,6 +572,7 @@
 - **residual connection** — Adding a block's input to its output, x + f(x). Gradients get a direct path back through the network, which is what makes very deep networks trainable. *(Module 11; also 31.)* Origin: He et al., 2015.
 - **residual stream** — The vector each token carries through the network; every attention and MLP block reads from it and adds its output back. A useful mental model for interpretability. *(Module 16; also 37, 47.)* Origin: Elhage et al., 2021.
 - **ResNet** — The 2015 deep convolutional network built from residual blocks, which made 100+ layer networks trainable. *(Module 11.)* Origin: He et al., 2015.
+- **response masking** — In instruction fine-tuning, counting the loss only on the response tokens, so the model learns to answer instructions rather than to write them. *(Module 50; also 35.)* Origin: Taori et al., 2023 (Alpaca).
 - **retrieval-augmented generation** — Retrieve relevant documents for a question and put them in the prompt, so the model answers from sources instead of memory alone. *(Module 38; also 32, 39.)* Origin: Lewis et al., 2020.
 - **reverse mode** — Autodiff that runs forward, then sweeps backwards from the output, getting the gradient for all inputs in one pass. Ideal for one scalar loss and millions of parameters, which is why training uses it. *(Module 03; also 08.)*
 - **reverse process** — In diffusion, the learned procedure that removes noise step by step, turning random noise into a sample. *(Module 33.)*
@@ -645,7 +649,7 @@
 - **subsampling** — Randomly dropping very frequent words (the, of) from training pairs so rarer words get more updates. *(Module 30.)* Origin: Mikolov et al., 2013.
 - **subword** — A token that is part of a word: common words stay whole while rare ones split into pieces, balancing vocabulary size and sequence length. *(Module 13.)*
 - **superposition** — Networks representing more features than they have dimensions by overlapping them in nearly orthogonal directions, which works when features are sparse. *(Module 37; also 47.)* Origin: Elhage et al., 2022.
-- **supervised fine-tuning** — The first post-training step: fine-tune on demonstration responses by ordinary next-token prediction. *(Module 35; also 25, 26.)* Origin: Ouyang et al., 2022.
+- **supervised fine-tuning** — The first post-training step: fine-tune on demonstration responses by ordinary next-token prediction. *(Module 35; also 25, 26, 50.)* Origin: Ouyang et al., 2022.
 - **surprise** — −log p of an outcome: rare events are very surprising, certain ones not at all. Entropy is the expected surprise. *(Module 04; also 21.)* Origin: Shannon, 1948.
 - **SVD** — Any matrix factors as rotate, scale along axes, rotate: A = U Σ Vᵀ. The scale factors (singular values) rank the directions by importance. *(Module 02; also 05, 30.)*
 - **SwiGLU** — A gated MLP: one projection passed through SiLU (swish) multiplies another elementwise before the down-projection. Used by Llama and DeepSeek in place of a GELU MLP. *(Module 17; also 10.)* Origin: Shazeer, 2020.
@@ -690,6 +694,7 @@
 ## U
 
 - **U-Net** — A convolutional encoder-decoder with skip connections between matching resolutions, the standard denoiser in image diffusion. *(Module 33.)* Origin: Ronneberger et al., 2015.
+- **uncensored model** — An open-weights model with its refusals removed, either by fine-tuning on data with the refusals filtered out or by editing the refusal direction out of the weights. *(Module 50.)* Origin: Hartford, 2023; Arditi et al., 2024.
 - **underfitting** — A model too simple, or trained too little, to capture the pattern even on the training data. *(Module 09; also 11.)*
 - **universal approximation** — One hidden layer with enough units can approximate any continuous function. It says nothing about how many units or how to find the weights. *(Module 10.)* Origin: Cybenko, 1989; Hornik, 1991.
 - **unrolling** — Turning a Python loop into a long straight-line program during tracing. It makes compile time grow with the loop length; lax.scan avoids it. *(Module 08.)*
