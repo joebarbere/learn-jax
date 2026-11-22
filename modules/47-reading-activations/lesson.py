@@ -842,7 +842,7 @@ def _(mo):
       layer over `jaxprobe.run`. Use the library directly to capture or patch any tap, e.g. each layer's
       attention output. It also has BatchTopK and JumpReLU SAEs.
 
-    **Next:** Module 48 (planned): tracing a circuit, from a prompt's features to its answer.
+    **Next:** Module 48, tracing a circuit: patching, transcoders and attribution graphs.
     """)
     return
 

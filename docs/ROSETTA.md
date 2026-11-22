@@ -6,8 +6,8 @@ Each operation the course introduces, written five ways: the formula (and how pa
 
 - **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add)
 - **Elementwise math:** [exp, log and powers](#exp-log-and-powers), [trig and sign functions](#trig-and-sign-functions), [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero), [clip, maximum and minimum (elementwise)](#clip-maximum-and-minimum-elementwise), [round to bfloat16](#round-to-bfloat16)
-- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation), [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome), [directional ablation of a weight matrix](#directional-ablation-of-a-weight-matrix)
-- **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient)
+- **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation), [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome), [directional ablation of a weight matrix](#directional-ablation-of-a-weight-matrix), [total influence in a graph](#total-influence-in-a-graph)
+- **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient), [attribution patching](#attribution-patching)
 - **Random numbers:** [normal samples](#normal-samples), [uniform samples](#uniform-samples), [random integers](#random-integers), [categorical sampling](#categorical-sampling), [Bernoulli samples](#bernoulli-samples), [shuffle (random permutation)](#shuffle-random-permutation), [sample without replacement](#sample-without-replacement), [He (Kaiming) normal initialization](#he-kaiming-normal-initialization)
 - **Control flow and transforms:** [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap), [loop with carried state: lax.scan](#loop-with-carried-state-laxscan), [fixed and open-ended loops: fori_loop and while_loop](#fixed-and-open-ended-loops-foriloop-and-whileloop), [branches: lax.cond and lax.switch](#branches-laxcond-and-laxswitch)
 - **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip), [naive Bayes readout for binary features](#naive-bayes-readout-for-binary-features)
@@ -18,7 +18,7 @@ Each operation the course introduces, written five ways: the formula (and how pa
 - **Sequence and state-space models:** [LSTM cell](#lstm-cell), [linear recurrence as a parallel scan](#linear-recurrence-as-a-parallel-scan), [long convolution via FFT](#long-convolution-via-fft), [decayed linear attention (recurrent form)](#decayed-linear-attention-recurrent-form), [gated delta rule](#gated-delta-rule)
 - **Generative models:** [VAE reparameterization and Gaussian KL](#vae-reparameterization-and-gaussian-kl), [diffusion forward noising](#diffusion-forward-noising), [contrastive (CLIP / InfoNCE) loss](#contrastive-clip--infonce-loss)
 - **Reinforcement learning and preferences:** [GRPO group-relative advantage](#grpo-group-relative-advantage), [DQN target and Huber loss](#dqn-target-and-huber-loss), [PUCT score (AlphaZero search)](#puct-score-alphazero-search), [Bradley–Terry reward-model loss](#bradleyterry-reward-model-loss), [DPO loss](#dpo-loss)
-- **Retrieval and evaluation:** [BM25 scoring as a sparse matrix product](#bm25-scoring-as-a-sparse-matrix-product), [reciprocal rank fusion](#reciprocal-rank-fusion), [MRR and nDCG@k](#mrr-and-ndcgk), [fraction of variance unexplained](#fraction-of-variance-unexplained), [mutual nearest-neighbour alignment](#mutual-nearest-neighbour-alignment)
+- **Retrieval and evaluation:** [BM25 scoring as a sparse matrix product](#bm25-scoring-as-a-sparse-matrix-product), [reciprocal rank fusion](#reciprocal-rank-fusion), [MRR and nDCG@k](#mrr-and-ndcgk), [fraction of variance unexplained](#fraction-of-variance-unexplained), [mutual nearest-neighbour alignment](#mutual-nearest-neighbour-alignment), [logit difference](#logit-difference)
 
 ## Reading paper notation
 
@@ -2334,6 +2334,77 @@ def ablate(W, u, alpha):
 - Apply it to every matrix that writes to the residual stream (embeddings, attention outputs, MLP down-projections) and the stream never contains u: the same as projecting u out of the activations after every write, but with no runtime hook.
 - With tied embeddings, untie the output head first, or the edit changes the unembedding too.
 
+### total influence in a graph
+
+*Module 48.*
+
+How much each node matters to the output through every path. Normalise the graph so each node's incoming weights sum to 1, then add up direct effects, two-step effects, three-step effects… The series stops because a causal graph has no cycles.
+
+$$
+\hat A_{ts} = \frac{\lvert A_{ts}\rvert}{\sum_{s'}\lvert A_{ts'}\rvert},\qquad x = w\hat A + w\hat A^2 + \dots = w\hat A\,(I-\hat A)^{-1}
+$$
+
+**In papers:** $B = (I - A)^{-1} - I$, influence $= \text{logit weights}\cdot B$ (Ameisen et al. 2025)
+
+**Shapes:** `A (n, n) row = target, w (n,) -> (n,)`
+
+**Python**
+
+```python
+def influence(A, w):
+    n = len(A)
+    An = []
+    for row in A:
+        s = sum(abs(a) for a in row)
+        An.append([abs(a) / s if s else 0.0 for a in row])
+    x, v = [0.0] * n, [sum(w[t] * An[t][s] for t in range(n)) for s in range(n)]
+    for _ in range(n):
+        x = [a + b for a, b in zip(x, v)]
+        v = [sum(v[t] * An[t][s] for t in range(n)) for s in range(n)]
+    return x
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def influence(A, w):
+    a = np.abs(A)
+    s = a.sum(1, keepdims=True)
+    An = np.divide(a, s, out=np.zeros_like(a), where=s > 0)
+    return w @ An @ np.linalg.inv(np.eye(len(A)) - An)
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def influence(A, w):
+    a = jnp.abs(A)
+    s = a.sum(1, keepdims=True)
+    An = jnp.where(s > 0, a / jnp.where(s > 0, s, 1.0), 0.0)
+    return w @ An @ jnp.linalg.inv(jnp.eye(len(A)) - An)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def influence(A, w):
+    a = A.abs()
+    s = a.sum(1, keepdim=True)
+    An = torch.where(s > 0, a / s.clamp_min(1e-30), torch.zeros_like(a))
+    return w @ An @ torch.linalg.inv(torch.eye(len(A), dtype=A.dtype) - An)
+```
+
+**Where they differ**
+
+- For a graph of 10,000 nodes the inverse is heavy; the series w Â, w Â², … needs only matrix-vector products and stops after the graph's depth (jaxprobe.trace.influence does that).
+- Influence decides what to keep: prune features until the kept ones carry, say, 80% of the total.
+
 ## Calculus and autodiff
 
 ### gradient
@@ -2810,6 +2881,61 @@ def grad_f(x):
 
 - PyTorch's `.detach()` is the same operation. Without it the gradient here would be `2 * x`.
 - Uses in the course: DQN's target network values (Module 34), the straight-through trick and auxiliary losses that must not move part of a model (Module 17).
+
+### attribution patching
+
+*Module 48.*
+
+Estimate what pasting a clean activation into a corrupted run would do to a metric, for every activation at once: the gradient on the corrupted run times the difference between the two activations. One backward pass replaces thousands of forward passes.
+
+$$
+\Delta m \approx \nabla_a m\,\big\rvert_{a_{\text{corr}}} \cdot (a_{\text{clean}} - a_{\text{corr}})
+$$
+
+**In papers:** $\hat c_{\text{AtP}}(n) = (n(x^{\text{clean}}) - n(x^{\text{noise}}))^\top \frac{\partial \mathcal L}{\partial n}\big\rvert_{n(x^{\text{noise}})}$ (Kramár et al. 2024)
+
+**Shapes:** `grad, clean, corrupt (..., d) -> (...)`
+
+**Python**
+
+```python
+def atp(grad, clean, corrupt):
+    def walk(g, c, r):
+        if not isinstance(g[0], list):
+            return sum(gi * (ci - ri) for gi, ci, ri in zip(g, c, r))
+        return [walk(*t) for t in zip(g, c, r)]
+    return walk(grad, clean, corrupt)
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def atp(grad, clean, corrupt):
+    return (grad * (clean - corrupt)).sum(-1)
+```
+
+**JAX**
+
+```python
+def atp(grad, clean, corrupt):
+    return (grad * (clean - corrupt)).sum(-1)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def atp(grad, clean, corrupt):
+    return (grad * (clean - corrupt)).sum(-1)
+```
+
+**Where they differ**
+
+- Get grad with jax.grad of the metric with respect to an additive offset at the activation (zero at the corrupted run): with jaxprobe, patch the tap with x + delta and differentiate in delta.
+- It is exact for a linear metric and wrong where attention saturates; Module 48 shows a head it underrates by 3×.
 
 ## Random numbers
 
@@ -8883,6 +9009,67 @@ def mknn(X, Y, k):
 **Where they differ**
 
 - Chance is k/(N−1). Module 47 measures it between SmolLM2-135M and SmolLM2-360M layer by layer, against a shuffled pairing.
+
+### logit difference
+
+*Module 48.*
+
+How strongly the model prefers the right answer to one specific wrong answer, at the last position, averaged over prompts. Unlike a probability it is linear in the final residual stream, so contributions add up.
+
+$$
+\mathrm{LD} = \frac{1}{B}\sum_b \big(z_{b,T,\,io_b} - z_{b,T,\,s_b}\big)
+$$
+
+**In papers:** $\mathrm{logit}(IO) - \mathrm{logit}(S)$ (Wang et al. 2022)
+
+**Shapes:** `logits (B, T, V), io (B,), s (B,) -> ()`
+
+**Python**
+
+```python
+def logit_diff(logits, io, s):
+    total = 0.0
+    for b in range(len(logits)):
+        last = logits[b][-1]
+        total += last[io[b]] - last[s[b]]
+    return total / len(logits)
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def logit_diff(logits, io, s):
+    last = logits[:, -1]
+    b = np.arange(len(last))
+    return (last[b, io] - last[b, s]).mean()
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def logit_diff(logits, io, s):
+    last = logits[:, -1]
+    pick = lambda ids: jnp.take_along_axis(last, ids[:, None], 1)[:, 0]
+    return (pick(io) - pick(s)).mean()
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def logit_diff(logits, io, s):
+    last = logits[:, -1]
+    return (last.gather(1, io[:, None]) - last.gather(1, s[:, None])).mean()
+```
+
+**Where they differ**
+
+- Normalised against a clean and a corrupted run, (LD − LD_corrupt) / (LD_clean − LD_corrupt), it becomes the patching effect Module 48 plots: 0 = nothing restored, 1 = everything.
 
 ## Index by JAX name
 

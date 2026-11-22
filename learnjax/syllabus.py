@@ -67,6 +67,7 @@ MODULES = [
     (45, "45-diffusion-lm", "Diffusion language models: writing a whole passage at once (2021–2026)", 12),
     (46, "46-weights-by-hand", "Weights by hand: compiling, merging and editing networks (1990s–2026)", 12),
     (47, "47-reading-activations", "Reading activations: lenses, sparse autoencoders and steering (2020–2025)", 12),
+    (48, "48-tracing-circuits", "Tracing a circuit: patching, transcoders and attribution graphs (2022–2025)", 12),
 ]
 
 

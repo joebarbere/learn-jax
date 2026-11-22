@@ -15,9 +15,13 @@ The forward pass is marked with jaxprobe taps (https://github.com/joebarbere/jax
 read and edit the residual stream without a second copy of the model. Outside `jaxprobe.run` the taps do nothing:
     embed              h_0, the token embeddings                       (B, T, d)
     layers.attn_out    what each layer's attention adds                 (L, B, T, d) when captured
+    layers.z           each head's output before the output projection  (L, B, T, H, hd)
+    layers.pattern     attention weights, query heads grouped by KV head (L, B, KV, H/KV, T, S)
     layers.mid         the stream between attention and MLP
+    layers.mlp_in      the MLP's input (after its RMSNorm)              (L, B, T, d)
     layers.mlp_out     what each layer's MLP adds
     layers.resid       h_ℓ, the stream after layer ℓ = 1..L
+    layers.attn_scale, layers.mlp_scale, final_scale    the 1/rms factors of the norms (…, 1)
 """
 from __future__ import annotations
 
@@ -124,9 +128,13 @@ def count_params(params) -> int:
 
 # ---------------------------------------------------------------- the model
 
-def rms_norm(x, w, eps):
+def rms_norm(x, w, eps, name: str | None = None):
+    """x / rms(x) * w. With a name, the 1/rms factor (…, 1) is a jaxprobe tap: attribution graphs freeze it."""
     x32 = x.astype(jnp.float32)
-    return (x32 * jax.lax.rsqrt(jnp.mean(x32 * x32, -1, keepdims=True) + eps)).astype(x.dtype) * w
+    scale = jax.lax.rsqrt(jnp.mean(x32 * x32, -1, keepdims=True) + eps)
+    if name is not None:
+        scale = jp.tap(name, scale)
+    return (x32 * scale).astype(x.dtype) * w
 
 
 def rope(x, positions, theta):
@@ -153,7 +161,7 @@ def attn_block(cfg: Config, x, lp, positions, cache_kv=None, pos=0):
     """The attention half of a layer: what it adds to the residual stream (B, T, d), and the updated cache."""
     B, T, _ = x.shape
     H, KV, hd = cfg.n_heads, cfg.n_kv_heads, cfg.head_dim
-    h = rms_norm(x, lp["attn_norm"], cfg.norm_eps)
+    h = rms_norm(x, lp["attn_norm"], cfg.norm_eps, "attn_scale")
     q = rope((h @ lp["wq"]).reshape(B, T, H, hd), positions, cfg.rope_theta)
     k = rope((h @ lp["wk"]).reshape(B, T, KV, hd), positions, cfg.rope_theta)
     v = (h @ lp["wv"]).reshape(B, T, KV, hd)
@@ -171,14 +179,14 @@ def attn_block(cfg: Config, x, lp, positions, cache_kv=None, pos=0):
     scores = jnp.einsum("btgrd,bsgd->bgrts", qg, keys).astype(jnp.float32) / jnp.sqrt(hd)
     mask = k_pos[:, None, None, None, :] <= positions[:, None, None, :, None]   # causal (and hides empty cache)
     scores = jnp.where(mask, scores, -jnp.inf)
-    weights = jax.nn.softmax(scores, axis=-1).astype(x.dtype)
-    out = jnp.einsum("bgrts,bsgd->btgrd", weights, vals).reshape(B, T, H * hd)
-    return out @ lp["wo"], cache_kv
+    weights = jp.tap("pattern", jax.nn.softmax(scores, axis=-1).astype(x.dtype))   # (B, KV, rep, T, S)
+    z = jp.tap("z", jnp.einsum("bgrts,bsgd->btgrd", weights, vals).reshape(B, T, H, hd))   # per-head outputs
+    return z.reshape(B, T, H * hd) @ lp["wo"], cache_kv
 
 
 def mlp_block(cfg: Config, x, lp):
     """The MLP half of a layer (SwiGLU): what it adds to the residual stream."""
-    h = rms_norm(x, lp["mlp_norm"], cfg.norm_eps)
+    h = jp.tap("mlp_in", rms_norm(x, lp["mlp_norm"], cfg.norm_eps, "mlp_scale"))
     return (jax.nn.silu(h @ lp["w_gate"]) * (h @ lp["w_up"])) @ lp["w_down"]
 
 
@@ -209,7 +217,7 @@ def trunk(params, tokens, cfg: Config, cache=None, pos=0):
 def forward(params, tokens, cfg: Config, cache=None, pos=0):
     """tokens [B, T] → (logits [B, T, V] float32, cache). With a cache, `pos` is where this chunk starts."""
     x, new_cache = trunk(params, tokens, cfg, cache, pos)
-    x = rms_norm(x, params["final_norm"], cfg.norm_eps)
+    x = rms_norm(x, params["final_norm"], cfg.norm_eps, "final_scale")
     head = params["embed"].T if cfg.tied else params["head"]
     return (x @ head).astype(jnp.float32), new_cache
 

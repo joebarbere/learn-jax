@@ -970,3 +970,136 @@ ENTRIES += [
              "against a shuffled pairing."),),
       module="47"),
 ]
+
+
+def _atp_inputs(r: np.random.Generator) -> dict:
+    return {"grad": r.normal(size=(4, 3, 6)), "clean": r.normal(size=(4, 3, 6)), "corrupt": r.normal(size=(4, 3, 6))}
+
+
+def _influence_inputs(r: np.random.Generator) -> dict:
+    A = np.triu(r.normal(size=(7, 7)), 1)  # row = target, column = source; upper triangular: a DAG
+    w = np.zeros(7)
+    w[0] = 0.7
+    w[1] = 0.3
+    return {"A": A, "w": w}
+
+
+def _ld_inputs(r: np.random.Generator) -> dict:
+    return {"logits": r.normal(size=(5, 4, 9)), "io": r.integers(0, 9, 5), "s": r.integers(0, 9, 5)}
+
+
+ENTRIES += [
+    E("logit difference", "Retrieval and evaluation",
+      "How strongly the model prefers the right answer to one specific wrong answer, at the last position, averaged "
+      "over prompts. Unlike a probability it is linear in the final residual stream, so contributions add up.",
+      r"\mathrm{LD} = \frac{1}{B}\sum_b \big(z_{b,T,\,io_b} - z_{b,T,\,s_b}\big)",
+      r"$\mathrm{logit}(IO) - \mathrm{logit}(S)$ (Wang et al. 2022)",
+      "logits (B, T, V), io (B,), s (B,) -> ()", "logit_diff(logits, io, s)", _ld_inputs,
+      python="""
+        def logit_diff(logits, io, s):
+            total = 0.0
+            for b in range(len(logits)):
+                last = logits[b][-1]
+                total += last[io[b]] - last[s[b]]
+            return total / len(logits)
+      """,
+      numpy="""
+        def logit_diff(logits, io, s):
+            last = logits[:, -1]
+            b = np.arange(len(last))
+            return (last[b, io] - last[b, s]).mean()
+      """,
+      jax="""
+        def logit_diff(logits, io, s):
+            last = logits[:, -1]
+            pick = lambda ids: jnp.take_along_axis(last, ids[:, None], 1)[:, 0]
+            return (pick(io) - pick(s)).mean()
+      """,
+      torch="""
+        def logit_diff(logits, io, s):
+            last = logits[:, -1]
+            return (last.gather(1, io[:, None]) - last.gather(1, s[:, None])).mean()
+      """,
+      notes=(("Normalised against a clean and a corrupted run, (LD − LD_corrupt) / (LD_clean − LD_corrupt), it becomes "
+              "the patching effect Module 48 plots: 0 = nothing restored, 1 = everything."),),
+      module="48"),
+    E("attribution patching", "Calculus and autodiff",
+      "Estimate what pasting a clean activation into a corrupted run would do to a metric, for every activation at "
+      "once: the gradient on the corrupted run times the difference between the two activations. One backward pass "
+      "replaces thousands of forward passes.",
+      r"\Delta m \approx \nabla_a m\,\big\rvert_{a_{\text{corr}}} \cdot (a_{\text{clean}} - a_{\text{corr}})",
+      r"$\hat c_{\text{AtP}}(n) = (n(x^{\text{clean}}) - n(x^{\text{noise}}))^\top \frac{\partial \mathcal L}{\partial n}"
+      r"\big\rvert_{n(x^{\text{noise}})}$ (Kramár et al. 2024)",
+      "grad, clean, corrupt (..., d) -> (...)", "atp(grad, clean, corrupt)", _atp_inputs,
+      python="""
+        def atp(grad, clean, corrupt):
+            def walk(g, c, r):
+                if not isinstance(g[0], list):
+                    return sum(gi * (ci - ri) for gi, ci, ri in zip(g, c, r))
+                return [walk(*t) for t in zip(g, c, r)]
+            return walk(grad, clean, corrupt)
+      """,
+      numpy="""
+        def atp(grad, clean, corrupt):
+            return (grad * (clean - corrupt)).sum(-1)
+      """,
+      jax="""
+        def atp(grad, clean, corrupt):
+            return (grad * (clean - corrupt)).sum(-1)
+      """,
+      torch="""
+        def atp(grad, clean, corrupt):
+            return (grad * (clean - corrupt)).sum(-1)
+      """,
+      notes=(("Get grad with jax.grad of the metric with respect to an additive offset at the activation (zero at "
+              "the corrupted run): with jaxprobe, patch the tap with x + delta and differentiate in delta."),
+             ("It is exact for a linear metric and wrong where attention saturates; Module 48 shows a head it "
+              "underrates by 3×.")),
+      module="48"),
+    E("total influence in a graph", "Linear algebra",
+      "How much each node matters to the output through every path. Normalise the graph so each node's incoming "
+      "weights sum to 1, then add up direct effects, two-step effects, three-step effects… The series stops because "
+      "a causal graph has no cycles.",
+      r"\hat A_{ts} = \frac{\lvert A_{ts}\rvert}{\sum_{s'}\lvert A_{ts'}\rvert},\qquad x = w\hat A + w\hat A^2 + \dots = "
+      r"w\hat A\,(I-\hat A)^{-1}",
+      r"$B = (I - A)^{-1} - I$, influence $= \text{logit weights}\cdot B$ (Ameisen et al. 2025)",
+      "A (n, n) row = target, w (n,) -> (n,)", "influence(A, w)", _influence_inputs,
+      python="""
+        def influence(A, w):
+            n = len(A)
+            An = []
+            for row in A:
+                s = sum(abs(a) for a in row)
+                An.append([abs(a) / s if s else 0.0 for a in row])
+            x, v = [0.0] * n, [sum(w[t] * An[t][s] for t in range(n)) for s in range(n)]
+            for _ in range(n):
+                x = [a + b for a, b in zip(x, v)]
+                v = [sum(v[t] * An[t][s] for t in range(n)) for s in range(n)]
+            return x
+      """,
+      numpy="""
+        def influence(A, w):
+            a = np.abs(A)
+            s = a.sum(1, keepdims=True)
+            An = np.divide(a, s, out=np.zeros_like(a), where=s > 0)
+            return w @ An @ np.linalg.inv(np.eye(len(A)) - An)
+      """,
+      jax="""
+        def influence(A, w):
+            a = jnp.abs(A)
+            s = a.sum(1, keepdims=True)
+            An = jnp.where(s > 0, a / jnp.where(s > 0, s, 1.0), 0.0)
+            return w @ An @ jnp.linalg.inv(jnp.eye(len(A)) - An)
+      """,
+      torch="""
+        def influence(A, w):
+            a = A.abs()
+            s = a.sum(1, keepdim=True)
+            An = torch.where(s > 0, a / s.clamp_min(1e-30), torch.zeros_like(a))
+            return w @ An @ torch.linalg.inv(torch.eye(len(A), dtype=A.dtype) - An)
+      """,
+      notes=(("For a graph of 10,000 nodes the inverse is heavy; the series w Â, w Â², … needs only matrix-vector "
+              "products and stops after the graph's depth (jaxprobe.trace.influence does that)."),
+             "Influence decides what to keep: prune features until the kept ones carry, say, 80% of the total."),
+      module="48"),
+]

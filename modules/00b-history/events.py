@@ -257,6 +257,14 @@ EVENTS = [
          "why_it_mattered": "The first serious alternative to left-to-right generation; sold on speed (over "
                             "1,000 tokens/s reported), at some cost in quality per parameter.",
          "module": "45-diffusion-lm", "url": "https://arxiv.org/abs/2502.09992"},
+    {"year": 2025, "title": "Attribution graphs trace a model's reasoning", "who": "Anthropic (Ameisen, Lindsey "
+         "et al.); open-sourced as circuit-tracer with Decode Research and Neuronpedia",
+         "what": "Replace every MLP by a sparse transcoder, freeze attention, and the path from a prompt to an answer "
+              "becomes a graph of readable features, with error nodes marking what isn't explained.",
+         "why_it_mattered": "Showed multi-step reasoning and planning inside Claude 3.5 Haiku, and made circuit "
+                            "tracing a tool anyone can run on open models.",
+         "module": "48-tracing-circuits",
+         "url": "https://transformer-circuits.pub/2025/attribution-graphs/methods.html"},
     {"year": 2026, "title": "New axes of sparsity: LatentMoE and Engram", "who": "NVIDIA; DeepSeek",
          "what": "Experts that work in a compressed latent width (shipped in Nemotron 3), and hashed n-gram lookup "
               "tables beside the experts.",

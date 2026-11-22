@@ -30,7 +30,7 @@ TERMS: list[Term] = [
     Term("ablation", ("ablate", "ablate_head", "ablating"),
          "Switching off a component (e.g. zeroing a head's output) and measuring what breaks, to test its "
          "role.",
-         "37", ("34",), ""),
+         "37", ("34", "48"), ""),
     Term("acceptance rate", ("accepted tokens",),
          "In speculative decoding, the fraction of draft tokens the target model accepts; it decides the "
          "speed-up.",
@@ -46,6 +46,10 @@ TERMS: list[Term] = [
          "The elementwise nonlinear function between layers. Without it, stacked linear layers collapse "
          "into one linear map.",
          "10", ("31",), ""),
+    Term("activation patching", ("patching", "patching_effect", "denoising"),
+         "Run the model on a corrupted input, paste in one activation from the clean run, and see how much of the "
+         "clean behaviour comes back: a causal test of where information lives.",
+         "48", ("46",), "Vig et al., 2020; Meng et al., 2022"),
     Term("activation steering", ("steering", "steering vector", "steering vectors", "CAA", "ActAdd",
                                  "activation addition", "contrastive activation addition"),
          "Change a model's behaviour at inference by adding a direction to its residual stream, usually the "
@@ -160,7 +164,15 @@ TERMS: list[Term] = [
          "The first token(s) of a sequence, on which a trained model parks attention it doesn't need "
          "(softmax weights must sum to 1). Dropping them from a sliding window breaks a pretrained model; "
          "keeping four fixes it.",
-         "44", (), "Xiao et al., 2023"),
+         "44", ("48",), "Xiao et al., 2023"),
+    Term("attribution graph", ("attribution graphs", "edge_weights", "graph pruning"),
+         "A per-prompt graph of which features, embeddings and error terms drive which others and the output, "
+         "computed exactly in a linearised replacement model, then pruned by influence.",
+         "48", (), "Ameisen et al., 2025"),
+    Term("attribution patching", ("attribution_patch", "AtP"),
+         "Estimate every activation patch at once from one backward pass: gradient · (clean − corrupted), a "
+         "first-order Taylor approximation that fails where the model is far from linear.",
+         "48", (), "Nanda, 2023; Kramár et al., 2024"),
     Term("auto-interpretability", ("auto-interp", "autointerp", "detection scoring"),
          "Using a language model to explain each SAE feature from its top-activating contexts, then scoring "
          "the explanation by how well it predicts where the feature fires on new text.",
@@ -297,7 +309,7 @@ TERMS: list[Term] = [
     Term("causal tracing", (),
          "Finding where a model computes something by corrupting the input and restoring one layer's activations "
          "at a time: the layers whose restoration brings the answer back are where it lives.",
-         "46", (), "Meng et al., 2022"),
+         "46", ("48",), "Meng et al., 2022"),
     Term("chain of thought", ("chain-of-thought", "CoT"),
          "Having a model write out intermediate reasoning steps before its final answer, which improves "
          "accuracy on multi-step problems.",
@@ -332,7 +344,7 @@ TERMS: list[Term] = [
          "38", (), ""),
     Term("circuit", ("circuits",),
          "A subnetwork of heads and neurons that together implement a specific behaviour.",
-         "37", (), "Olah et al., 2020"),
+         "37", ("48",), "Olah et al., 2020"),
     Term("classifier-free guidance", (),
          "Training a diffusion model with and without its conditioning, then extrapolating from the "
          "unconditional toward the conditional prediction to follow the prompt more strongly.",
@@ -627,6 +639,10 @@ TERMS: list[Term] = [
     Term("epoch", ("epochs",),
          "One full pass over the training set.",
          "10", ("09", "11", "12", "29", "33"), ""),
+    Term("error node", ("error nodes", "reconstruction error"),
+         "In an attribution graph, what a sparse replacement got wrong at one layer and position, kept as a node so "
+         "the graph still reproduces the model exactly; its share of the influence measures what is unexplained.",
+         "48", (), "Marks et al., 2024"),
     Term("evaluator-optimizer", ("evaluator–optimizer", "Reflexion"),
          "A workflow in which one call proposes an answer and another critiques it, repeating until the "
          "critic is satisfied.",
@@ -929,6 +945,10 @@ TERMS: list[Term] = [
          "Arguments to vmap saying which axis of each input (or None for no axis) is the batch axis to map "
          "over.",
          "07", (), ""),
+    Term("indirect object identification", ("IOI", "indirect object"),
+         "The task \"When Mary and John went to the store, John gave a drink to\" → Mary: name the person who "
+         "isn't repeated. A standard test case for finding circuits.",
+         "48", (), "Wang et al., 2022"),
     Term("induction head", ("induction heads", "induction circuit", "induction_score"),
          "A two-layer attention circuit that completes repeated patterns ([A][B] … [A] → [B]): a "
          "previous-token head plus a head that looks for the token after the last copy. The mechanism "
@@ -1136,6 +1156,10 @@ TERMS: list[Term] = [
          "An unnormalized score, one per class or token, that softmax turns into probabilities. Logits are "
          "log-probabilities up to a shared constant.",
          "04", ("09", "11", "14", "18", "27"), ""),
+    Term("logit difference", ("logit_diff", "logit diff"),
+         "logit(right answer) − logit(wrong answer): a behaviour metric that is linear in the final residual "
+         "stream, unlike probabilities, so patching effects add up.",
+         "48", (), "Zhang & Nanda, 2023"),
     Term("logit lens", ("logit-lens", "tuned lens"),
          "Decode a middle layer's residual stream with the model's own final norm and output head, to see "
          "what it would predict if it stopped there. The tuned lens first applies a learned affine map per "
@@ -1222,7 +1246,7 @@ TERMS: list[Term] = [
     Term("mechanistic interpretability", (),
          "Reverse-engineering what a trained network computes, finding the features and circuits inside "
          "it.",
-         "37", (), ""),
+         "37", ("48",), ""),
     Term("memory bandwidth", (),
          "How fast the GPU can read and write its memory, 288 GB/s on the RX 7600 XT. Sets the speed limit "
          "for memory-bound work.",
@@ -1348,6 +1372,10 @@ TERMS: list[Term] = [
          "A classifier that assumes features are independent given the class; for binary features its "
          "log-probabilities are a linear layer whose weights are log-odds counted from data, not trained.",
          "46", (), ""),
+    Term("name mover head", ("name movers", "name mover heads", "negative name mover"),
+         "A late attention head that attends from the last token to a name and copies it to the output; a negative "
+         "one attends to the same name and pushes it down.",
+         "48", (), "Wang et al., 2022"),
     Term("NaN", ("NaNs",),
          "Not-a-Number: the result of invalid float math like 0/0 or inf − inf. One NaN poisons everything "
          "it touches, so catching its source is a key debugging skill.",
@@ -1761,6 +1789,10 @@ TERMS: list[Term] = [
     Term("repetition penalty", (),
          "Lowering the logits of tokens already generated to discourage loops.",
          "18", (), "Keskar et al., 2019"),
+    Term("replacement model", ("replacement_forward", "local replacement model"),
+         "A model in which each MLP is swapped for its transcoder; with error terms added back and attention "
+         "patterns and norms frozen, it matches the real model exactly on one prompt and is linear.",
+         "48", (), "Ameisen et al., 2025"),
     Term("reranker", ("rerankers",),
          "A second stage that rescores the top candidates from a fast retriever with a slower, more "
          "accurate model.",
@@ -1976,7 +2008,7 @@ TERMS: list[Term] = [
     Term("sparse autoencoder", ("sparse autoencoders", "SAE", "SAEs"),
          "An autoencoder with a sparsity penalty trained on a model's activations, to pull superposed "
          "features apart into separate, more interpretable units.",
-         "37", ("47",), "Bricken et al., 2023"),
+         "37", ("47", "48"), "Bricken et al., 2023"),
     Term("sparse retrieval", ("lexical search", "keyword search"),
          "Search by exact word overlap, using sparse vectors with one dimension per vocabulary word "
          "(TF-IDF, BM25).",
@@ -2131,6 +2163,10 @@ TERMS: list[Term] = [
          "Sample from the smallest set of tokens whose probabilities add up to p, so the candidate set "
          "adapts to how confident the model is.",
          "18", (), "Holtzman et al., 2019"),
+    Term("total influence", ("indirect influence", "total_influence", "normalize_rows"),
+         "How much a node matters to the output through every path, direct and indirect: w Â (I − Â)⁻¹ for a "
+         "row-normalised graph Â, summed as a finite series because the graph has no cycles.",
+         "48", (), "Ameisen et al., 2025"),
     Term("TPU", ("TPUs",),
          "Google's Tensor Processing Unit, a chip built for matrix multiplies. XLA and JAX grew up "
          "targeting it, which is why JAX's programming model is compiler-first.",
@@ -2148,6 +2184,10 @@ TERMS: list[Term] = [
          "Training data fits the parameters, validation data picks hyperparameters and detects "
          "overfitting, and the test set is touched once at the end for an honest estimate.",
          "09", ("10", "13", "21", "35", "37"), ""),
+    Term("transcoder", ("transcoders", "per-layer transcoder", "cross-layer transcoder"),
+         "A sparse autoencoder that reads an MLP's input and predicts its output, so the MLP can be replaced by "
+         "a sparse, interpretable layer through which circuits can be traced.",
+         "48", ("47",), "Dunefsky et al., 2024"),
     Term("Transformer", ("transformer block",),
          "The architecture of stacked blocks of self-attention plus a per-token MLP, each wrapped in a "
          "residual connection and normalization. The basis of all modern LLMs.",

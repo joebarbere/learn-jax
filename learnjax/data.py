@@ -148,3 +148,45 @@ def coco_val2017() -> dict:
         captions.setdefault(a["image_id"], []).append(a["caption"].strip())
     images = sorted((im["id"], im["file_name"]) for im in meta["images"])
     return {"image_dir": image_dir, "images": images, "captions": captions}
+
+
+WIKITEXT_URL = ("https://huggingface.co/datasets/Salesforce/wikitext/resolve/"
+                "b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1/")
+WIKITEXT_FILES = {"train": ["train-00000-of-00002.parquet", "train-00001-of-00002.parquet"],
+                  "validation": ["validation-00000-of-00001.parquet"], "test": ["test-00000-of-00001.parquet"]}
+
+
+def wikitext103(split: str = "train") -> list[str]:
+    """WikiText-103 (Merity et al. 2016): ~28,000 good and featured Wikipedia articles, raw text, ~120M words in
+    train. Returns one string per article (the dataset stores lines; articles start at " = Title = " lines).
+    CC BY-SA 3.0. Module 48 trains its transcoders on it. Downloads ~315 MB once (train).
+    The dataset's own tokenisation (" , ", " @-@ ", "( x )") is undone so the text reads like ordinary prose."""
+    import pyarrow.parquet as pq
+
+    articles, cur = [], []
+    for name in WIKITEXT_FILES[split]:
+        path = _download(WIKITEXT_URL + name, CACHE / "wikitext103" / name)
+        for line in pq.read_table(path, columns=["text"]).column("text").to_pylist():
+            if line.startswith(" = ") and not line.startswith(" = = ") and cur:
+                articles.append(_detok("".join(cur)).strip())
+                cur = []
+            cur.append(line)
+    if cur:
+        articles.append(_detok("".join(cur)).strip())
+    return articles
+
+
+def _detok(s: str) -> str:
+    """Undo WikiText's tokenisation: "the city 's 1 @,@ 000 @-@ seat hall ( built 1900 ) ." → "the city's 1,000-seat
+    hall (built 1900)."."""
+    import re
+
+    for a, b in ((" @-@ ", "-"), (" @,@ ", ","), (" @.@ ", "."), (" n't", "n't"), (" 's", "'s"), (" 're", "'re"),
+                 (" 've", "'ve"), (" 'll", "'ll"), (" 'm", "'m"), (" 'd", "'d"), ("( ", "("), (" )", ")"),
+                 ("[ ", "["), (" ]", "]")):
+        s = s.replace(a, b)
+    s = re.sub(r" ([.,;:!?%])", r"\1", s)
+    s = re.sub(r'" (.*?) "', r'"\1"', s)
+    s = re.sub(r"(\n) ", r"\1", s)
+    s = re.sub(r"= = (.*?) = =", r"== \1 ==", s)
+    return s

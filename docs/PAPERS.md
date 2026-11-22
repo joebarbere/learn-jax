@@ -508,6 +508,20 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[The Platonic Representation Hypothesis](https://arxiv.org/abs/2405.07987)** — Huh, Cheung, Wang, Isola, 2024. Different models converge on similar representations; mutual nearest neighbours measure it.
 - **[Harnessing the Universal Geometry of Embeddings](https://arxiv.org/abs/2505.12540)** — Jha, Zhang, Shmatikov, Morris, 2025. vec2vec: translate between embedding spaces with no paired data at all.
 
+### 48 · Tracing a circuit: patching, transcoders and attribution graphs (2022–2025)
+
+- **[Interpretability in the Wild: a Circuit for Indirect Object Identification in GPT-2 small](https://arxiv.org/abs/2211.00593)** — Wang et al., 2022. The indirect-object task and its circuit of name movers and S-inhibition heads, found by patching.
+- **[Towards Best Practices of Activation Patching in Language Models: Metrics and Methods](https://arxiv.org/abs/2309.16042)** — Zhang, Nanda, 2023. Logit difference over probabilities, and why the choice of corruption matters.
+- **[How to use and interpret activation patching](https://arxiv.org/abs/2404.15255)** — Heimersheim, Nanda, 2024. Denoising vs noising, what a patching result does and doesn't show.
+- **[Attribution Patching: Activation Patching At Industrial Scale](https://www.neelnanda.io/mechanistic-interpretability/attribution-patching)** — Nanda, 2023. Replace thousands of patching runs with one backward pass: a first-order Taylor estimate.
+- **[AtP*: An efficient and scalable method for localizing LLM behaviour to components](https://arxiv.org/abs/2403.00745)** — Kramár et al., 2024. Where attribution patching fails (saturated attention) and how to fix it.
+- **[Towards Automated Circuit Discovery for Mechanistic Interpretability](https://arxiv.org/abs/2304.14997)** — Conmy et al., 2023. ACDC: prune a model's computational graph edge by edge, by patching.
+- **[Copy Suppression: Comprehensively Understanding an Attention Head](https://arxiv.org/abs/2310.04625)** — McDougall et al., 2023. The negative name mover: a head that attends to a name and pushes it down.
+- **[Transcoders Find Interpretable LLM Feature Circuits](https://arxiv.org/abs/2406.11944)** — Dunefsky, Chlenski, Nanda, 2024. Sparse replacements for MLPs, so circuits can be traced through them.
+- **[Sparse Feature Circuits: Discovering and Editing Interpretable Causal Graphs in Language Models](https://arxiv.org/abs/2403.19647)** — Marks et al., 2024. Circuits of SAE features, with error nodes, found by attribution.
+- **[Circuit Tracing: Revealing Computational Graphs in Language Models](https://transformer-circuits.pub/2025/attribution-graphs/methods.html)** — Ameisen et al., 2025. Attribution graphs: a frozen linear replacement model, error nodes, pruning by influence.
+- **[On the Biology of a Large Language Model](https://transformer-circuits.pub/2025/attribution-graphs/biology.html)** — Lindsey et al., 2025. Attribution graphs on Claude 3.5 Haiku: two-hop reasoning, planning, and their limits.
+
 ## Books
 
 For a second pass, or a different angle. Most are free to read online from their authors; each entry says so.

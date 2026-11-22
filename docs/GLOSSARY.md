@@ -1,6 +1,6 @@
 # Glossary
 
-605 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+615 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -16,11 +16,12 @@
 
 ## A
 
-- **ablation** — Switching off a component (e.g. zeroing a head's output) and measuring what breaks, to test its role. *(Module 37; also 34.)*
+- **ablation** — Switching off a component (e.g. zeroing a head's output) and measuring what breaks, to test its role. *(Module 37; also 34, 48.)*
 - **acceptance rate** — In speculative decoding, the fraction of draft tokens the target model accepts; it decides the speed-up. *(Module 18.)*
 - **accumulation** — Summing many products into one result. Doing it in float32 even when inputs are bfloat16 (`preferred_element_type=float32`) avoids losing small terms. *(Module 08; also 23.)*
 - **accuracy** — The fraction of predictions that are exactly right. *(Module 09; also 10, 12, 15, 21, 26.)*
 - **activation function** — The elementwise nonlinear function between layers. Without it, stacked linear layers collapse into one linear map. *(Module 10; also 31.)*
+- **activation patching** — Run the model on a corrupted input, paste in one activation from the clean run, and see how much of the clean behaviour comes back: a causal test of where information lives. *(Module 48; also 46.)* Origin: Vig et al., 2020; Meng et al., 2022.
 - **activation steering** — Change a model's behaviour at inference by adding a direction to its residual stream, usually the mean difference between activations on contrasting examples (CAA) or on one contrast pair (ActAdd). *(Module 47.)* Origin: Turner et al., 2023; Rimsky et al., 2023.
 - **activations** — The intermediate values a network computes in the forward pass. They must be stored for the backward pass, which often dominates training memory. *(Module 10; also 11, 17, 20, 25, 37.)*
 - **Adam** — Momentum plus RMSProp, with bias correction for the early steps. The default optimizer for deep learning. *(Module 05; also 09, 12, 14, 20, 24.)* Origin: Kingma & Ba, 2014.
@@ -48,7 +49,9 @@
 - **asynchronous dispatch** — JAX returns from a call as soon as the work is queued on the GPU, not when it finishes. Timing must call `block_until_ready()` or you measure only the launch. *(Module 06; also 10, 16, 18, 20, 33, 40.)*
 - **attention** — A soft dictionary lookup: each position scores every position it may see, softmaxes the scores into weights, and takes the weighted average of their values. Lets any token read from any other. *(Module 15; also 17, 23, 31, 36, 37.)* Origin: Bahdanau et al., 2014; Vaswani et al., 2017.
 - **attention pattern** — The matrix of attention weights from each query to each key, the first thing to look at in a head. *(Module 37.)*
-- **attention sink** — The first token(s) of a sequence, on which a trained model parks attention it doesn't need (softmax weights must sum to 1). Dropping them from a sliding window breaks a pretrained model; keeping four fixes it. *(Module 44.)* Origin: Xiao et al., 2023.
+- **attention sink** — The first token(s) of a sequence, on which a trained model parks attention it doesn't need (softmax weights must sum to 1). Dropping them from a sliding window breaks a pretrained model; keeping four fixes it. *(Module 44; also 48.)* Origin: Xiao et al., 2023.
+- **attribution graph** — A per-prompt graph of which features, embeddings and error terms drive which others and the output, computed exactly in a linearised replacement model, then pruned by influence. *(Module 48.)* Origin: Ameisen et al., 2025.
+- **attribution patching** — Estimate every activation patch at once from one backward pass: gradient · (clean − corrupted), a first-order Taylor approximation that fails where the model is far from linear. *(Module 48.)* Origin: Nanda, 2023; Kramár et al., 2024.
 - **auto-interpretability** — Using a language model to explain each SAE feature from its top-activating contexts, then scoring the explanation by how well it predicts where the feature fires on new text. *(Module 47.)* Origin: Bills et al., 2023; Paulo et al., 2024.
 - **autoencoder** — A network trained to reconstruct its input through a narrow bottleneck, so the bottleneck learns a compressed code. *(Module 33; also 37.)*
 - **automatic differentiation** — Computing exact derivatives of a program by applying the chain rule to each primitive operation it executes. Neither symbolic algebra nor finite differences. *(Module 03; also 00b.)* Origin: Baydin et al., 2015 (survey).
@@ -95,7 +98,7 @@
 - **capstone** — The course's final project: specialize, evaluate and serve a model of your own, end to end, with optional cloud scale-up. *(Module 25.)*
 - **carry** — The state lax.scan passes from one step to the next (an RNN hidden state, a running sum, the train state). *(Module 08; also 05, 09, 10, 14, 24.)*
 - **causal mask** — Setting attention scores for future positions to −∞ before softmax, so each token sees only itself and the past. Required for next-token training. *(Module 15; also 32.)*
-- **causal tracing** — Finding where a model computes something by corrupting the input and restoring one layer's activations at a time: the layers whose restoration brings the answer back are where it lives. *(Module 46.)* Origin: Meng et al., 2022.
+- **causal tracing** — Finding where a model computes something by corrupting the input and restoring one layer's activations at a time: the layers whose restoration brings the answer back are where it lives. *(Module 46; also 48.)* Origin: Meng et al., 2022.
 - **chain of thought** — Having a model write out intermediate reasoning steps before its final answer, which improves accuracy on multi-step problems. *(Module 26.)* Origin: Wei et al., 2022.
 - **chain rule** — The derivative of a composition is the product of the derivatives of its parts. Backpropagation is the chain rule applied systematically over a computation graph. *(Module 03.)*
 - **channel** — One feature map in a convolutional layer, like the R, G, B of an image or one learned detector's output. *(Module 12; also 01.)*
@@ -104,7 +107,7 @@
 - **checkpoint** — A saved snapshot of parameters and optimizer state so training can resume or the model be reused. The course uses Orbax, JAX's checkpointing library. *(Module 11; also 10, 16, 26, 39.)*
 - **Chinchilla scaling** — The finding that, for a fixed compute budget, parameters and training tokens should grow together, roughly 20 tokens per parameter. Many earlier large models were under-trained. *(Module 16; also 42.)* Origin: Hoffmann et al., 2022.
 - **chunking** — Splitting documents into passages before indexing. Chunk size trades context per hit against retrieval precision. *(Module 38.)*
-- **circuit** — A subnetwork of heads and neurons that together implement a specific behaviour. *(Module 37.)* Origin: Olah et al., 2020.
+- **circuit** — A subnetwork of heads and neurons that together implement a specific behaviour. *(Module 37; also 48.)* Origin: Olah et al., 2020.
 - **classifier-free guidance** — Training a diffusion model with and without its conditioning, then extrapolating from the unconditional toward the conditional prediction to follow the prompt more strongly. *(Module 33.)* Origin: Ho & Salimans, 2022.
 - **CLIP** — Contrastive Language–Image Pretraining: an image encoder and a text encoder trained so matching image–caption pairs have high cosine similarity. Enables zero-shot classification and guides image generation. *(Module 33; also 38, 43.)* Origin: Radford et al., 2021.
 - **clipped objective** — PPO's trick: cap how far the probability ratio between new and old policy can move in one update, so a step can't change the policy too much. *(Module 26.)* Origin: Schulman et al., 2017.
@@ -194,6 +197,7 @@
 - **energy function** — A scalar a Hopfield network's updates never increase, so the network rolls downhill into stored patterns (local minima). *(Module 29.)* Origin: Hopfield, 1982.
 - **entropy** — The average surprise of a distribution, −Σ p log p: how uncertain it is. Measured in bits (log base 2) or nats (natural log). *(Module 04; also 33, 37.)* Origin: Shannon, 1948.
 - **epoch** — One full pass over the training set. *(Module 10; also 09, 11, 12, 29, 33.)*
+- **error node** — In an attribution graph, what a sparse replacement got wrong at one layer and position, kept as a node so the graph still reproduces the model exactly; its share of the influence measures what is unexplained. *(Module 48.)* Origin: Marks et al., 2024.
 - **evaluator-optimizer** — A workflow in which one call proposes an answer and another critiques it, repeating until the critic is satisfied. *(Module 39.)* Origin: Anthropic, 2024; Shinn et al., 2023.
 - **exact match** — Scoring a generated answer as right only if it equals the reference after normalization. *(Module 21; also 20.)*
 - **expectation** — The probability-weighted average of a random variable: its long-run mean. *(Module 04.)*
@@ -296,6 +300,7 @@
 - **implicit reward** — In DPO, β × the log-ratio of policy to reference probability for a response; the reward the policy implicitly optimizes. *(Module 35.)* Origin: Rafailov et al., 2023.
 - **in-context learning** — A model doing a new task from examples given in the prompt, with no weight updates. *(Module 20; also 33, 37.)* Origin: Brown et al., 2020 (GPT-3).
 - **in_axes** — Arguments to vmap saying which axis of each input (or None for no axis) is the batch axis to map over. *(Module 07.)*
+- **indirect object identification** — The task "When Mary and John went to the store, John gave a drink to" → Mary: name the person who isn't repeated. A standard test case for finding circuits. *(Module 48.)* Origin: Wang et al., 2022.
 - **induction head** — A two-layer attention circuit that completes repeated patterns ([A][B] … [A] → [B]): a previous-token head plus a head that looks for the token after the last copy. The mechanism behind much in-context learning. *(Module 37.)* Origin: Elhage et al., 2021; Olsson et al., 2022.
 - **inductive bias** — The assumptions an architecture builds in, such as locality for CNNs or order for RNNs. Good biases trade flexibility for data efficiency. *(Module 12.)*
 - **inference-time scaling** — Getting better answers by spending more compute at generation time: more samples, longer reasoning, voting or search. *(Module 26.)* Origin: Snell et al., 2024.
@@ -366,6 +371,7 @@
 - **log-sum-exp** — log(Σ exp xᵢ), computed safely by subtracting the max first so nothing overflows. It is the normalizer inside log-softmax and cross-entropy. *(Module 04; also 08, 11, 39.)*
 - **logistic regression** — A linear model followed by a sigmoid, giving the probability of the positive class; trained with binary cross-entropy. *(Module 09.)*
 - **logit** — An unnormalized score, one per class or token, that softmax turns into probabilities. Logits are log-probabilities up to a shared constant. *(Module 04; also 09, 11, 14, 18, 27.)*
+- **logit difference** — logit(right answer) − logit(wrong answer): a behaviour metric that is linear in the final residual stream, unlike probabilities, so patching effects add up. *(Module 48.)* Origin: Zhang & Nanda, 2023.
 - **logit lens** — Decode a middle layer's residual stream with the model's own final norm and output head, to see what it would predict if it stopped there. The tuned lens first applies a learned affine map per layer. *(Module 47.)* Origin: nostalgebraist, 2020; Belrose et al., 2023.
 - **long-term memory** — Information an agent stores across sessions and retrieves when relevant, often with RAG over past episodes. *(Module 39.)*
 - **LoRA** — Fine-tuning by freezing the base weights W and learning a low-rank update B·A (rank r) added to them, scaled by α/r. B starts at zero, so training starts from the base model, and only a tiny adapter is trained and shipped. *(Module 20; also 02, 26, 27, 35.)* Origin: Hu et al., 2021.
@@ -391,7 +397,7 @@
 - **matrix multiplication** — Combining two matrices so the result applies one transformation after the other (right to left). Order matters. It is the operation GPUs are built to do fast. *(Module 02; also 08, 18, 22, 23, 24.)*
 - **MCP** — Model Context Protocol: an open standard for exposing tools and data to LLM applications through a common server interface. *(Module 39.)* Origin: Anthropic, 2024.
 - **mean squared error** — The average squared difference between prediction and target: the standard regression loss. *(Module 09; also 10, 33, 34.)*
-- **mechanistic interpretability** — Reverse-engineering what a trained network computes, finding the features and circuits inside it. *(Module 37.)*
+- **mechanistic interpretability** — Reverse-engineering what a trained network computes, finding the features and circuits inside it. *(Module 37; also 48.)*
 - **memory bandwidth** — How fast the GPU can read and write its memory, 288 GB/s on the RX 7600 XT. Sets the speed limit for memory-bound work. *(Module 18; also 06.)*
 - **memory profile** — Measurements of how much GPU memory is live and at peak, used to see the effect of donation and precision. *(Module 22.)*
 - **memory-bandwidth-bound** — When time is set by bytes moved from GPU memory, not arithmetic. Single-sequence decoding is, so its speed ≈ bandwidth ÷ model size. *(Module 18; also 19, 22.)*
@@ -429,6 +435,7 @@
 
 - **n-gram** — A run of n consecutive tokens; an n-gram model predicts from the previous n − 1. Also used to measure text overlap in evaluation and contamination checks. *(Module 14; also 21, 40.)* Origin: Shannon, 1948.
 - **naive Bayes** — A classifier that assumes features are independent given the class; for binary features its log-probabilities are a linear layer whose weights are log-odds counted from data, not trained. *(Module 46.)*
+- **name mover head** — A late attention head that attends from the last token to a name and copies it to the output; a negative one attends to the same name and pushes it down. *(Module 48.)* Origin: Wang et al., 2022.
 - **NaN** — Not-a-Number: the result of invalid float math like 0/0 or inf − inf. One NaN poisons everything it touches, so catching its source is a key debugging skill. *(Module 11; also 05, 09, 25, 35, 39.)*
 - **Native Sparse Attention** — DeepSeek's trainable sparse attention: compressed block summaries, a few selected blocks and a sliding window, combined by a learned gate and laid out for GPU kernels. *(Module 44.)* Origin: Yuan et al., 2025.
 - **nats** — Units of information: a nat uses the natural log, a bit uses log base 2 (1 nat ≈ 1.44 bits). Losses in JAX are usually in nats. *(Module 04; also 14, 32, 33, 35, 37.)*
@@ -557,6 +564,7 @@
 - **ReLU** — max(0, x): the simplest common nonlinearity. Networks of ReLUs compute piecewise-linear functions. *(Module 10; also 11, 12, 17, 33, 37.)* Origin: Nair & Hinton, 2010.
 - **reparameterization trick** — Write a sample as μ + σ·ε with ε random noise, so gradients can flow through the sampling step to μ and σ. *(Module 33.)* Origin: Kingma & Welling, 2013.
 - **repetition penalty** — Lowering the logits of tokens already generated to discourage loops. *(Module 18.)* Origin: Keskar et al., 2019.
+- **replacement model** — A model in which each MLP is swapped for its transcoder; with error terms added back and attention patterns and norms frozen, it matches the real model exactly on one prompt and is linear. *(Module 48.)* Origin: Ameisen et al., 2025.
 - **reranker** — A second stage that rescores the top candidates from a fast retriever with a slower, more accurate model. *(Module 38.)*
 - **residual connection** — Adding a block's input to its output, x + f(x). Gradients get a direct path back through the network, which is what makes very deep networks trainable. *(Module 11; also 31.)* Origin: He et al., 2015.
 - **residual stream** — The vector each token carries through the network; every attention and MLP block reads from it and adds its output back. A useful mental model for interpretability. *(Module 16; also 37, 47.)* Origin: Elhage et al., 2021.
@@ -615,7 +623,7 @@
 - **softmax** — Exponentiate a vector of logits and divide by the total, turning arbitrary scores into a probability distribution. Large logits dominate. *(Module 04; also 08, 15, 18, 22, 23.)*
 - **softmax regression** — Logistic regression for many classes: one linear score per class, then softmax and cross-entropy. *(Module 09; also 10.)*
 - **sparse activation** — Only part of the model runs per token (the chosen experts), so active parameters are far fewer than total parameters. *(Module 17.)*
-- **sparse autoencoder** — An autoencoder with a sparsity penalty trained on a model's activations, to pull superposed features apart into separate, more interpretable units. *(Module 37; also 47.)* Origin: Bricken et al., 2023.
+- **sparse autoencoder** — An autoencoder with a sparsity penalty trained on a model's activations, to pull superposed features apart into separate, more interpretable units. *(Module 37; also 47, 48.)* Origin: Bricken et al., 2023.
 - **sparse retrieval** — Search by exact word overlap, using sparse vectors with one dimension per vocabulary word (TF-IDF, BM25). *(Module 38.)*
 - **sparse upcycling** — Turn a trained dense model into a mixture of experts by copying its feed-forward block into every expert, adding a fresh router, and training on. *(Module 42; also 17.)* Origin: Komatsuzaki et al., 2022.
 - **sparsity** — Having many parameters but using only a few for each input: an MoE's unpicked experts, an Engram table's unread rows. Capacity grows without per-token compute growing. *(Module 40; also 17.)*
@@ -665,10 +673,12 @@
 - **tool calling** — A model emitting a structured request (tool name + JSON arguments) that the host program executes, feeding the result back as a message. *(Module 27; also 25, 39.)* Origin: Schick et al., 2023 (Toolformer).
 - **top-k sampling** — Sample only from the k most probable tokens, renormalized. *(Module 18.)* Origin: Fan et al., 2018.
 - **top-p sampling** — Sample from the smallest set of tokens whose probabilities add up to p, so the candidate set adapts to how confident the model is. *(Module 18.)* Origin: Holtzman et al., 2019.
+- **total influence** — How much a node matters to the output through every path, direct and indirect: w Â (I − Â)⁻¹ for a row-normalised graph Â, summed as a finite series because the graph has no cycles. *(Module 48.)* Origin: Ameisen et al., 2025.
 - **TPU** — Google's Tensor Processing Unit, a chip built for matrix multiplies. XLA and JAX grew up targeting it, which is why JAX's programming model is compiler-first. *(Module 00b; also 25.)*
 - **tracer** — The placeholder value JAX passes through your function while tracing. It knows its shape and dtype but not its numbers, which is why Python `if` on it fails. *(Module 06.)*
 - **tracing** — Running a Python function with abstract stand-in values (tracers) that record each array operation instead of computing it. The recording is what JAX transforms and compiles. *(Module 06; also 08.)* Origin: Frostig, Johnson, Leary, 2018.
 - **train/validation/test split** — Training data fits the parameters, validation data picks hyperparameters and detects overfitting, and the test set is touched once at the end for an honest estimate. *(Module 09; also 10, 13, 21, 35, 37.)*
+- **transcoder** — A sparse autoencoder that reads an MLP's input and predicts its output, so the MLP can be replaced by a sparse, interpretable layer through which circuits can be traced. *(Module 48; also 47.)* Origin: Dunefsky et al., 2024.
 - **Transformer** — The architecture of stacked blocks of self-attention plus a per-token MLP, each wrapped in a residual connection and normalization. The basis of all modern LLMs. *(Module 15; also 00b, 17, 31, 32, 37.)* Origin: Vaswani et al., 2017.
 - **translation equivariance** — Shifting the input shifts the output the same way. Convolutions have it built in; attention is instead permutation-equivariant. *(Module 12.)*
 - **Tree of Thoughts** — Search over partial chains of thought, evaluating and expanding the most promising branches rather than following one chain. *(Module 26.)* Origin: Yao et al., 2023.
