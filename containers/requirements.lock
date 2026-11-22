@@ -1204,8 +1204,8 @@ jaxlib==0.12.1 \
     #   jax
     #   mctx
     #   optax
-jaxprobe @ https://github.com/joebarbere/jaxprobe/releases/download/v0.2.0/jaxprobe-0.2.0-py3-none-any.whl \
-    --hash=sha256:d071b062406d1b9f1d736f3b08b135757b287809c477ea6677e0a89ac90f92a2
+jaxprobe @ https://github.com/joebarbere/jaxprobe/releases/download/v0.3.0/jaxprobe-0.3.0-py3-none-any.whl \
+    --hash=sha256:5972c23458e1f85158efb5916518793f5a6d79d5e656b84d65f6856a70931c26
     # via -r requirements.txt
 jedi==0.20.1 \
     --hash=sha256:0fb16d86c4a4c73c37ba518c77419975e30fcc620658a8d14fbb5720cdd34142 \
@@ -1765,6 +1765,7 @@ ml-dtypes==0.7.0 \
     # via
     #   jax
     #   jaxlib
+    #   jaxprobe
     #   tensorstore
 msgpack==1.2.4 \
     --hash=sha256:0221748c30ace75fde0dec8c470abe65fb5374cd4f37adb9db6aca7a3c362c0a \
@@ -2138,6 +2139,7 @@ numpy==2.5.3 \
     #   gymnasium
     #   jax
     #   jaxlib
+    #   jaxprobe
     #   matplotlib
     #   ml-dtypes
     #   optax

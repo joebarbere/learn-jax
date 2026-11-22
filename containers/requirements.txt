@@ -27,4 +27,4 @@ fastapi==0.162.0           # a tiny OpenAI-compatible server in front of the JAX
 mcp==2.3.0                 # Model Context Protocol client/server (module 39)
 # Interpretability library grown out of modules 47 and 48 (capture/patch activations, SAEs, steering); learnjax/llama.py
 # marks its forward pass with jaxprobe taps. A release wheel at a fixed tag, so the lock can pin it by hash.
-jaxprobe @ https://github.com/joebarbere/jaxprobe/releases/download/v0.2.0/jaxprobe-0.2.0-py3-none-any.whl
+jaxprobe @ https://github.com/joebarbere/jaxprobe/releases/download/v0.3.0/jaxprobe-0.3.0-py3-none-any.whl

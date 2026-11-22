@@ -1,4 +1,5 @@
-"""A small, readable Llama-architecture model in pure JAX that runs real pretrained weights.
+"""A small, readable Llama-architecture model in pure JAX that runs real pretrained weights (and Qwen2, which adds
+biases to q, k and v).
 
 It is the reference the Part 5 modules (18 inference, 20 LoRA, 21 evaluation) build on: the same parts
 you wrote in Module 17 (RMSNorm, RoPE, grouped-query attention, SwiGLU), loaded with Hugging Face
@@ -117,6 +118,9 @@ def convert_hf(raw: dict, cfg: Config) -> dict:
             "w_down": stack(p + "mlp.down_proj.weight"),              # [L, F, D]
         },
     }
+    if "model.layers.0.self_attn.q_proj.bias" in raw:            # Qwen2-architecture checkpoints
+        for n, hf in (("bq", "q_proj"), ("bk", "k_proj"), ("bv", "v_proj")):
+            params["layers"][n] = stack(p + f"self_attn.{hf}.bias", transpose=False)
     if not cfg.tied:
         params["head"] = w("lm_head.weight").T
     return params
@@ -157,14 +161,18 @@ def init_cache(cfg: Config, batch: int, max_len: int | None = None):
     return {"k": jnp.zeros(shape, cfg.dtype), "v": jnp.zeros(shape, cfg.dtype)}
 
 
-def attn_block(cfg: Config, x, lp, positions, cache_kv=None, pos=0):
-    """The attention half of a layer: what it adds to the residual stream (B, T, d), and the updated cache."""
+def attn_block(cfg: Config, x, lp, positions, cache_kv=None, pos=0, key_mask=None):
+    """The attention half of a layer: what it adds to the residual stream (B, T, d), and the updated cache.
+    key_mask (B, T) hides padding keys (full forward only)."""
     B, T, _ = x.shape
     H, KV, hd = cfg.n_heads, cfg.n_kv_heads, cfg.head_dim
     h = rms_norm(x, lp["attn_norm"], cfg.norm_eps, "attn_scale")
-    q = rope((h @ lp["wq"]).reshape(B, T, H, hd), positions, cfg.rope_theta)
-    k = rope((h @ lp["wk"]).reshape(B, T, KV, hd), positions, cfg.rope_theta)
-    v = (h @ lp["wv"]).reshape(B, T, KV, hd)
+    q, k, v = h @ lp["wq"], h @ lp["wk"], h @ lp["wv"]
+    if "bq" in lp:                                 # Qwen2: biases on q, k, v (Llama has none)
+        q, k, v = q + lp["bq"], k + lp["bk"], v + lp["bv"]
+    q = rope(q.reshape(B, T, H, hd), positions, cfg.rope_theta)
+    k = rope(k.reshape(B, T, KV, hd), positions, cfg.rope_theta)
+    v = v.reshape(B, T, KV, hd)
     if cache_kv is None:                          # full forward: keys = this chunk
         keys, vals, k_pos = k, v, positions
     else:                                         # write this chunk at `pos`, attend over the whole cache
@@ -178,7 +186,11 @@ def attn_block(cfg: Config, x, lp, positions, cache_kv=None, pos=0):
     qg = q.reshape(B, T, KV, rep, hd)
     scores = jnp.einsum("btgrd,bsgd->bgrts", qg, keys).astype(jnp.float32) / jnp.sqrt(hd)
     mask = k_pos[:, None, None, None, :] <= positions[:, None, None, :, None]   # causal (and hides empty cache)
-    scores = jnp.where(mask, scores, -jnp.inf)
+    if key_mask is None:
+        scores = jnp.where(mask, scores, -jnp.inf)
+    else:  # padding keys hidden; a finite fill keeps all-padding query rows from turning into NaN
+        mask = mask & (jnp.arange(T)[None, None, None, :, None] >= jnp.arange(T)[None, None, None, None, :])
+        scores = jnp.where(mask & key_mask[:, None, None, None, :], scores, -1e30)
     weights = jp.tap("pattern", jax.nn.softmax(scores, axis=-1).astype(x.dtype))   # (B, KV, rep, T, S)
     z = jp.tap("z", jnp.einsum("bgrts,bsgd->btgrd", weights, vals).reshape(B, T, H, hd))   # per-head outputs
     return z.reshape(B, T, H * hd) @ lp["wo"], cache_kv
@@ -190,16 +202,23 @@ def mlp_block(cfg: Config, x, lp):
     return (jax.nn.silu(h @ lp["w_gate"]) * (h @ lp["w_up"])) @ lp["w_down"]
 
 
-def _layer(cfg: Config, x, lp, positions, cache_kv, pos):
-    a, cache_kv = attn_block(cfg, x, lp, positions, cache_kv, pos)
+def _layer(cfg: Config, x, lp, positions, cache_kv, pos, key_mask=None):
+    a, cache_kv = attn_block(cfg, x, lp, positions, cache_kv, pos, key_mask)
     x = jp.tap("mid", x + jp.tap("attn_out", a))
     return jp.tap("resid", x + jp.tap("mlp_out", mlp_block(cfg, x, lp))), cache_kv
 
 
-def trunk(params, tokens, cfg: Config, cache=None, pos=0):
-    """The residual stream after the last layer, before the final norm: (h_L [B, T, d], cache)."""
+def trunk(params, tokens, cfg: Config, cache=None, pos=0, mask=None):
+    """The residual stream after the last layer, before the final norm: (h_L [B, T, d], cache).
+    mask (B, T) bool marks real tokens in a padded batch (full forward only): padding keys are hidden and RoPE
+    positions count real tokens only, so a left-padded row computes what it would alone."""
     B, T = tokens.shape
-    positions = jnp.broadcast_to(pos + jnp.arange(T), (B, T))
+    if mask is not None:
+        if cache is not None:
+            raise ValueError("mask is supported for the full forward pass only (no cache)")
+        positions = jnp.maximum(jnp.cumsum(mask.astype(jnp.int32), 1) - 1, 0) + pos
+    else:
+        positions = jnp.broadcast_to(pos + jnp.arange(T), (B, T))
     x = jp.tap("embed", params["embed"][tokens])
 
     def body(x, layer):
@@ -208,15 +227,16 @@ def trunk(params, tokens, cfg: Config, cache=None, pos=0):
         return x, ckv
 
     if cache is None:
-        x, _ = jp.scan(lambda x, lp: (_layer(cfg, x, lp, positions, None, pos)[0], None), x, params["layers"])
+        x, _ = jp.scan(lambda x, lp: (_layer(cfg, x, lp, positions, None, pos, mask)[0], None), x, params["layers"])
         return x, None
     x, (k, v) = jp.scan(body, x, (params["layers"], (cache["k"], cache["v"])))
     return x, {"k": k, "v": v}
 
 
-def forward(params, tokens, cfg: Config, cache=None, pos=0):
-    """tokens [B, T] → (logits [B, T, V] float32, cache). With a cache, `pos` is where this chunk starts."""
-    x, new_cache = trunk(params, tokens, cfg, cache, pos)
+def forward(params, tokens, cfg: Config, cache=None, pos=0, mask=None):
+    """tokens [B, T] → (logits [B, T, V] float32, cache). With a cache, `pos` is where this chunk starts.
+    mask (B, T): real tokens in a padded batch (see `trunk`)."""
+    x, new_cache = trunk(params, tokens, cfg, cache, pos, mask)
     x = rms_norm(x, params["final_norm"], cfg.norm_eps, "final_scale")
     head = params["embed"].T if cfg.tied else params["head"]
     return (x @ head).astype(jnp.float32), new_cache
