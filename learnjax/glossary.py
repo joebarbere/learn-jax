@@ -2459,6 +2459,33 @@ TERMS: list[Term] = [
          "A way to scale initialization and learning rates with width so the best hyperparameters found on a "
          "narrow model still work on a wide one.",
          "42", (), "Yang et al., 2022"),
+    Term("catastrophic forgetting", ("catastrophic interference",),
+         "Training a network on something new overwrites what it knew before, often abruptly, because the same "
+         "weights store both.",
+         "49", ("20", "46"), "McCloskey & Cohen, 1989"),
+    Term("continual learning", ("lifelong learning", "sequential learning", "continual learner"),
+         "Learning tasks or facts one after another, keeping the old ones, without retraining on everything "
+         "from scratch each time.",
+         "49", (), "McCloskey & Cohen, 1989; Kirkpatrick et al., 2017"),
+    Term("backward transfer", ("BWT", "accuracy matrix"),
+         "How training on later tasks changed accuracy on earlier ones, read off the accuracy matrix R[i, j]: "
+         "negative means forgetting.",
+         "49", (), "Lopez-Paz & Ranzato, 2017"),
+    Term("elastic weight consolidation", ("EWC", "ewc_penalty", "Fisher penalty"),
+         "Keep weights the old task needs near their old values: a penalty Σ F_i (θ_i − θ*_i)², each weight "
+         "weighted by its Fisher information.",
+         "49", (), "Kirkpatrick et al., 2017"),
+    Term("experience replay", ("replay buffer", "rehearsal"),
+         "Mix examples from earlier tasks into each new training batch, so the old tasks keep being practised.",
+         "49", ("34",), "Lin, 1992; McClelland et al., 1995"),
+    Term("self-distillation", ("SDFT", "context distillation", "on-policy distillation", "knowledge seeding"),
+         "A model teaches itself: the same model with extra information in its prompt (a document, a worked "
+         "example) is the teacher, and the student learns to answer as well without it, on its own samples.",
+         "49", ("42",), "Snell et al., 2022; Agarwal et al., 2023; Shenfeld et al., 2026"),
+    Term("sleep (continual learning)", ("Sleep paradigm", "dreaming", "memory consolidation"),
+         "Behrouz et al.'s name for offline phases between use: consolidate recent knowledge into new low-rank "
+         "experts by self-distillation, then train on self-generated \"dreams\".",
+         "49", (), "Behrouz et al., 2026"),
     Term("refusal direction", ("refusal vector", "refusal_score", "refusal score"),
          "A single direction in a chat model's residual stream that mediates refusal: the mean activation on "
          "harmful requests minus the mean on harmless ones. Removing it stops refusals; adding it causes them.",

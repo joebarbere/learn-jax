@@ -1185,3 +1185,113 @@ ENTRIES += [
               "template tokens after the request, so the content itself is out of view.")),
       module="50", also=("47",)),
 ]
+
+
+def _ewc_inputs(r: np.random.Generator) -> dict:
+    return {"params": r.normal(size=(5, 4)), "anchor": r.normal(size=(5, 4)),
+            "fisher": np.abs(r.normal(size=(5, 4)))}
+
+
+def _tkl_inputs(r: np.random.Generator) -> dict:
+    return {"t": r.normal(size=(3, 4, 9)) * 2, "s": r.normal(size=(3, 4, 9)) * 2}
+
+
+ENTRIES += [
+    E("elastic weight consolidation penalty", "Optimization",
+      "Let each weight move, but charge for moving the ones the old task relied on: a spring back to the old value, "
+      "as stiff as that weight's Fisher information (how much the old task's loss bends when the weight moves).",
+      r"\Omega(\theta) = \sum_i F_i\,(\theta_i - \theta^*_i)^2",
+      r"$\mathcal L(\theta) = \mathcal L_B(\theta) + \sum_i \frac{\lambda}{2} F_i (\theta_i - \theta^*_{A,i})^2$ "
+      r"(Kirkpatrick et al. 2017, eq. 3)",
+      "params, anchor, fisher (same shapes) -> scalar", "ewc(params, anchor, fisher)", _ewc_inputs,
+      python="""
+        def ewc(params, anchor, fisher):
+            return sum(f * (p - a) ** 2 for pr, ar, fr in zip(params, anchor, fisher)
+                       for p, a, f in zip(pr, ar, fr))
+      """,
+      numpy="""
+        def ewc(params, anchor, fisher):
+            return np.sum(fisher * (params - anchor) ** 2)
+      """,
+      jax="""
+        def ewc(params, anchor, fisher):   # params etc. can be whole pytrees
+            terms = jax.tree.map(lambda p, a, f: jnp.sum(f * (p - a) ** 2), params, anchor, fisher)
+            return sum(jax.tree.leaves(terms))
+      """,
+      torch="""
+        def ewc(params, anchor, fisher):
+            return (fisher * (params - anchor) ** 2).sum()
+      """,
+      notes=(("The diagonal Fisher is usually estimated as the mean *squared gradient* of the old task's loss (the "
+              "empirical Fisher); Kirkpatrick et al. sample labels from the model instead. Both are cheap: one "
+              "backward pass per batch."),
+             ("For a model, `params` is a pytree: `jax.tree.map` pairs the three trees leaf by leaf. In PyTorch you "
+              "loop over `named_parameters()` and keep dicts of anchors and Fishers by name.")),
+      module="49"),
+    E("per-token KL: forward, reverse, Jensen-Shannon", "Probability and information",
+      "Distillation compares the teacher's and the student's whole next-token distributions at every position. "
+      "Forward KL(teacher ‖ student) punishes the student for missing anything the teacher thinks likely "
+      "(mass-covering); reverse KL(student ‖ teacher) punishes it for saying anything the teacher thinks unlikely "
+      "(mode-seeking); Jensen-Shannon sits between and is bounded by log 2.",
+      r"\mathrm{KL}(p\Vert q) = \sum_v p_v(\log p_v - \log q_v),\quad "
+      r"\mathrm{JSD} = \tfrac12\mathrm{KL}(p\Vert m) + \tfrac12\mathrm{KL}(q\Vert m),\ m = \tfrac{p+q}{2}",
+      r"$D_{JSD(\beta)}$ with $\beta = 0.5$ (Agarwal et al. 2023, GKD); SDFT's analytic per-token estimator "
+      r"(Shenfeld et al. 2026, App. A.1)",
+      "teacher logits (..., V), student logits (..., V) -> three arrays (...)", "tkl(t, s)", _tkl_inputs,
+      python="""
+        import math
+
+        def tkl(t, s):
+            def logsm(z):
+                m = max(z)
+                lse = m + math.log(sum(math.exp(v - m) for v in z))
+                return [v - lse for v in z]
+
+            def one(zt, zs):
+                lt, ls = logsm(zt), logsm(zs)
+                p, q = [math.exp(v) for v in lt], [math.exp(v) for v in ls]
+                lm = [math.log((a + b) / 2) for a, b in zip(p, q)]
+                fwd = sum(a * (x - y) for a, x, y in zip(p, lt, ls))
+                rev = sum(b * (y - x) for b, x, y in zip(q, lt, ls))
+                jsd = 0.5 * sum(a * (x - m) for a, x, m in zip(p, lt, lm)) + \\
+                    0.5 * sum(b * (y - m) for b, y, m in zip(q, ls, lm))
+                return fwd, rev, jsd
+
+            out = [[one(a, b) for a, b in zip(ra, rb)] for ra, rb in zip(t, s)]
+            return tuple([[[c[k] for c in row] for row in out] for k in range(3)])
+      """,
+      numpy="""
+        def tkl(t, s):
+            def logsm(z):
+                z = z - z.max(-1, keepdims=True)
+                return z - np.log(np.exp(z).sum(-1, keepdims=True))
+            lt, ls = logsm(t), logsm(s)
+            p, q = np.exp(lt), np.exp(ls)
+            lm = np.log((p + q) / 2)
+            fwd = (p * (lt - ls)).sum(-1)
+            rev = (q * (ls - lt)).sum(-1)
+            return fwd, rev, 0.5 * (p * (lt - lm)).sum(-1) + 0.5 * (q * (ls - lm)).sum(-1)
+      """,
+      jax="""
+        def tkl(t, s):
+            lt, ls = jax.nn.log_softmax(t, -1), jax.nn.log_softmax(s, -1)
+            lm = jnp.logaddexp(lt, ls) - jnp.log(2.0)          # log of the average, without leaving log space
+            fwd = jnp.sum(jnp.exp(lt) * (lt - ls), -1)
+            rev = jnp.sum(jnp.exp(ls) * (ls - lt), -1)
+            return fwd, rev, 0.5 * jnp.sum(jnp.exp(lt) * (lt - lm), -1) + 0.5 * jnp.sum(jnp.exp(ls) * (ls - lm), -1)
+      """,
+      torch="""
+        def tkl(t, s):
+            lt, ls = F.log_softmax(t, -1), F.log_softmax(s, -1)
+            lm = torch.logaddexp(lt, ls) - math.log(2.0)
+            fwd = (lt.exp() * (lt - ls)).sum(-1)
+            rev = (ls.exp() * (ls - lt)).sum(-1)
+            return fwd, rev, 0.5 * (lt.exp() * (lt - lm)).sum(-1) + 0.5 * (ls.exp() * (ls - lm)).sum(-1)
+      """,
+      notes=(("Work in log space: with a 152,000-token vocabulary most probabilities underflow in bf16, and "
+              "`jnp.logaddexp` gives log((p + q)/2) without exponentiating."),
+             ("Which direction is \"forward\" depends on the paper. Here forward = KL(teacher ‖ student), as in GKD "
+              "and SDFT; `optax.losses.kl_divergence(log_q, p)` and `F.kl_div(log_q, p)` both compute it with the "
+              "student's log-probabilities first.")),
+      module="49", apis=("jax.numpy.logaddexp",)),
+]

@@ -10,8 +10,8 @@ Each operation the course introduces, written five ways: the formula (and how pa
 - **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient), [attribution patching](#attribution-patching)
 - **Random numbers:** [normal samples](#normal-samples), [uniform samples](#uniform-samples), [random integers](#random-integers), [categorical sampling](#categorical-sampling), [Bernoulli samples](#bernoulli-samples), [shuffle (random permutation)](#shuffle-random-permutation), [sample without replacement](#sample-without-replacement), [He (Kaiming) normal initialization](#he-kaiming-normal-initialization)
 - **Control flow and transforms:** [apply a function to every row: vmap and lax.map](#apply-a-function-to-every-row-vmap-and-laxmap), [loop with carried state: lax.scan](#loop-with-carried-state-laxscan), [fixed and open-ended loops: fori_loop and while_loop](#fixed-and-open-ended-loops-foriloop-and-whileloop), [branches: lax.cond and lax.switch](#branches-laxcond-and-laxswitch)
-- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip), [naive Bayes readout for binary features](#naive-bayes-readout-for-binary-features), [refusal score](#refusal-score)
-- **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz), [TIES merging of task vectors](#ties-merging-of-task-vectors)
+- **Probability and information:** [softmax](#softmax), [log-sum-exp](#log-sum-exp), [cross-entropy from logits](#cross-entropy-from-logits), [KL divergence](#kl-divergence), [log-softmax](#log-softmax), [one-hot encoding](#one-hot-encoding), [binary cross-entropy from logits](#binary-cross-entropy-from-logits), [perplexity](#perplexity), [skip-gram negative-sampling loss](#skip-gram-negative-sampling-loss), [distillation loss (teacher's top-k, temperature T)](#distillation-loss-teachers-top-k-temperature-t), [masked diffusion loss (MDLM)](#masked-diffusion-loss-mdlm), [sigmoid image-text loss (SigLIP)](#sigmoid-image-text-loss-siglip), [naive Bayes readout for binary features](#naive-bayes-readout-for-binary-features), [refusal score](#refusal-score), [per-token KL: forward, reverse, Jensen-Shannon](#per-token-kl-forward-reverse-jensen-shannon)
+- **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz), [TIES merging of task vectors](#ties-merging-of-task-vectors), [elastic weight consolidation penalty](#elastic-weight-consolidation-penalty)
 - **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution), [TopK sparse code](#topk-sparse-code)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
 - **Sampling and inference:** [KV cache write](#kv-cache-write), [temperature and top-k filter](#temperature-and-top-k-filter), [top-p (nucleus) filter](#top-p-nucleus-filter), [int8 absmax quantization](#int8-absmax-quantization)
@@ -4768,6 +4768,99 @@ def refusal_score(logits, ids):
 - Compute the softmax in float32: in bf16, p near 1 rounds to exactly 1 and log(1 − p) blows up.
 - It reads one position, so it's cheap enough to score 150 candidate directions; check what it misses by generating full answers for the one you pick.
 
+### per-token KL: forward, reverse, Jensen-Shannon
+
+*Module 49.*
+
+Distillation compares the teacher's and the student's whole next-token distributions at every position. Forward KL(teacher ‖ student) punishes the student for missing anything the teacher thinks likely (mass-covering); reverse KL(student ‖ teacher) punishes it for saying anything the teacher thinks unlikely (mode-seeking); Jensen-Shannon sits between and is bounded by log 2.
+
+$$
+\mathrm{KL}(p\Vert q) = \sum_v p_v(\log p_v - \log q_v),\quad \mathrm{JSD} = \tfrac12\mathrm{KL}(p\Vert m) + \tfrac12\mathrm{KL}(q\Vert m),\ m = \tfrac{p+q}{2}
+$$
+
+**In papers:** $D_{JSD(\beta)}$ with $\beta = 0.5$ (Agarwal et al. 2023, GKD); SDFT's analytic per-token estimator (Shenfeld et al. 2026, App. A.1)
+
+**Shapes:** `teacher logits (..., V), student logits (..., V) -> three arrays (...)`
+
+**JAX names:** `jax.numpy.logaddexp`
+
+**Python**
+
+```python
+import math
+
+import math
+
+def tkl(t, s):
+    def logsm(z):
+        m = max(z)
+        lse = m + math.log(sum(math.exp(v - m) for v in z))
+        return [v - lse for v in z]
+
+    def one(zt, zs):
+        lt, ls = logsm(zt), logsm(zs)
+        p, q = [math.exp(v) for v in lt], [math.exp(v) for v in ls]
+        lm = [math.log((a + b) / 2) for a, b in zip(p, q)]
+        fwd = sum(a * (x - y) for a, x, y in zip(p, lt, ls))
+        rev = sum(b * (y - x) for b, x, y in zip(q, lt, ls))
+        jsd = 0.5 * sum(a * (x - m) for a, x, m in zip(p, lt, lm)) + \
+            0.5 * sum(b * (y - m) for b, y, m in zip(q, ls, lm))
+        return fwd, rev, jsd
+
+    out = [[one(a, b) for a, b in zip(ra, rb)] for ra, rb in zip(t, s)]
+    return tuple([[[c[k] for c in row] for row in out] for k in range(3)])
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def tkl(t, s):
+    def logsm(z):
+        z = z - z.max(-1, keepdims=True)
+        return z - np.log(np.exp(z).sum(-1, keepdims=True))
+    lt, ls = logsm(t), logsm(s)
+    p, q = np.exp(lt), np.exp(ls)
+    lm = np.log((p + q) / 2)
+    fwd = (p * (lt - ls)).sum(-1)
+    rev = (q * (ls - lt)).sum(-1)
+    return fwd, rev, 0.5 * (p * (lt - lm)).sum(-1) + 0.5 * (q * (ls - lm)).sum(-1)
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def tkl(t, s):
+    lt, ls = jax.nn.log_softmax(t, -1), jax.nn.log_softmax(s, -1)
+    lm = jnp.logaddexp(lt, ls) - jnp.log(2.0)          # log of the average, without leaving log space
+    fwd = jnp.sum(jnp.exp(lt) * (lt - ls), -1)
+    rev = jnp.sum(jnp.exp(ls) * (ls - lt), -1)
+    return fwd, rev, 0.5 * jnp.sum(jnp.exp(lt) * (lt - lm), -1) + 0.5 * jnp.sum(jnp.exp(ls) * (ls - lm), -1)
+```
+
+**PyTorch**
+
+```python
+import torch
+import torch.nn.functional as F
+
+def tkl(t, s):
+    lt, ls = F.log_softmax(t, -1), F.log_softmax(s, -1)
+    lm = torch.logaddexp(lt, ls) - math.log(2.0)
+    fwd = (lt.exp() * (lt - ls)).sum(-1)
+    rev = (ls.exp() * (ls - lt)).sum(-1)
+    return fwd, rev, 0.5 * (lt.exp() * (lt - lm)).sum(-1) + 0.5 * (ls.exp() * (ls - lm)).sum(-1)
+```
+
+**Where they differ**
+
+- Work in log space: with a 152,000-token vocabulary most probabilities underflow in bf16, and `jnp.logaddexp` gives log((p + q)/2) without exponentiating.
+- Which direction is "forward" depends on the paper. Here forward = KL(teacher ‖ student), as in GKD and SDFT; `optax.losses.kl_divergence(log_q, p)` and `F.kl_div(log_q, p)` both compute it with the student's log-probabilities first.
+
 ## Optimization
 
 ### Adam update
@@ -5467,6 +5560,62 @@ def ties(taus, density, lam):
 
 - TIES keeps the top 20% by default. Tools like mergekit apply it tensor by tensor; the paper trims each whole task vector at once. Module 46 does it tensor by tensor.
 - Plain task arithmetic is the special case with no trimming and no vote: $\theta = \theta_{\mathrm{pre}} + \lambda\sum_t \tau_t$. DARE (Yu et al. 2023) instead drops a random fraction p of each task vector and rescales the rest by $1/(1-p)$.
+
+### elastic weight consolidation penalty
+
+*Module 49.*
+
+Let each weight move, but charge for moving the ones the old task relied on: a spring back to the old value, as stiff as that weight's Fisher information (how much the old task's loss bends when the weight moves).
+
+$$
+\Omega(\theta) = \sum_i F_i\,(\theta_i - \theta^*_i)^2
+$$
+
+**In papers:** $\mathcal L(\theta) = \mathcal L_B(\theta) + \sum_i \frac{\lambda}{2} F_i (\theta_i - \theta^*_{A,i})^2$ (Kirkpatrick et al. 2017, eq. 3)
+
+**Shapes:** `params, anchor, fisher (same shapes) -> scalar`
+
+**Python**
+
+```python
+def ewc(params, anchor, fisher):
+    return sum(f * (p - a) ** 2 for pr, ar, fr in zip(params, anchor, fisher)
+               for p, a, f in zip(pr, ar, fr))
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def ewc(params, anchor, fisher):
+    return np.sum(fisher * (params - anchor) ** 2)
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def ewc(params, anchor, fisher):   # params etc. can be whole pytrees
+    terms = jax.tree.map(lambda p, a, f: jnp.sum(f * (p - a) ** 2), params, anchor, fisher)
+    return sum(jax.tree.leaves(terms))
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def ewc(params, anchor, fisher):
+    return (fisher * (params - anchor) ** 2).sum()
+```
+
+**Where they differ**
+
+- The diagonal Fisher is usually estimated as the mean *squared gradient* of the old task's loss (the empirical Fisher); Kirkpatrick et al. sample labels from the model instead. Both are cheap: one backward pass per batch.
+- For a model, `params` is a pytree: `jax.tree.map` pairs the three trees leaf by leaf. In PyTorch you loop over `named_parameters()` and keep dicts of anchors and Fishers by name.
 
 ## Neural network layers
 
@@ -9286,6 +9435,7 @@ Every JAX, optax and Flax name the lessons use for math, and the entry that expl
 | `jax.numpy.log` | [exp, log and powers](#exp-log-and-powers) |
 | `jax.numpy.log10` | [exp, log and powers](#exp-log-and-powers) |
 | `jax.numpy.log1p` | [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero) |
+| `jax.numpy.logaddexp` | [per-token KL: forward, reverse, Jensen-Shannon](#per-token-kl-forward-reverse-jensen-shannon) |
 | `jax.numpy.logspace` | [ranges and grids](#ranges-and-grids) |
 | `jax.numpy.matmul` | [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum) |
 | `jax.numpy.max` | [max and argmax (reductions)](#max-and-argmax-reductions) |

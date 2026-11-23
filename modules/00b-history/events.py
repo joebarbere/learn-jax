@@ -65,6 +65,11 @@ EVENTS = [
               "systems proved costly to maintain.",
          "why_it_mattered": "Symbolic AI's decline set the stage for statistical methods.",
          "module": None, "url": W + "Lisp_machine"},
+    {"year": 1989, "title": "Catastrophic interference", "who": "Michael McCloskey and Neal Cohen",
+         "what": "A network taught simple arithmetic facts one set after another lost the first set almost entirely "
+              "while learning the second.",
+         "why_it_mattered": "Named the central problem of continual learning; neural networks still have it.",
+         "module": "49-continual-learning", "url": "https://doi.org/10.1016/S0079-7421(08)60536-8"},
     {"year": 1989, "title": "LeNet: convolutional networks read digits", "who": "Yann LeCun and colleagues at Bell Labs",
          "what": "1989–1998: convolutional networks trained by backprop recognize handwritten digits, later "
               "reading many US bank checks.", "why_it_mattered": "The blueprint for every CNN that followed.",
@@ -277,6 +282,13 @@ EVENTS = [
                             "tracing a tool anyone can run on open models.",
          "module": "48-tracing-circuits",
          "url": "https://transformer-circuits.pub/2025/attribution-graphs/methods.html"},
+    {"year": 2026, "title": "Language models that sleep", "who": "Google Research (Behrouz, Hashemi, Javanmard, "
+         "Mirrokni); MIT (Shenfeld, Damani, Agrawal) and ETH Zurich (Hübotter)",
+         "what": "A model with new information in its prompt teaches itself to answer without it (self-distillation), "
+              "into newly added low-rank experts, then practises on data it writes itself.",
+         "why_it_mattered": "Turned the 1995 complementary-learning-systems idea (fast memory, slow memory, replay in "
+                            "sleep) into a training recipe for language models.",
+         "module": "49-continual-learning", "url": "https://arxiv.org/abs/2606.03979"},
     {"year": 2026, "title": "New axes of sparsity: LatentMoE and Engram", "who": "NVIDIA; DeepSeek",
          "what": "Experts that work in a compressed latent width (shipped in Nemotron 3), and hashed n-gram lookup "
               "tables beside the experts.",

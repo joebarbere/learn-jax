@@ -1118,7 +1118,8 @@ def _(mo):
     * [jaxprobe](https://github.com/joebarbere/jaxprobe) — `jaxprobe.directions` is Sections 7–9: collect,
       candidates, arditi_score, grid, select, abliterate, check_edit.
 
-    **Next:** Module 49 (planned): continual learning, forgetting and consolidation.
+    **That is the last module so far.** The README's syllabus lists every module, and the course book collects
+    them.
     """)
     return
 

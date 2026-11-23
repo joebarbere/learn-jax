@@ -68,6 +68,7 @@ MODULES = [
     (46, "46-weights-by-hand", "Weights by hand: compiling, merging and editing networks (1990s–2026)", 12),
     (47, "47-reading-activations", "Reading activations: lenses, sparse autoencoders and steering (2020–2025)", 12),
     (48, "48-tracing-circuits", "Tracing a circuit: patching, transcoders and attribution graphs (2022–2025)", 12),
+    (49, "49-continual-learning", "Continual learning: forgetting, consolidation and sleep (1989–2026)", 12),
     (50, "50-uncensored-models", "Uncensored models: removing refusals from the data and from the weights (2023–2024)",
      12),
 ]

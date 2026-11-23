@@ -877,7 +877,7 @@ def _(mo):
     * [jaxprobe](https://github.com/joebarbere/jaxprobe) — the library under this module: `jaxprobe.trace` is
       sections 6–8 in about 400 lines of JAX.
 
-    **Next:** Module 49 (planned): continual learning, forgetting and consolidation.
+    **Next:** Module 49, continual learning: forgetting, consolidation and sleep.
     """)
     return
 

@@ -522,6 +522,18 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Circuit Tracing: Revealing Computational Graphs in Language Models](https://transformer-circuits.pub/2025/attribution-graphs/methods.html)** — Ameisen et al., 2025. Attribution graphs: a frozen linear replacement model, error nodes, pruning by influence.
 - **[On the Biology of a Large Language Model](https://transformer-circuits.pub/2025/attribution-graphs/biology.html)** — Lindsey et al., 2025. Attribution graphs on Claude 3.5 Haiku: two-hop reasoning, planning, and their limits.
 
+### 49 · Continual learning: forgetting, consolidation and sleep (1989–2026)
+
+- **[Catastrophic Interference in Connectionist Networks: The Sequential Learning Problem](https://doi.org/10.1016/S0079-7421(08)60536-8)** — McCloskey & Cohen, 1989. Train a network on a second task and it can lose the first almost completely: the problem, named.
+- **[Why There Are Complementary Learning Systems in the Hippocampus and Neocortex](https://doi.org/10.1037/0033-295X.102.3.419)** — McClelland, McNaughton & O'Reilly, 1995. A fast learner (hippocampus) and a slow one (neocortex), with replay in sleep: the idea every "sleep" method borrows.
+- **[Overcoming catastrophic forgetting in neural networks](https://arxiv.org/abs/1612.00796)** — Kirkpatrick et al., 2017. Elastic weight consolidation: anchor each weight by how much the old task needs it (its Fisher).
+- **[Gradient Episodic Memory for Continual Learning](https://arxiv.org/abs/1706.08840)** — Lopez-Paz & Ranzato, 2017. The accuracy matrix and backward transfer, the measurements this module scores every method with.
+- **[Physics of Language Models: Part 3.1, Knowledge Storage and Extraction](https://arxiv.org/abs/2309.14316)** — Allen-Zhu & Li, 2023. Invented biographies as a clean test of what a model stores and can retrieve.
+- **[On-Policy Distillation of Language Models: Learning from Self-Generated Mistakes](https://arxiv.org/abs/2306.13649)** — Agarwal et al., 2023. GKD: distil on the student's own samples, with a choice of divergence.
+- **[Self-Adapting Language Models](https://arxiv.org/abs/2506.10943)** — Zweiger et al., 2025. SEAL: the model writes its own training data from a passage; RL keeps the writing that helps.
+- **[Self-Distillation Enables Continual Learning](https://arxiv.org/abs/2601.19897)** — Shenfeld et al., 2026. SDFT: the model with a demonstration in its prompt teaches itself without it, and forgets less than SFT.
+- **[Language Models Need Sleep: Learning to Self-Modify and Consolidate Memories](https://arxiv.org/abs/2606.03979)** — Behrouz et al., 2026. Sleep = consolidation into new low-rank experts by self-distillation, then dreaming.
+
 ### 50 · Uncensored models: removing refusals from the data and from the weights (2023–2024)
 
 - **[Uncensored Models](https://erichartford.com/uncensored-models)** — Hartford, 2023. The data route: drop refusals from an instruction set, fine-tune a base model the same way as before.

@@ -1,6 +1,6 @@
 # Glossary
 
-620 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+627 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -65,6 +65,7 @@
 - **back-of-the-envelope estimate** — Predicting a training run's memory, time, communication and cost from a few measured numbers before paying for it. *(Module 25.)*
 - **backpropagation** — Reverse-mode autodiff applied to a neural network: run forward, then propagate the loss's derivative backwards through each layer to get every parameter's gradient in one pass. *(Module 03; also 00b, 10, 11, 29, 31.)* Origin: Rumelhart, Hinton, Williams, 1986.
 - **backpropagation through time** — Backpropagation on an RNN unrolled over the sequence; gradients pass back through every step, so they can vanish or explode. *(Module 31.)* Origin: Werbos, 1990.
+- **backward transfer** — How training on later tasks changed accuracy on earlier ones, read off the accuracy matrix R[i, j]: negative means forgetting. *(Module 49.)* Origin: Lopez-Paz & Ranzato, 2017.
 - **base model** — A model trained only on next-token prediction over raw text. It continues text but doesn't follow instructions until fine-tuned. *(Module 20; also 18, 21, 25, 26, 35.)*
 - **batching** — Serving several sequences in one forward pass, so each weight read from memory is used many times. Throughput rises almost for free until compute becomes the limit. *(Module 18; also 27.)*
 - **BatchNorm** — Normalize each feature across the examples in a batch. Needs running averages for inference, so train and inference behave differently; the CNN standard. *(Module 11.)* Origin: Ioffe & Szegedy, 2015.
@@ -97,6 +98,7 @@
 - **capacity factor** — How many token slots an expert (or a device's experts) accepts per batch, as a multiple of the even share. Slots past capacity are dropped; 1.25 leaves room for uneven routing. *(Module 40; also 24.)* Origin: Lepikhin et al., 2020 (GShard).
 - **capstone** — The course's final project: specialize, evaluate and serve a model of your own, end to end, with optional cloud scale-up. *(Module 25.)*
 - **carry** — The state lax.scan passes from one step to the next (an RNN hidden state, a running sum, the train state). *(Module 08; also 05, 09, 10, 14, 24.)*
+- **catastrophic forgetting** — Training a network on something new overwrites what it knew before, often abruptly, because the same weights store both. *(Module 49; also 20, 46.)* Origin: McCloskey & Cohen, 1989.
 - **causal mask** — Setting attention scores for future positions to −∞ before softmax, so each token sees only itself and the past. Required for next-token training. *(Module 15; also 32.)*
 - **causal tracing** — Finding where a model computes something by corrupting the input and restoring one layer's activations at a time: the layers whose restoration brings the answer back are where it lives. *(Module 46; also 48.)* Origin: Meng et al., 2022.
 - **chain of thought** — Having a model write out intermediate reasoning steps before its final answer, which improves accuracy on multi-step problems. *(Module 26.)* Origin: Wei et al., 2022.
@@ -132,6 +134,7 @@
 - **content-addressable memory** — Memory retrieved by giving part of its content rather than an address; a Hopfield network is one. *(Module 29.)*
 - **context window** — How many previous tokens a model can see when predicting the next one. *(Module 14; also 13, 27, 36, 39.)*
 - **contextual embedding** — A vector for a word that depends on its sentence, as produced by a transformer, unlike word2vec's single vector per word. *(Module 32; also 30, 38.)*
+- **continual learning** — Learning tasks or facts one after another, keeping the old ones, without retraining on everything from scratch each time. *(Module 49.)* Origin: McCloskey & Cohen, 1989; Kirkpatrick et al., 2017.
 - **continued pretraining** — Keep training an already-pretrained model with the same next-token objective on new data (a domain, a language), instead of starting from random weights. *(Module 42.)*
 - **convolution** — Sliding a small kernel of weights across the input and taking a dot product at every position. The same weights look for the same pattern everywhere. *(Module 12; also 00b, 33, 36.)*
 - **convolutional neural network** — A network built from convolution layers (plus pooling and a final classifier). The standard image model before vision transformers. *(Module 12; also 33.)* Origin: LeCun et al., 1989.
@@ -189,6 +192,7 @@
 
 - **eigenvector** — A direction a matrix only stretches, never turns; the stretch factor is its eigenvalue. They explain repeated application, e.g. why some directions blow up or vanish in an RNN. *(Module 02.)*
 - **einsum** — A one-line notation for products and sums over named axes, e.g. `einsum('bij,bjk->bik', a, b)` for a batched matmul. Indices that appear in the inputs but not the output are summed. *(Module 01; also 15, 17, 31, 36.)*
+- **elastic weight consolidation** — Keep weights the old task needs near their old values: a penalty Σ F_i (θ_i − θ*_i)², each weight weighted by its Fisher information. *(Module 49.)* Origin: Kirkpatrick et al., 2017.
 - **ELBO** — A lower bound on the log-likelihood of the data: reconstruction quality minus the KL divergence of the encoder's latent distribution from the prior. VAEs maximize it. *(Module 33.)* Origin: Kingma & Welling, 2013.
 - **Elman network** — The simple RNN: h_t = tanh(W h_{t-1} + U x_t + b). *(Module 31.)* Origin: Elman, 1990.
 - **embedding** — A learned vector for each token id, looked up from a table (V × d). Similar tokens end up with nearby vectors. *(Module 14; also 15, 16, 27, 30, 38.)* Origin: Bengio et al., 2003.
@@ -203,6 +207,7 @@
 - **exact match** — Scoring a generated answer as right only if it equals the reference after normalization. *(Module 21; also 20.)*
 - **expectation** — The probability-weighted average of a random variable: its long-run mean. *(Module 04.)*
 - **experience replay** — Storing past transitions and training on random samples of them, which breaks correlations between consecutive steps and reuses data. *(Module 34.)* Origin: Lin, 1992; Mnih et al., 2015.
+- **experience replay** — Mix examples from earlier tasks into each new training batch, so the old tasks keep being practised. *(Module 49; also 34.)* Origin: Lin, 1992; McClelland et al., 1995.
 - **expert parallelism** — Placing different MoE experts on different devices and using all-to-all to send each token to its experts' devices. *(Module 24; also 40.)*
 - **expert system** — AI built from hand-written if-then rules elicited from human experts. Commercially popular in the 1980s, they were brittle outside their rules, which helped bring on the second AI winter. *(Module 00b.)*
 - **explicit sharding** — JAX mode in which an array's sharding is part of its type and visible at trace time, so ambiguous cases are errors rather than compiler guesses. *(Module 24.)*
@@ -608,6 +613,7 @@
 - **selectivity** — Making an SSM's step size and B, C matrices depend on the current input, so it can choose what to store or ignore. Breaks time-invariance (no more convolution) but enables content-based recall. *(Module 36.)* Origin: Gu & Dao, 2023.
 - **self-attention** — Attention in which queries, keys and values all come from the same sequence, so tokens attend to each other. *(Module 15; also 31.)* Origin: Vaswani et al., 2017.
 - **self-consistency** — Sample several reasoning chains and take the most common final answer. *(Module 26.)* Origin: Wang et al., 2022.
+- **self-distillation** — A model teaches itself: the same model with extra information in its prompt (a document, a worked example) is the teacher, and the student learns to answer as well without it, on its own samples. *(Module 49; also 42.)* Origin: Snell et al., 2022; Agarwal et al., 2023; Shenfeld et al., 2026.
 - **self-play** — Training a game agent on games it plays against itself, generating its own ever-harder data. *(Module 34.)* Origin: Samuel, 1959; Tesauro, 1992.
 - **self-refinement** — Asking a model to critique and revise its own answer. *(Module 26.)* Origin: Madaan et al., 2023.
 - **semi-autoregressive sampling** — Generate in blocks left to right, filling each block by diffusion: a middle ground between autoregressive and fully parallel decoding. *(Module 45.)* Origin: Arriola et al., 2025; Nie et al., 2025.
@@ -621,6 +627,7 @@
 - **sigmoid** — σ(x) = 1/(1 + e⁻ˣ): squashes any number into (0, 1). The two-class special case of softmax. *(Module 09; also 10, 33.)*
 - **SIMD** — Single instruction, multiple data: a hardware unit applying one instruction to a whole wavefront at once. *(Module 23.)*
 - **skip-gram** — word2vec's objective: from a centre word, predict the words within a small window around it. *(Module 30.)* Origin: Mikolov et al., 2013.
+- **sleep (continual learning)** — Behrouz et al.'s name for offline phases between use: consolidate recent knowledge into new low-rank experts by self-distillation, then train on self-generated "dreams". *(Module 49.)* Origin: Behrouz et al., 2026.
 - **sliding-window attention** — Each token attends only to the previous W tokens, so compute and the KV cache grow with W instead of the context length. *(Module 44; also 00b.)* Origin: Beltagy, Peters, Cohan, 2020 (Longformer).
 - **SmolLM2** — Hugging Face's small open LLMs (135M–1.7B); the real pretrained weights the course loads for inference, LoRA, evaluation, RAG and agents. *(Module 18; also 20, 21, 27, 35, 38.)* Origin: Allal et al., 2025.
 - **smoothing** — Adding a small count to every possibility so unseen pairs don't get probability zero (and infinite loss). *(Module 14.)*
