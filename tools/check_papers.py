@@ -6,9 +6,11 @@ import json
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from difflib import SequenceMatcher
+from html import unescape
 
 from learnjax.papers import PAPERS, all_companions
 
@@ -19,21 +21,55 @@ def norm(s: str) -> str:
     return re.sub(r"[^a-z0-9 ]", "", s.lower().replace("-", " "))
 
 
+def api_titles(keys, ns, tries=3):
+    """(id, title) pairs from the arXiv API, or None if it keeps answering 429."""
+    out = []
+    for i in range(0, len(keys), 100):                  # the API returns at most max_results per query
+        q = "https://export.arxiv.org/api/query?max_results=100&id_list=" + ",".join(keys[i:i + 100])
+        for t in range(tries):
+            time.sleep(3 if i or t else 0)              # arXiv asks for one request every 3 s
+            try:
+                feed = ET.fromstring(urllib.request.urlopen(urllib.request.Request(q, headers=UA), timeout=60).read())
+                break
+            except urllib.error.HTTPError as ex:
+                if ex.code != 429:
+                    raise
+                time.sleep(10 * (t + 1))
+        else:
+            return None
+        for e in feed.findall("a:entry", ns):
+            out.append((re.sub(r"v\d+$", "", e.find("a:id", ns).text.rsplit("/", 1)[1]),
+                        " ".join(e.find("a:title", ns).text.split())))
+    return out
+
+
+def page_titles(keys):
+    """(id, title) pairs from each abstract page's citation_title meta tag."""
+    out = []
+    for i, aid in enumerate(keys):
+        if i:
+            time.sleep(3)
+        try:
+            html = urllib.request.urlopen(urllib.request.Request(f"https://arxiv.org/abs/{aid}", headers=UA),
+                                          timeout=60).read().decode("utf-8", "replace")
+        except urllib.error.HTTPError:
+            continue                                     # reported below as "not returned"
+        m = re.search(r'<meta name="citation_title" content="([^"]*)"', html)
+        if m:
+            out.append((aid, " ".join(unescape(m.group(1)).split())))
+    return out
+
+
 def main() -> int:
     papers = {p.url: p for ps in PAPERS.values() for p in ps}
     ids = {u.rsplit("/", 1)[1]: p for u, p in papers.items() if "arxiv.org/abs/" in u}
     bad = 0
     ns = {"a": "http://www.w3.org/2005/Atom"}
-    entries, keys = [], list(ids)
-    for i in range(0, len(keys), 100):                  # the API returns at most max_results per query
-        if i:
-            time.sleep(3)                               # arXiv asks for one request every 3 s
-        q = "https://export.arxiv.org/api/query?max_results=100&id_list=" + ",".join(keys[i:i + 100])
-        feed = ET.fromstring(urllib.request.urlopen(urllib.request.Request(q, headers=UA), timeout=60).read())
-        entries += feed.findall("a:entry", ns)
-    for e in entries:
-        aid = re.sub(r"v\d+$", "", e.find("a:id", ns).text.rsplit("/", 1)[1])
-        title = " ".join(e.find("a:title", ns).text.split())
+    titles = api_titles(list(ids), ns)
+    if titles is None:                                   # API rate-limited: read each abstract page instead
+        print("arXiv API refused (HTTP 429); reading titles from abstract pages, one every 3 s")
+        titles = page_titles(list(ids))
+    for aid, title in titles:
         p = ids.pop(aid, None)
         if p is None:
             continue
