@@ -1204,8 +1204,8 @@ jaxlib==0.12.1 \
     #   jax
     #   mctx
     #   optax
-jaxprobe @ https://github.com/joebarbere/jaxprobe/releases/download/v0.6.0/jaxprobe-0.6.0-py3-none-any.whl \
-    --hash=sha256:ca7529432a08697cc3444daaf70603a86bd05ec118f86be8eada851e499792dc
+jaxprobe @ https://github.com/joebarbere/jaxprobe/releases/download/v0.7.0/jaxprobe-0.7.0-py3-none-any.whl \
+    --hash=sha256:a67fd2c4b0f5475b2fdc2d0f2659601da67411bd06bfcc623b3bc92785c5eaf6
     # via -r requirements.txt
 jedi==0.20.1 \
     --hash=sha256:0fb16d86c4a4c73c37ba518c77419975e30fcc620658a8d14fbb5720cdd34142 \
