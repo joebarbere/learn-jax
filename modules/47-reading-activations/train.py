@@ -6,18 +6,21 @@
     containers/run.sh python modules/47-reading-activations/train.py --steer     # steering sweeps, ~5 min
     containers/run.sh python modules/47-reading-activations/train.py --ablate    # weight edit vs activation edit
     containers/run.sh python modules/47-reading-activations/train.py --map       # 135M vs 360M, ~5 min
-    containers/run.sh python modules/47-reading-activations/train.py --autointerp http://host:1234/v1 MODEL
+    NETWORK=host containers/run.sh python modules/47-reading-activations/train.py --autointerp \
+        http://localhost:1234/v1 MODEL                                          # needs a local chat model, ~40 min
     LEARNJAX_SOLUTIONS=1 containers/run.sh python modules/47-reading-activations/train.py ...   # reference
 
 --dash needs --sae; --ablate needs --steer. Uses *your* exercises.py (finish `make test N=47` first) or
 solutions.py with LEARNJAX_SOLUTIONS=1. Writes /course/runs/47-reading-activations/: lens.npz/.json,
-sae_*.npz, sae.json, dash.json, steer.json, ablate.json, map.json (and autointerp.json if you run it).
+sae_*.npz, sae.json, dash.json, dash_stats.pkl, features.html, steer.json, ablate.json, map.json (and
+autointerp.json + features_explained.html if you run it).
 """
 from __future__ import annotations
 
 import argparse
 import importlib.util
 import json
+import pickle
 import sys
 import time
 from dataclasses import replace
@@ -27,6 +30,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import optax
+from jaxprobe import autointerp, dash
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent.parent))  # the course root, for `learnjax`
@@ -221,8 +225,9 @@ def run_dash(M, params, cfg, data, tok, n_show: int = 8, ctx: int = 12):
     tok_fire = np.zeros((3, F))
     n_tok = np.zeros(3)
     win_fire = np.zeros((len(wv), F), bool)
-    top_v = np.full((F, n_show), -1.0, np.float32)
-    top_i = np.zeros((F, n_show), np.int64)
+    # jaxprobe.dash keeps each feature's 16 best contexts on the device (8 to show, the rest for auto-interp)
+    col = dash.Collector(F, top=16, before=ctx, after=3)
+    negs = []                                                        # random windows: auto-interp's negatives
 
     @jax.jit
     def codes(t):
@@ -233,18 +238,15 @@ def run_dash(M, params, cfg, data, tok, n_show: int = 8, ctx: int = 12):
 
     for j in range(0, len(wv), 32):
         z, keep = codes(jnp.asarray(wv[j:j + 32]))
-        zf = z.reshape(-1, F)
+        col.update(z, wv[j:j + 32, 1:], keep)
+        negs.append(autointerp.random_windows(z, wv[j:j + 32, 1:], keep, width=ctx + 4, per_seq=2, seed=j))
         fired = np.asarray(z > 0)
         win_fire[j:j + 32] = fired.any(1)
         for d in range(3):
             m = dv[j:j + 32] == d
             tok_fire[d] += fired[m].sum((0, 1))
             n_tok[d] += np.asarray(keep)[m].sum()
-        v, ix = jax.lax.top_k(zf.T, n_show)
-        v, ix = np.asarray(v), np.asarray(ix) + j * T
-        allv, alli = np.concatenate([top_v, v], 1), np.concatenate([top_i, ix], 1)
-        o = np.argsort(-allv, 1)[:, :n_show]
-        top_v, top_i = np.take_along_axis(allv, o, 1), np.take_along_axis(alli, o, 1)
+    stats = col.result()
     rate = tok_fire / n_tok[:, None]                                 # per-domain token firing rate (3, F)
     density = tok_fire.sum(0) / n_tok.sum()
     # module 46's readout on window-level "did it fire anywhere" features: fit on even windows, test on odd
@@ -263,7 +265,6 @@ def run_dash(M, params, cfg, data, tok, n_show: int = 8, ctx: int = 12):
     show["random"] = np.random.default_rng(0).choice(np.flatnonzero(alive & (density < 0.1)), 6, replace=False).tolist()
     # logit effects: decoder direction through the final norm's gain and the unembedding
     eff = (sae["W_dec"] * params["final_norm"].astype(jnp.float32)) @ params["embed"].astype(jnp.float32).T
-    flat = wv[:, 1:].reshape(-1)
     feats = {}
 
     def piece(i):
@@ -273,15 +274,9 @@ def run_dash(M, params, cfg, data, tok, n_show: int = 8, ctx: int = 12):
         for f in ids:
             if f in feats:
                 continue
-            contexts = []
-            for v, gi in zip(top_v[f], top_i[f]):
-                if v <= 0:
-                    continue
-                w_, p = divmod(int(gi), T)
-                z, _ = codes(jnp.asarray(wv[w_:w_ + 1]))
-                lo = max(0, p - ctx)
-                contexts.append({"domain": M.DOMAINS[int(dv[w_])], "tokens": [piece(t) for t in flat[w_ * T + lo:w_ * T + min(p + 4, T)]],
-                                 "acts": np.asarray(z[0, lo:p + 4, f]).round(2).tolist(), "peak": p - lo})
+            card = dash.card(stats, f, piece, n_contexts=n_show)
+            contexts = [{"domain": M.DOMAINS[int(dv[c["seq"]])], "tokens": c["tokens"],
+                         "acts": [round(a, 2) for a in c["acts"]], "peak": c["peak"]} for c in card["contexts"]]
             e = np.asarray(eff[f])
             feats[int(f)] = {"density": float(density[f]), "rate": rate[:, f].tolist(), "contexts": contexts,
                              "promotes": [piece(t) for t in np.argsort(-e)[:8]],
@@ -296,6 +291,14 @@ def run_dash(M, params, cfg, data, tok, n_show: int = 8, ctx: int = 12):
     (M.RUNS / "dash.json").write_text(json.dumps(res))
     _log("readout", acc, "alive", int(alive.sum()), "domain-specific", res["domain_specific_counts"])
     np.save(M.RUNS / "dash_rate.npy", rate.astype(np.float32))
+    # everything auto-interp needs, and the whole dictionary as one browsable page (jaxprobe.dash.to_html)
+    win, fires = np.concatenate([w for w, _ in negs]), np.concatenate([f for _, f in negs])
+    with open(M.RUNS / "dash_stats.pkl", "wb") as fh:
+        pickle.dump({"stats": stats, "neg_windows": win, "neg_fires": np.packbits(fires, axis=1), "show": show}, fh)
+    effects = dash.logit_effects(sae["W_dec"] * params["final_norm"].astype(jnp.float32), params["embed"].T)
+    dash.to_html(M.RUNS / "features.html", stats, piece, effects=effects,
+                 title="SmolLM2-135M layer 15 · 8,192 SAE features")
+    _log("wrote", M.RUNS / "features.html")
 
 
 # ---------------------------------------------------------------- 4. steering
@@ -504,45 +507,46 @@ def run_map(M, ex, params, cfg, data, tok):
 
 
 # ---------------------------------------------------------------- optional: auto-interpretation with a local LLM
-def run_autointerp(M, url: str, model: str, n_detect: int = 6):
-    """Explain each shown feature from its top contexts with a local model (OpenAI-compatible server, Modules 19/27),
-    then score the explanation: show the model held-out contexts (half top-activating, half random) and count how
-    often it says correctly which ones match (detection scoring, Paulo et al. 2024)."""
-    import urllib.request
+def run_autointerp(M, url: str, model: str, n_features: int = 200):
+    """Explain features with a local chat model (any OpenAI-compatible server: LM Studio, Module 27; llama.cpp,
+    Module 19) and score the explanations with jaxprobe.autointerp: detection (does it fire in this excerpt?)
+    and fuzzing (are the marked tokens where it fires?), each against a shuffled-explanation control. Scores the
+    30 features the lesson shows plus a random sample of the rest, to `n_features`. Needs --dash first."""
+    with open(M.RUNS / "dash_stats.pkl", "rb") as fh:
+        d = pickle.load(fh)
+    stats, show = d["stats"], d["show"]
+    neg = (d["neg_windows"], np.unpackbits(d["neg_fires"], axis=1, count=M.N_LATENTS).astype(bool))
+    from tokenizers import Tokenizer
+    tok = Tokenizer.from_file(str(llama.download(llama.SMOLLM_135M) / "tokenizer.json"))   # no model: GPU stays free
+    cache: dict[int, str] = {}
 
-    dash = json.loads((M.RUNS / "dash.json").read_text())
+    def piece(i):
+        i = int(i)
+        if i not in cache:
+            cache[i] = tok.decode([i])
+        return cache[i]
 
-    def chat(prompt):
-        body = json.dumps({"model": model, "messages": [{"role": "user", "content": prompt}], "temperature": 0,
-                           "max_tokens": 120}).encode()
-        req = urllib.request.Request(url.rstrip("/") + "/chat/completions", body, {"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=120) as r:
-            return json.loads(r.read())["choices"][0]["message"]["content"].strip()
-
-    def show(c):
-        return "".join(f"<<{t}>>" if i == c["peak"] else t for i, t in enumerate(c["tokens"]))
-
-    rng = np.random.default_rng(0)
-    all_ctx = [c for f in dash["features"].values() for c in f["contexts"]]
-    out = {}
-    for fid, f in dash["features"].items():
-        ctxs = f["contexts"]
-        if len(ctxs) < 4:
-            continue
-        expl = chat("Each line is a text snippet; the token between << >> is where one internal feature of a "
-                    "language model fires most. In at most 12 words, what does the feature detect?\n\n"
-                    + "\n".join(show(c) for c in ctxs[: len(ctxs) // 2]))
-        held = ctxs[len(ctxs) // 2:][: n_detect // 2]
-        others = [all_ctx[i] for i in rng.choice(len(all_ctx), n_detect, replace=False) if all_ctx[i] not in ctxs]
-        tests = [(c, True) for c in held] + [(c, False) for c in others[: len(held)]]
-        right = 0
-        for c, truth in tests:
-            a = chat(f"A feature detects: {expl}\nDoes it fire on the marked token in this snippet? Answer yes or "
-                     f"no.\n\n{show(c)}")
-            right += a.lower().startswith("yes") == truth
-        out[fid] = {"explanation": expl, "detection_acc": right / len(tests), "n": len(tests)}
-        _log(fid, out[fid])
-    (M.RUNS / "autointerp.json").write_text(json.dumps({"model": model, "features": out}))
+    enough = np.flatnonzero(stats["top_seq"][:, -1] >= 0)               # 16 contexts: 8 to explain, 8 to test
+    shown = [f for g in show.values() for f in g if f in set(enough.tolist())]
+    rest = np.random.default_rng(0).choice(np.setdiff1d(enough, shown), max(0, n_features - len(shown)),
+                                           replace=False)
+    feats = shown + sorted(int(f) for f in rest)
+    # reasoning_effort "none": thinking models (Qwen3.5) otherwise spend their whole budget thinking. One request
+    # at a time: on LM Studio's Qwen3.5 build, parallel requests decoded ~30x slower each.
+    llm = autointerp.Client(url, model, extra={"reasoning_effort": "none"}, workers=1,
+                            cache=M.RUNS / "autointerp_cache.jsonl")
+    _log(f"auto-interp on {len(feats)} features with {model}")
+    res = autointerp.run(llm, stats, piece, feats, negatives=neg)
+    _log(res["summary"], f"{llm.calls} new LLM calls")
+    out = {"model": model, "n_features": len(feats), "summary": res["summary"], "features": {
+        str(f): {"explanation": e, "density": float(stats["density"][f]),
+                 "detection": res["detection"][f]["accuracy"], "fuzzing": res["fuzzing"][f]["accuracy"],
+                 "detection_control": res["control"]["detection"][f]["accuracy"],
+                 "fuzzing_control": res["control"]["fuzzing"][f]["accuracy"]}
+        for f, e in res["explanations"].items()}}
+    (M.RUNS / "autointerp.json").write_text(json.dumps(out).replace("NaN", "null"))
+    dash.to_html(M.RUNS / "features_explained.html", stats, piece, features=list(res["explanations"]),
+                 labels=autointerp.labels(res), title=f"SmolLM2-135M layer 15 · explained by {model}")
 
 
 def main():
@@ -550,6 +554,7 @@ def main():
     for s in ("lens", "sae", "dash", "steer", "ablate", "map"):
         ap.add_argument(f"--{s}", action="store_true")
     ap.add_argument("--autointerp", nargs=2, metavar=("URL", "MODEL"))
+    ap.add_argument("--autointerp-n", type=int, default=200, help="features to explain and score")
     ap.add_argument("--tokens", type=float, default=20e6, help="SAE training tokens")
     ap.add_argument("--l1", type=float, nargs="*", default=[2e-3, 6e-3], help="ReLU SAE L1 coefficients")
     ap.add_argument("--lens-steps", type=int, default=1000)
@@ -557,7 +562,7 @@ def main():
     M = _models()
     M.RUNS.mkdir(parents=True, exist_ok=True)
     if args.autointerp:
-        run_autointerp(M, *args.autointerp)
+        run_autointerp(M, *args.autointerp, n_features=args.autointerp_n)
         return
     ex = load_exercises(HERE)
     params, cfg, tok = llama.load(llama.SMOLLM_135M)

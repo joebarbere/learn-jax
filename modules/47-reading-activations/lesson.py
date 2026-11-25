@@ -374,7 +374,9 @@ def _(mo):
     most strongly (its top contexts), what it pushes the output toward (its decoder direction sent through the
     final norm and unembedding), and how often it fires. Pick a group below. The domain groups are the
     features whose firing rate in that domain most exceeds every other domain; *random* is an honest sample of
-    living features, which tend to be messier than the hand-picked ones papers show.
+    living features, which tend to be messier than the hand-picked ones papers show. `train.py --dash` collects
+    all of this with `jaxprobe.dash` and also writes `runs/47-reading-activations/features.html`: every one of
+    the 8,192 features, with a card each, in one page you can open in a browser.
     """)
     return
 
@@ -405,11 +407,18 @@ def _(dash_r, feat_group, mo):
 
 
 @app.cell
-def _(M, dash_r, feat_pick, html, mo):
+def _(M, auto_r, dash_r, feat_pick, html, mo):
     if dash_r is None or feat_pick is None:
         _out = mo.md("")
     else:
         _f = dash_r["features"][feat_pick.value]
+        _a = (auto_r or {}).get("features", {}).get(feat_pick.value)
+        _expl = ""
+        if _a is not None:
+            _pct = {k: "n/a" if _a[k] is None else f"{_a[k]:.0%}" for k in ("detection", "fuzzing")}
+            _expl = (f"<p><b>{html.escape(auto_r['model'])} says:</b> {html.escape(_a['explanation'])} <small>"
+                     f"(detection {_pct['detection']}, fuzzing {_pct['fuzzing']}: see auto-interpretation below)"
+                     "</small></p>")
 
         def _ctx(c):
             top = max(c["acts"]) or 1.0
@@ -422,7 +431,7 @@ def _(M, dash_r, feat_pick, html, mo):
 
         _rates = ", ".join(f"{d} {r:.2%}" for d, r in zip(M.DOMAINS, _f["rate"]))
         _out = mo.Html(
-            f"<p><b>Feature {feat_pick.value}</b>: fires on {_f['density']:.3%} of tokens ({_rates}).</p>"
+            f"<p><b>Feature {feat_pick.value}</b>: fires on {_f['density']:.3%} of tokens ({_rates}).</p>" + _expl +
             f"<p>Promotes: {' '.join('<code>' + html.escape(repr(t)) + '</code>' for t in _f['promotes'])}<br>"
             f"Suppresses: {' '.join('<code>' + html.escape(repr(t)) + '</code>' for t in _f['suppresses'])}</p>"
             "<p>Top contexts (orange = how strongly it fires on each token):</p><ul>"
@@ -459,24 +468,76 @@ def _(dash_r, mo, np, plt):
 
 
 @app.cell
-def _(auto_r, mo):
+def _(mo):
+    mo.md(r"""
+    **Explaining features automatically.** Reading thousands of dashboards by hand doesn't scale, so the field
+    hands them to an LLM (Bills et al. 2023; Paulo et al. 2024). Show a chat model half of a feature's top
+    contexts with the firing tokens marked and ask for a one-sentence explanation. Then test the explanation
+    on the other half, which the model hasn't seen:
+
+    * **Detection:** mix those contexts with random windows where the feature does *not* fire, and ask, for
+      each, whether the feature fires anywhere in it. This tests whether the explanation says *which texts*.
+    * **Fuzzing:** mark tokens in those contexts, either the ones where it fires or as many others, and ask
+      whether the marks are right. This tests whether it says *where*.
+
+    Both are balanced yes/no questions, so 50% is chance. They're scored beside a **control**: every feature
+    gets another feature's explanation. If the control scores well too, the test is too easy. `train.py
+    --autointerp` does this with `jaxprobe.autointerp`, for the 30 features above plus 170 picked at random.
+    """)
+    return
+
+
+@app.cell
+def _(auto_r, dash_r, mo, np, textwrap):
     if auto_r is None:
         _out = mo.md(r"""
-        **Explaining features automatically.** Reading thousands of dashboards by hand doesn't scale, so the
-        field hands them to an LLM: show it a feature's top contexts, ask for a one-line explanation, then
-        *score* the explanation by asking the LLM, on contexts it hasn't seen (half where the feature fires, half
-        random), whether the feature fires there (**detection scoring**, Paulo et al. 2024). This step is
-        optional here because it needs a local chat model: start one in LM Studio (Module 27) or llama.cpp
-        (Module 19) and run `train.py --autointerp http://host.containers.internal:1234/v1 MODEL_NAME`.
-        Expect a 1–2B local model to write vaguer explanations than the frontier models papers use.
+        This step is optional because it needs a local chat model (LM Studio, Module 27, or llama.cpp, Module
+        19). Start the server, load a model, then run `NETWORK=host containers/run.sh python
+        modules/47-reading-activations/train.py --autointerp http://localhost:1234/v1 MODEL_NAME` (the course
+        ran Qwen3.5-9B: about 2,600 requests in 37 minutes). `NETWORK=host` lets the container reach a server
+        that only listens on the host's localhost. Turn off "thinking" for a thinking model: `train.py` sends
+        `reasoning_effort: "none"`, without which Qwen3.5 spent over 4,000 tokens on one question.
         """)
     else:
-        _rows = ["| feature | explanation | detection accuracy |", "|---|---|---|"]
-        _rows += [f"| {k} | {v['explanation'].replace('|', '/')} | {v['detection_acc']:.0%} of {v['n']} |"
-                  for k, v in auto_r["features"].items()]
-        _mean = sum(v["detection_acc"] for v in auto_r["features"].values()) / max(1, len(auto_r["features"]))
-        _out = mo.md(f"**Auto-interpretation** with `{auto_r['model']}`: mean detection accuracy {_mean:.0%} "
-                     "(50% is chance).\n\n" + "\n".join(_rows))
+        _S, _F = auto_r["summary"], auto_r["features"]
+        _rows = ["| | real explanations | control (another feature's) |", "|---|---|---|"]
+        for _m in ("detection", "fuzzing"):
+            _rows.append(f"| {_m} | {_S[_m]['accuracy']:.1%} ± {_S[_m]['stderr']:.1%} | "
+                         f"{_S['control_' + _m]['accuracy']:.1%} ± {_S['control_' + _m]['stderr']:.1%} |")
+        _shown = {str(f) for g in (dash_r or {"show": {}})["show"].values() for f in g}
+        _rest = [v for k, v in _F.items() if k not in _shown and v["detection"] is not None]
+        _det = np.array([v["detection"] for v in _rest])
+        _grp = ["| group | detection | fuzzing |", "|---|---|---|"]
+        for _g, _ids in (dash_r or {"show": {}})["show"].items():
+            _v = [_F[str(f)] for f in _ids if str(f) in _F]
+            _cells = []
+            for _k in ("detection", "fuzzing"):
+                _d = [x[_k] for x in _v if x[_k] is not None]
+                _cells.append(f"{np.mean(_d):.0%}" if _d else "n/a")
+            _grp.append(f"| {_g} | {_cells[0]} | {_cells[1]} |")
+        _out = mo.md(textwrap.dedent(f"""
+        **{auto_r['n_features']} features explained by `{auto_r['model']}`**, mean accuracy over features (±
+        standard error):
+        """) + "\n\n" + "\n".join(_rows) + textwrap.dedent(f"""
+
+        The explanations carry real information: about 30 points above their own control on detection, and
+        about 15 on fuzzing. Of the {len(_rest)} randomly picked features, {(_det >= 0.875).mean():.0%} were
+        detected at 14 of 16 or better and {(_det <= 0.5).mean():.0%} at chance or worse. Saying *where*
+        (fuzzing) is harder than saying *which texts*: an explanation that names the right kind of text picks out
+        the right excerpts without saying which token carries the feature. The feature card above shows each
+        explanation. By group:
+        """) + "\n\n" + "\n".join(_grp) + textwrap.dedent("""
+
+        The *common* features fire on nearly every token, so there are no windows without them and no tokens to
+        mark wrongly: neither test applies. The model still wrote an explanation for each (see their cards),
+        and nothing here can tell whether it means anything.
+
+        Two caveats. The held-out contexts are the feature's *top* ones, the easiest; Paulo et al. sample across
+        the whole activation range, which scores lower. And negatives are random windows, so an explanation that
+        only names the domain ("Shakespeare") gets credit on detection; the control catches that only when the
+        borrowed explanation comes from another domain.
+        `runs/47-reading-activations/features_explained.html` has all of them, one card per feature.
+        """))
     _out
     return
 
