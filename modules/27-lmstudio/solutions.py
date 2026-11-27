@@ -98,3 +98,12 @@ def quant_recommendation(n_params, vram_gb, ctx, kv_bytes_per_token, overhead_gb
         if n_params * bits / 8 + fixed <= budget:
             return name
     return None
+
+
+def pick_quant(results, budget_gb, tolerance=0.02):
+    if not results:
+        return None
+    best = max(r["exact_match"] for r in results.values())
+    ok = [(r["size_gb"], -r["exact_match"], name) for name, r in results.items()
+          if r["size_gb"] <= budget_gb and r["exact_match"] >= best - tolerance]
+    return min(ok)[2] if ok else None

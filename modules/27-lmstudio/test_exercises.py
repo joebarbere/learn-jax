@@ -118,3 +118,20 @@ def test_quant_recommendation(impl):
     assert impl.quant_recommendation(70e9, 16, 4096, 327680) is None
     # overhead counts: exactly at the limit fits
     assert impl.quant_recommendation(gib * 8 / 16.0, 3, 0, 0, overhead_gb=1.0) == "F16"
+
+
+def test_pick_quant(impl):
+    r = {"Q8_0": {"size_gb": 9.79, "exact_match": 0.448}, "Q4_K_M": {"size_gb": 5.83, "exact_match": 0.438},
+         "IQ4_XS": {"size_gb": 5.39, "exact_match": 0.454}, "IQ3_XXS": {"size_gb": 4.27, "exact_match": 0.410},
+         "IQ2_XXS": {"size_gb": 3.48, "exact_match": 0.252}}
+    assert impl.pick_quant(r, 16) == "IQ4_XS"                     # the smallest that stays within 2 points of best
+    assert impl.pick_quant(r, 16, tolerance=0.05) == "IQ3_XXS"     # accept 5 points: one size down
+    assert impl.pick_quant(r, 16, tolerance=0.25) == "IQ2_XXS"
+    assert impl.pick_quant(r, 5.0) is None                        # best is measured over all entries, not just fits
+    assert impl.pick_quant(r, 5.0, tolerance=0.05) == "IQ3_XXS"
+    assert impl.pick_quant(r, 5.39) == "IQ4_XS"                   # the budget is inclusive
+    assert impl.pick_quant({}, 16) is None
+    tie = {"b": {"size_gb": 4.0, "exact_match": 0.5}, "a": {"size_gb": 4.0, "exact_match": 0.5},
+           "c": {"size_gb": 4.0, "exact_match": 0.49}}
+    assert impl.pick_quant(tie, 16) == "a"                        # same size: higher score, then name
+    assert impl.pick_quant({"x": {"size_gb": 4.0, "exact_match": 0.49}, **tie}, 16, tolerance=0.0) == "a"

@@ -294,6 +294,9 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)** — Hu et al., 2021. Fine-tune by learning a low-rank update instead of all weights.
 - **[Fast Inference from Transformers via Speculative Decoding](https://arxiv.org/abs/2211.17192)** — Leviathan, Kalman, Matias, 2022. The draft-and-verify scheme behind LM Studio's speculative decoding.
 - **[GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers](https://arxiv.org/abs/2210.17323)** — Frantar et al., 2022. Why 4-bit weights lose so little: the idea behind GGUF's k-quants.
+- **[QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314)** — Dettmers et al., 2023. Train a LoRA on a frozen 4-bit NF4 base: how section 16 fine-tunes a 9B model on a 16 GB card.
+- **[QuIP#: Even Better LLM Quantization with Hadamard Incoherence and Lattice Codebooks](https://arxiv.org/abs/2402.04396)** — Tseng et al., 2024. Lattice codebooks for 2-bit weights: the idea behind llama.cpp's i-quants.
+- **[Neural Generation of Regular Expressions from Natural Language with Minimal Domain Knowledge](https://arxiv.org/abs/1608.03000)** — Locascio et al., 2016. The NL-RX dataset section 16 fine-tunes and scores on.
 
 ## Part 10 — Milestones, rebuilt in JAX
 

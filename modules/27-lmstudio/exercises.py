@@ -102,3 +102,15 @@ def quant_recommendation(n_params: float, vram_gb: float, ctx: int, kv_bytes_per
     Fits if needed <= vram_gb * 2**30. Try types from most to fewest bits.
     """
     raise NotImplementedError
+
+
+def pick_quant(results: dict, budget_gb: float, tolerance: float = 0.02) -> str | None:
+    """The smallest quant that fits the budget and scores within `tolerance` of the best score (§16).
+
+    results maps a name ("IQ4_XS-task") to {"size_gb": float, "exact_match": float in [0, 1]}.
+    best = the highest exact_match over *all* entries, whether or not they fit. A name qualifies if
+    size_gb <= budget_gb and exact_match >= best - tolerance (absolute, so 0.02 is two percentage points).
+    Return the qualifying name with the smallest size_gb; break ties by higher exact_match, then by name
+    (alphabetical). Return None if nothing qualifies (including an empty dict).
+    """
+    raise NotImplementedError

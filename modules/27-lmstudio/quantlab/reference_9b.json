@@ -1,0 +1,269 @@
+{
+ "provenance": "Course author's run, 2026-11-26, RX 7600 XT: torch 2.14 + ROCm 7.16, bitsandbytes 0.50.2, llama.cpp b12375 (Vulkan). Base-model 5-shot score from the same day's earlier run (its output file wasn't kept); training loss logged every 25 steps. Perplexity text: the second half of heldout.txt split at byte 23,739 (prep.py now splits at the nearest line break, so a fresh run's perplexities differ slightly).",
+ "quants": {
+  "IQ2_XXS-generic": {
+   "exact_match": 0.082,
+   "n": 500,
+   "ppl": 21.9383,
+   "size_gb": 3.483,
+   "bpw": 3.02,
+   "agree_with_ref": 0.108,
+   "ref": "Q8_0-none"
+  },
+  "IQ2_XXS-task": {
+   "exact_match": 0.252,
+   "n": 500,
+   "ppl": 25.9889,
+   "size_gb": 3.483,
+   "bpw": 3.02,
+   "agree_with_ref": 0.402,
+   "ref": "Q8_0-none"
+  },
+  "IQ3_XXS-generic": {
+   "exact_match": 0.406,
+   "n": 500,
+   "ppl": 17.2331,
+   "size_gb": 4.269,
+   "bpw": 3.7,
+   "agree_with_ref": 0.724,
+   "ref": "Q8_0-none"
+  },
+  "IQ3_XXS-task": {
+   "exact_match": 0.41,
+   "n": 500,
+   "ppl": 17.7166,
+   "size_gb": 4.269,
+   "bpw": 3.7,
+   "agree_with_ref": 0.786,
+   "ref": "Q8_0-none"
+  },
+  "IQ4_XS-generic": {
+   "exact_match": 0.452,
+   "n": 500,
+   "ppl": 16.295,
+   "size_gb": 5.389,
+   "bpw": 4.68,
+   "agree_with_ref": 0.908,
+   "ref": "Q8_0-none"
+  },
+  "IQ4_XS-task": {
+   "exact_match": 0.454,
+   "n": 500,
+   "ppl": 16.3962,
+   "size_gb": 5.389,
+   "bpw": 4.68,
+   "agree_with_ref": 0.906,
+   "ref": "Q8_0-none"
+  },
+  "Q4_K_M-generic": {
+   "exact_match": 0.44,
+   "n": 500,
+   "ppl": 16.2115,
+   "size_gb": 5.832,
+   "bpw": 5.06,
+   "agree_with_ref": 0.912,
+   "ref": "Q8_0-none"
+  },
+  "Q4_K_M-none": {
+   "exact_match": 0.434,
+   "n": 500,
+   "ppl": 16.3949,
+   "size_gb": 5.832,
+   "bpw": 5.06,
+   "agree_with_ref": 0.902,
+   "ref": "Q8_0-none"
+  },
+  "Q4_K_M-task": {
+   "exact_match": 0.438,
+   "n": 500,
+   "ppl": 16.2808,
+   "size_gb": 5.832,
+   "bpw": 5.06,
+   "agree_with_ref": 0.906,
+   "ref": "Q8_0-none"
+  },
+  "Q8_0-none": {
+   "exact_match": 0.448,
+   "n": 500,
+   "ppl": 16.1106,
+   "size_gb": 9.786,
+   "bpw": 8.5,
+   "agree_with_ref": 1.0,
+   "ref": "Q8_0-none"
+  }
+ },
+ "train": {
+  "steps": 500,
+  "skipped": 0,
+  "minutes": 47.9,
+  "peak_gib": 8.8,
+  "loss": [
+   [
+    1,
+    2.3853
+   ],
+   [
+    26,
+    0.7115
+   ],
+   [
+    51,
+    0.5181
+   ],
+   [
+    76,
+    0.4347
+   ],
+   [
+    101,
+    0.2421
+   ],
+   [
+    126,
+    0.2666
+   ],
+   [
+    151,
+    0.1191
+   ],
+   [
+    176,
+    0.2667
+   ],
+   [
+    201,
+    0.4043
+   ],
+   [
+    226,
+    0.0504
+   ],
+   [
+    251,
+    0.4477
+   ],
+   [
+    276,
+    0.1912
+   ],
+   [
+    301,
+    0.1499
+   ],
+   [
+    326,
+    0.4834
+   ],
+   [
+    351,
+    0.1818
+   ],
+   [
+    376,
+    0.052
+   ],
+   [
+    401,
+    0.2575
+   ],
+   [
+    426,
+    0.1685
+   ],
+   [
+    451,
+    0.0976
+   ],
+   [
+    476,
+    0.094
+   ],
+   [
+    500,
+    0.2374
+   ]
+  ]
+ },
+ "eval_base_5shot": {
+  "exact_match": 0.004,
+  "n": 500,
+  "shots": 5,
+  "seconds": null
+ },
+ "eval_ft": {
+  "exact_match": 0.438,
+  "n": 500,
+  "shots": 0,
+  "seconds": 231
+ },
+ "examples": [
+  {
+   "nl": "all lines",
+   "gt": ".*(.*)(([AEIOUaeiou])*).*",
+   "gen": ".*([A-Z])|([a-z])|([0-9]).*"
+  },
+  {
+   "nl": "lines that have a capital letter before 'dog' and end with a lower-case letter",
+   "gt": "([A-Z].*dog.*)&((.*)([a-z]))",
+   "gen": "([A-Z]).*((dog)&((.*)([a-z]))).*"
+  },
+  {
+   "nl": "lines wherein at least once a letter is preceded by a vowel",
+   "gt": "([AEIOUaeiou].*[A-Za-z].*)+",
+   "gen": "([AEIOUaeiou]).*(([A-Za-z])+).*"
+  },
+  {
+   "nl": "lines with a vowel or letter",
+   "gt": ".*([a-z])|([AEIOUaeiou])|([A-Za-z]).*",
+   "gen": ".*([AEIOUaeiou])|([A-Za-z]).*"
+  },
+  {
+   "nl": "lines with a character after a vowel at least once",
+   "gt": "(([AEIOUaeiou])+).*(.).*",
+   "gen": "([AEIOUaeiou]).*((.)*).*"
+  },
+  {
+   "nl": "lines ending with 7 or more of the string 'dog'",
+   "gt": "((.*)(.*dog.*)){7,}",
+   "gen": "(.*)(.*(dog){7,}.*)"
+  },
+  {
+   "nl": "lines that do not contain the string 'dog' followed by a number, three times or more",
+   "gt": "~((dog.*[0-9].*){3,})",
+   "gen": "~((dog.*[0-9].*){3,})"
+  },
+  {
+   "nl": "lines with a number or character before vowel",
+   "gt": "(([0-9])|(.)).*([AEIOUaeiou]).*",
+   "gen": "(([0-9])|(.)).*([AEIOUaeiou]).*"
+  },
+  {
+   "nl": "lines ending with vowel or starting with character",
+   "gt": "((.*)([AEIOUaeiou]))|((.)(.*))",
+   "gen": "((.*)([AEIOUaeiou]))|((.)(.*))"
+  }
+ ],
+ "update_rel": {
+  "median": 0.00662,
+  "max": 0.0164
+ },
+ "allocator_probe": {
+  "note": "40-step probes, same data and settings, PYTORCH_HIP_ALLOC_CONF=expandable_segments:True vs unset",
+  "with": {
+   "qwen3.5-9b-4bit": 7,
+   "qwen3.5-4b-bf16": 7
+  },
+  "without": {
+   "qwen3.5-9b-4bit": 0,
+   "qwen3.5-4b-bf16": 0
+  },
+  "steps": 40
+ },
+ "lmstudio_thinking": {
+  "note": "first 50 test items through LM Studio's chat API, IQ4_XS-task",
+  "thinking_on": 4,
+  "thinking_forced_off": 21,
+  "llama_server_raw_prompt": 24,
+  "n": 50
+ }
+}

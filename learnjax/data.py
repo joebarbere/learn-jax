@@ -240,3 +240,23 @@ def advbench() -> list[dict]:
     """AdvBench harmful behaviours (Zou et al. 2023, the GCG paper): 520 harmful instructions ("goal") with an
     affirmative opening ("target"). Module 50 uses the goals to find the refusal direction. MIT."""
     return _csv(_download(ADVBENCH_URL, CACHE / "advbench" / "harmful_behaviors.csv"))
+
+
+# NL-RX (Locascio et al. 2016): English descriptions → regular expressions. The chat-formatted copy in the LLM-JEPA
+# repo (galilai-group, Apache-2.0), pinned; Module 27's 9B quantization lab fine-tunes on it.
+NLRX_URL = "https://raw.githubusercontent.com/galilai-group/llm-jepa/ea0017c654ad917066ff32afc88276bea8ca5f7e/datasets/"
+
+
+def nlrx(split: str = "turk") -> dict[str, list[dict]]:
+    """NL-RX (Locascio et al. 2016): 10,000 English descriptions of string patterns ("lines with a vowel before
+    'dog'") and the regex for each, in a dialect with `&` (and) and `~` (not). split="turk" (paraphrased by
+    Mechanical Turk workers, noisier) or "synth" (template-generated). Returns {"train": 8,000, "test": 2,000}; each
+    item is a chat: [system, user (description), assistant (regex)] as {"role", "content"} dicts."""
+    if split not in ("turk", "synth"):
+        raise ValueError(f"split must be 'turk' or 'synth', not {split!r}")
+    out = {}
+    for part in ("train", "test"):
+        name = f"{split}_{part}.jsonl"
+        path = _download(NLRX_URL + name, CACHE / "nlrx" / name)
+        out[part] = [json.loads(line)["messages"] for line in path.read_text(encoding="utf-8").splitlines() if line]
+    return out

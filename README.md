@@ -228,12 +228,16 @@ creators for videos, posts and docs. Most of all:
   Module 27's tool-calling demo and Module 50's refusal direction;
   [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) by the Qwen Team (Apache-2.0), the
   continual learner of Module 49; [SigLIP-B/16-224](https://huggingface.co/google/siglip-base-patch16-224) by
-  Google (Apache-2.0), loaded into JAX in Module 43.
+  Google (Apache-2.0), loaded into JAX in Module 43; [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B) by the
+  Qwen Team (Apache-2.0), fine-tuned with QLoRA and quantized in Module 27 §16, with
+  [bitsandbytes](https://github.com/bitsandbytes-foundation/bitsandbytes) (MIT).
 - **[LM Studio](https://lmstudio.ai/)** by Element Labs (Module 27), free for personal and internal business use
   under its [app terms](https://lmstudio.ai/app-terms). The course fetches it only inside a container build.
 - **Data:** [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) by Zalando Research (MIT);
   [MNIST](https://doi.org/10.1109/5.726791) by LeCun, Cortes & Burges (CC BY-SA 3.0; downloaded from Google's mirror);
-  [tiny Shakespeare](https://github.com/karpathy/char-rnn) from Andrej Karpathy's char-rnn; public-domain
+  [tiny Shakespeare](https://github.com/karpathy/char-rnn) from Andrej Karpathy's char-rnn;
+  [NL-RX](https://arxiv.org/abs/1608.03000) by Locascio et al. (2016), in the chat-formatted copy from
+  galilai-group's [LLM-JEPA](https://github.com/galilai-group/llm-jepa) repo (Apache-2.0), Module 27; public-domain
   detective novels from Standard Ebooks and Project Gutenberg, via deepseek-v3-jax;
   [ARC](https://allenai.org/data/arc) by the Allen Institute for AI (CC BY-SA 4.0); 49,950 arXiv abstracts
   from the [aws-ai](https://github.com/joebarbere/aws-ai) `local-kb` benchmark (Module 38);

@@ -8,7 +8,7 @@ N    ?= 00
 MOD   = $(shell ls -d modules/$(N)-* 2>/dev/null | head -1)
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 build: ## Build the course image (JAX + ROCm + marimo)
 	podman build -t learn-jax -f containers/Containerfile containers
@@ -120,6 +120,12 @@ export-models: ## Export your models (16, 20, 26) + SmolLM2 to HF and GGUF, veri
 	modules/27-lmstudio/build_gguf.sh
 	modules/27-lmstudio/import_models.sh
 
+quant-lab: ## Quantizer's workflow on your Module 20 LoRA: imatrix x quant types, scored (module 27 §15, ~10 min)
+	modules/27-lmstudio/quantlab/lab.sh
+
+quant-lab-9b: ## QLoRA Qwen3.5-9B on NL-RX, f32 merge, quantize Q8_0..IQ2_XXS, score (module 27 §16; ~2.5 h, 90 GB)
+	modules/27-lmstudio/quantlab/lab9b.sh
+
 lms-bench: ## Same model four ways: JAX vs llama.cpp vs LM Studio Vulkan/ROCm (module 27)
 	modules/27-lmstudio/bench.sh
 
@@ -164,4 +170,4 @@ links: ## Link the first JAX API mentions to the docs, then check every external
 lint: ## Ruff
 	$(RUN) ruff check learnjax modules tools tests
 
-.PHONY: rosetta rosetta-browse help build lock build-torch up url down lesson torch-lesson read md test progress check shell papers lineage links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary
+.PHONY: rosetta rosetta-browse help build lock build-torch up url down lesson torch-lesson read md test progress check shell papers lineage links lint aws-plan aws-howto bench lms-build lms-up lms-down export-models quant-lab quant-lab-9b lms-bench llama-download llama-up llama-down llama-bench rag-data book-image render site pdf glossary

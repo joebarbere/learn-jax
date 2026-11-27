@@ -59,8 +59,9 @@ def _(mo):
     Module 16 GPT onto GPT-2's tensor names · see why a LoRA must be merged in float32 · convert to GGUF and
     measure what each quantization costs · read a chat template out of a GGUF file · drive LM Studio's three
     APIs · run your Module 20 JSON extractor and Module 26 reasoning model through it and check they still
-    score what they scored in JAX · and compare the same model four ways: JAX, raw llama.cpp, LM Studio on
-    Vulkan, LM Studio on ROCm.
+    score what they scored in JAX · compare the same model four ways: JAX, raw llama.cpp, LM Studio on
+    Vulkan, LM Studio on ROCm · and work as a quantizer does: importance matrices, i-quants and task-scored
+    quants, first on your LoRA, then on a Qwen3.5-9B you fine-tune with QLoRA.
 
     **Setup** (once): `make lms-build`, then `make export-models` (export → verify → GGUF → import; ~3 min),
     then `make lms-up` before opening this lesson. Every live section below says what to run if the server
@@ -79,7 +80,9 @@ def _(mo):
     model format (August 2023). Desktop apps such as LM Studio and Ollama (both 2023) wrapped those engines
     with model catalogs and OpenAI-compatible servers. The techniques you combine here come from earlier
     modules: LoRA (Hu et al., 2021) for adapting, GPTQ-style quantization (Frantar et al., 2022) for
-    shrinking, and speculative decoding (Leviathan et al., 2022) for speed.
+    shrinking, and speculative decoding (Leviathan et al., 2022) for speed. QLoRA (Dettmers et al., 2023)
+    made fine-tuning a 4-bit base on one GPU routine, and llama.cpp's importance matrices and i-quants (2024,
+    after QuIP#, Tseng et al.) made 2–3-bit files usable.
 
     *Timeline: Module 00b.*
     """), kind="info")
@@ -772,6 +775,370 @@ def _(BASE, lj, lmclient, mo, np):
 
 
 @app.cell
+def _(mo, read_json):
+    quant15 = read_json("quantlab/results.json")
+    _intro = mo.md(r"""
+    ## 15 · The quantizer's workflow I: importance matrices, on your LoRA
+
+    §5 rounded every weight as if all of them mattered equally. They don't. A linear layer computes
+    $y = \sum_j w_j x_j$, so an error $\delta_j = w_j - \hat w_j$ in weight $j$ costs $\delta_j x_j$ in the
+    output: rounding a weight that multiplies a large, frequent input hurts far more than one whose input is
+    usually near zero. If the inputs are roughly uncorrelated, the expected squared output error is
+
+    $$\mathbb{E}\Big[\big(\textstyle\sum_j \delta_j x_j\big)^2\Big] \approx \sum_j \delta_j^2\, \mathbb{E}[x_j^2].$$
+
+    That weighting is the **importance matrix**. `llama-imatrix` runs the model over calibration text and
+    records $\mathbb{E}[x_j^2]$ for every input column of every linear layer; `llama-quantize --imatrix` then
+    picks each block's scale to minimise the weighted error instead of the plain one (ggml-org,
+    [imatrix README](https://github.com/ggml-org/llama.cpp/blob/master/tools/imatrix/README.md); Iwan Kawrakow
+    added it to llama.cpp in early 2024). It costs nothing at inference: the file has the same size and format.
+
+    The same work brought the **i-quants** (IQ2_XS, IQ3_XXS, …): groups of 8 weights stored as an index into a
+    fixed codebook of points on a lattice, the idea of QuIP# (Tseng et al., 2024), reaching 2–3 bits per
+    weight. At those widths blind rounding is hopeless, so `llama-quantize` won't make most of them without an
+    imatrix.
+
+    **What calibration text?** `make quant-lab` (~10 min) tries two on your Module 20 LoRA (SmolLM2-360M,
+    merged in float32 by `export.py`): **task**, 1,000 of its training prompts with answers, and **generic**,
+    the first half of the held-out detective prose. Perplexity is measured on the *other* half (measuring it on
+    the calibration text would flatter the generic imatrix), and the task score is exact match on Module 20's
+    200 held-out orders through `llama-server`.
+    """)
+    _intro
+    return (quant15,)
+
+
+@app.cell
+def _(mo, quant15):
+    if not quant15:
+        _out = mo.callout(mo.md("No results yet: run `make quant-lab` (after `make export-models`), ~10 minutes, "
+                                "then re-run this cell."), kind="info")
+    else:
+        def _c(q, c, f, fmt):
+            v = quant15.get(f"{q}-{c}", {}).get(f)
+            return format(v, fmt) if v is not None else "–"
+
+        _rows = []
+        for _q in ("F16", "Q8_0", "Q4_K_M", "Q3_K_S", "Q2_K", "IQ3_XXS", "IQ2_XS"):
+            _any = next((v for k, v in quant15.items() if k.startswith(_q + "-")), None)
+            if _any is None:
+                continue
+            _rows.append(f"| {_q} | {_any['bpw'] or 16:.2f} | {1000 * _any['size_gb']:.0f} | "
+                         + " / ".join(_c(_q, c, "exact_match", ".1%") for c in ("none", "task", "generic")) + " | "
+                         + " / ".join(_c(_q, c, "ppl", ".2f") for c in ("none", "task", "generic")) + " |")
+        _out = mo.md(r"""
+    | quant | real bits/weight | MB | orders exact match (none / task / generic imatrix) | perplexity (none / task / generic) |
+    |---|---|---|---|---|
+    """ + "\n    ".join(_rows) + r"""
+
+    * **Read the real bits per weight, not the name.** "Q3_K_S" and "Q2_K" are both **4.80 bits** and score
+      the same: SmolLM2-360M's rows are 960 wide, k-quants need multiples of 256, so `llama-quantize` falls back
+      to Q4_0 for 192 of the 290 tensors (it warns: "192 of 290 tensor(s) required fallback quantization").
+      Only the 32 `ffn_down` matrices, 2,560 wide, get real 3-bit blocks. The i-quants fall back the same way
+      (to IQ4_NL), so "IQ2_XS" is 4.56 bits with 28 tensors truly at 2 bits. §5 saw the same with your 14M GPT.
+    * **The imatrix still helps where rounding happens.** At ~4.8 bits it cuts held-out perplexity by about a
+      tenth (none → generic); at Q4_K_M by about 1 %.
+    * **This task can't separate the quants.** Extracting an order into JSON is so easy for this model that every
+      quant stays within a few of 200 examples of perfect, and those few go either way. Too small a model, too
+      easy a task: §16 does it properly.
+    """)
+    _out
+    return
+
+
+@app.cell
+def _(ROOT, json, read_json):
+    q9_ref = json.loads((ROOT / "modules" / "27-lmstudio" / "quantlab" / "reference_9b.json").read_text())
+    q9 = read_json("quantlab9b/summary.json")
+    q9_src = "your run (`runs/27-lmstudio/quantlab9b/summary.json`)"
+    if q9 is None:
+        q9 = q9_ref
+        q9_src = ("the course author's run (`quantlab/reference_9b.json`); `make quant-lab-9b` replaces it with "
+                  "yours")
+    return q9, q9_ref, q9_src
+
+
+@app.cell
+def _(mo, plt, q9, q9_src):
+    _t, _b, _f = q9.get("train", {}), q9.get("eval_base_5shot", {}), q9.get("eval_ft", {})
+    _fig = None
+    if _t.get("loss"):
+        _fig, _ax = plt.subplots(figsize=(5.2, 2.4))
+        _ax.plot([s for s, _ in _t["loss"]], [v for _, v in _t["loss"]], lw=1.2)
+        _ax.set_xlabel("optimizer step (16 examples)")
+        _ax.set_ylabel("training loss")
+        _ax.set_title("QLoRA, Qwen3.5-9B on NL-RX", fontsize=10)
+        _fig.tight_layout()
+    _ex = "\n    ".join(f"| {o['nl'][:60].replace('|', '&#124;')} | `{o['gt'].replace('|', '&#124;')}` | "
+                        f"`{o['gen'].replace('|', '&#124;')}` |" for o in q9.get("examples", [])[:6])
+    mo.vstack([mo.md(rf"""
+    ## 16 · The quantizer's workflow II: a real 9B
+
+    §15's model was too small and its task too easy to separate the quants. Now the real thing, the job
+    community uploaders such as [TheBloke](https://huggingface.co/TheBloke) (2023) and today
+    [bartowski](https://huggingface.co/bartowski) and [Unsloth](https://huggingface.co/unsloth) do for every
+    new model, on a model you fine-tuned yourself: **Qwen3.5-9B** (Qwen team, Apache-2.0), a hybrid of
+    full attention and Gated DeltaNet linear attention (Yang, Kautz & Hatamizadeh, 2024) whose 4096-wide rows
+    divide by 256, so every k-quant and i-quant is real here.
+
+    **The task:** NL-RX (Locascio et al., 2016), English to regular expressions in a dialect with `&` (and)
+    and `~` (not): "lines that do not contain 'dog' followed by a number, three times or more" →
+    `~((dog.*[0-9].*){{3,}})`. The 8,000 training pairs are paraphrases written by Mechanical Turk workers;
+    `learnjax.data.nlrx()` fetches the chat-formatted copy from the LLM-JEPA repo (galilai-group,
+    Apache-2.0). Scored by exact string match on 500 test pairs, which undercounts: an equivalent regex
+    written differently is a miss.
+
+    **The pipeline** (`make quant-lab-9b`, ~2.5 hours, optional; this section shows {q9_src}):
+
+    1. **QLoRA** (Dettmers et al., 2023) in the PyTorch image: the base model loaded in 4-bit NF4 with
+       bitsandbytes and frozen, a rank-16 LoRA on every linear layer, one epoch: {_t.get('steps', '?')} steps
+       in {_t.get('minutes', '?')} min, {_t.get('peak_gib', '?')} GiB peak, {_t.get('skipped', '?')} skipped
+       updates. A 9B model in bf16 is 18 GB of weights alone; in NF4 it's about 5.
+    2. **Merge in float32** into the original bf16 safetensors (`merge_f32.py`), then **convert to an f32
+       GGUF** (37 GB): the reference every quant is made from.
+    3. **Q8_0**, then **importance matrices from the Q8_0** on the GPU (the f32 file doesn't fit in 16 GB),
+       from task text and from generic prose, as in §15.
+    4. **Quantize** Q4_K_M, IQ4_XS, IQ3_XXS, IQ2_XXS; **score** each through `llama-server`.
+
+    | | exact match, 500 test pairs |
+    |---|---|
+    | base Qwen3.5-9B, 5 examples in the prompt | {_b.get('exact_match', float('nan')):.1%} |
+    | after QLoRA (4-bit base + adapter, PyTorch) | **{_f.get('exact_match', float('nan')):.1%}** |
+
+    The base model writes Python-flavoured regexes with explanations; one epoch teaches it the dialect and the
+    format. What it still gets wrong:
+
+    | description | reference | fine-tuned |
+    |---|---|---|
+    {_ex}
+
+    Some misses are real errors; some are equivalent or arguably better than the reference ("all lines"):
+    the Turk paraphrases are noisy. Exact match is a lower bound.
+    """)] + ([_fig] if _fig else []))
+    return
+
+
+@app.cell
+def _(mo, q9, q9_ref):
+    _a = q9_ref["allocator_probe"]
+    _u = q9.get("update_rel") or q9_ref["update_rel"]
+    mo.md(rf"""
+    ### Snag 1: NaN gradients that weren't numerics
+
+    The first full training run kept skipping updates with non-finite gradients (9 by step 105), then **hung
+    the GPU** with a page fault. Bitsandbytes was the first suspect (its 0.50.2 wheel has no
+    ROCm 7.16 build); rebuilding it for 7.16 changed nothing, and neither did a 4B model in plain bf16 with no
+    bitsandbytes at all (7 of 40 updates skipped either way). Two observations pointed elsewhere: the **loss was always finite**, and PyTorch's
+    anomaly mode found **no backward op producing a NaN**, yet ~470 of 496 LoRA gradient tensors went NaN at
+    once, next to garbage values like 4.7e32, mostly on the first micro-batch after `zero_grad` (fresh
+    gradient memory). That is memory corruption, not arithmetic. The cause was an environment variable every
+    run had set:
+
+    | {_a['steps']}-step probe, same data and settings | `PYTORCH_HIP_ALLOC_CONF=expandable_segments:True` | unset |
+    |---|---|---|
+    | Qwen3.5-9B, 4-bit | {_a['with']['qwen3.5-9b-4bit']} skipped | **{_a['without']['qwen3.5-9b-4bit']}** |
+    | Qwen3.5-4B, bf16 | {_a['with']['qwen3.5-4b-bf16']} skipped | **{_a['without']['qwen3.5-4b-bf16']}** |
+
+    Expandable segments make PyTorch's allocator map GPU memory through virtual-memory APIs, a far less
+    exercised path on ROCm than on CUDA. Without it the full run had 0 skipped updates, the same speed and
+    memory, and no hang. `qlora_nlrx.py` refuses to start with it set, and keeps a cheap guard that skips an
+    update whose gradient norm isn't finite. The lesson generalises: when values go bad everywhere at once
+    and no single operation produced them, suspect memory, and change one setting at a time.
+
+    ### Why merge in float32, again
+
+    The trained update is small next to the weights it changes: $\lVert\Delta W\rVert / \lVert W\rVert$ has a
+    median of **{_u['median']:.1e}** (max {_u['max']:.1e}) over the 248 adapted matrices. bf16's relative
+    precision is about 3.9e-3 and f16's about 4.9e-4, so a bf16 merge would round each update to a step not
+    much smaller than the update itself (§3 measured the same effect on your Module 20 LoRA). The update also
+    grows with training: after a 40-step probe it was 4.8e-4, far below bf16's step, so most of it would
+    simply have vanished. Merge in f32, keep an f32 GGUF as the source, and let the quantizer do the rounding,
+    once.
+    """)
+    return
+
+
+@app.cell
+def _(mo, plt, q9):
+    _Q = q9["quants"]
+    _order = ["Q8_0", "Q4_K_M", "IQ4_XS", "IQ3_XXS", "IQ2_XXS"]
+
+    def _cell(q, c, f, fmt):
+        v = _Q.get(f"{q}-{c}", {}).get(f)
+        return format(v, fmt) if v is not None else "–"
+
+    _rows = []
+    for _q in _order:
+        _any = next((v for k, v in _Q.items() if k.startswith(_q + "-")), None)
+        if _any is None:
+            continue
+        _rows.append(f"| {_q} | {_any['bpw'] or float('nan'):.2f} | {_any['size_gb']:.2f} | "
+                     + " / ".join(_cell(_q, c, "exact_match", ".1%") for c in ("none", "task", "generic")) + " | "
+                     + " / ".join(_cell(_q, c, "ppl", ".1f") for c in ("none", "task", "generic")) + " | "
+                     + " / ".join(_cell(_q, c, "agree_with_ref", ".0%") for c in ("none", "task", "generic")) + " |")
+    _fig, (_a1, _a2) = plt.subplots(1, 2, figsize=(8, 2.6))
+    for _c, _style in (("task", "o-"), ("generic", "s--")):
+        _pts = sorted((v["bpw"], v["exact_match"], v["ppl"]) for k, v in _Q.items()
+                      if k.endswith("-" + _c) or k == "Q8_0-none")
+        _a1.plot([p[0] for p in _pts], [100 * p[1] for p in _pts], _style, label=f"{_c} imatrix", ms=4)
+        _a2.plot([p[0] for p in _pts], [p[2] for p in _pts], _style, label=f"{_c} imatrix", ms=4)
+    _a1.set_xlabel("real bits per weight")
+    _a1.set_ylabel("NL-RX exact match (%)")
+    _a2.set_xlabel("real bits per weight")
+    _a2.set_ylabel("perplexity, held-out prose")
+    _a1.legend(fontsize=8)
+    _fig.tight_layout()
+    mo.vstack([mo.md(r"""
+    ### The quants
+
+    Every quant scored on the same 500 test prompts, in the exact chat format the model was trained on,
+    greedy, through `llama-server` (Vulkan); perplexity on the half of the held-out prose the generic imatrix
+    didn't see. The last column is how often a quant gives *exactly the same answer* as Q8_0: steadier than
+    exact match, whose noise at 500 examples is about ±2.2 points.
+
+    | quant | real bits/weight | GB | exact match (none / task / generic imatrix) | perplexity (none / task / generic) | same answer as Q8_0 |
+    |---|---|---|---|---|---|
+    """ + "\n    ".join(_rows) + r"""
+    """), _fig])
+    return
+
+
+@app.cell
+def _(mo, q9):
+    _Q = q9["quants"]
+
+    def _e(k):
+        return _Q.get(k, {}).get("exact_match", float("nan"))
+
+    def _p(k):
+        return _Q.get(k, {}).get("ppl", float("nan"))
+
+    _ft = q9.get("eval_ft", {}).get("exact_match", float("nan"))
+
+    mo.md(rf"""
+    What the table says:
+
+    1. **Down to IQ4_XS (~4.7 real bits), nothing measurable is lost.** Q8_0 {_e('Q8_0-none'):.1%},
+       Q4_K_M {_e('Q4_K_M-task'):.1%}, IQ4_XS {_e('IQ4_XS-task'):.1%}: all inside the noise. IQ4_XS is
+       the pick: Q8_0's accuracy in 55 % of the file. (The PyTorch number, {_ft:.1%},
+       ran the adapter on a 4-bit NF4 base, so a good 4.7-bit quant of the full-precision merge can match it.)
+    2. **The cliff is between 3.7 and 3.0 bits.** IQ3_XXS loses a few points; IQ2_XXS falls apart.
+    3. **Calibration only matters at the cliff, and there it's a trade.** At IQ2_XXS the task imatrix
+       scores {_e('IQ2_XXS-task'):.1%} against the generic one's {_e('IQ2_XXS-generic'):.1%}, while the
+       generic one keeps prose better (perplexity {_p('IQ2_XXS-generic'):.1f} vs {_p('IQ2_XXS-task'):.1f}).
+       Each imatrix protects what it saw. At 4–5 bits the choice barely matters.
+    4. **Perplexity ranks the IQ2 quants the wrong way round for this model's job.** For a fine-tune,
+       measure the task.
+    5. **Read the real bits per weight, not the name.** "Q4_K_M" is 5.06 bits here (Module 27's `GGUF_BITS`
+       table says 4.85): the embedding and output matrices, a sizable share of a 9B with a 248K vocabulary,
+       are kept at higher precision.
+    """)
+    return
+
+
+@app.cell
+def _(mo, q9_ref):
+    _t = q9_ref["lmstudio_thinking"]
+    mo.md(rf"""
+    ### Snag 2: a layer the imatrix never sees
+
+    The first IQ3_XXS and IQ2_XXS runs stopped with *"Missing importance matrix for tensor blk.32.attn_k.weight
+    in a very low-bit quantization. The result will be garbage, so bailing out"*. Qwen3.5-9B has 32 layers,
+    but its GGUF has 33 blocks: `blk.32` is a **multi-token-prediction head** (`qwen35.nextn_predict_layers =
+    1`), used only to draft tokens for speculative decoding (§13). Normal inference never runs it, so
+    `llama-imatrix` collected no statistics for it, and the 2–3-bit types won't guess. The fix keeps that one
+    block at Q8_0, about 0.26 GB:
+
+    ```bash
+    llama-quantize --imatrix imat-task.gguf --tensor-type 'blk\.32\.=q8_0' f32.gguf out.gguf IQ2_XXS
+    ```
+
+    ### Snag 3: thinking mode in LM Studio
+
+    Imported into LM Studio, the IQ4_XS quant got **{_t['thinking_on']}/{_t['n']}** test items right through
+    the chat API against {_t['llama_server_raw_prompt']}/{_t['n']} through `llama-server` with the raw prompt.
+    Qwen3.5's chat template opens a `&lt;think&gt;` block unless `enable_thinking` is false, and LM Studio passes
+    `enable_thinking=true` from its own setting, ignoring a request's `chat_template_kwargs`. The fine-tune
+    only ever saw the empty `&lt;think&gt;&lt;/think&gt;` format (§6: the template is part of the model), so it wrote a
+    regex inside the reasoning and another after it. Per request, `"reasoning_effort": "none"` works. For every
+    client, `lab9b.sh` writes the pick with `{{%- set enable_thinking = false %}}` prepended to its template
+    (`gguf_new_metadata.py --chat-template`): **{_t['thinking_forced_off']}/{_t['n']}**, with 46 of 50 answers
+    identical to `llama-server`'s (the rest: LM Studio's own llama.cpp build).
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    budget9 = mo.ui.slider(3, 12, step=0.25, value=5.5, label="file-size budget (GB)", show_value=True)
+    tol9 = mo.ui.slider(0, 0.25, step=0.01, value=0.02, label="accuracy you'll give up (absolute)", show_value=True)
+    mo.vstack([mo.md("**Your turn:** `pick_quant`: the smallest quant that fits a budget and scores within a "
+                     "tolerance of the best. Move the sliders."), budget9, tol9])
+    return budget9, tol9
+
+
+@app.cell
+def _(budget9, ex, lj, mo, q9, tol9):
+    _r = {k: {"size_gb": v["size_gb"], "exact_match": v["exact_match"]} for k, v in q9["quants"].items()}
+    _a = lj.attempt(ex.pick_quant, _r, budget9.value, tol9.value)
+    if _a.ok:
+        _v = _a.value
+        _out = mo.md(f"Pick: **{_v}** ({_r[_v]['size_gb']:.2f} GB, {_r[_v]['exact_match']:.1%})" if _v
+                     else "Nothing fits within that tolerance: raise the budget or the tolerance.")
+    else:
+        _out = _a.view(mo)
+    _out
+    return
+
+
+@app.cell
+def _(BASE, lj, lmclient, mo):
+    def _live9():
+        key = "learnjax/qwen3.5-9b-nlrx-iq4_xs"
+        if not BASE or not any(k.startswith(key) for k in lmclient.available(BASE)):
+            return mo.callout(mo.md("Your 9B isn't in LM Studio: `make quant-lab-9b` imports it when the server is "
+                                    "up (`make lms-up`). Then try your own descriptions here."), kind="info")
+        lmclient.ensure_loaded(BASE, key)
+        asks = ["lines that start with a vowel and end with the string 'dog'",
+                "lines containing the word 'cat' followed by a number", "lines with at least 3 capital letters"]
+        rows = []
+        for q in asks:
+            r = lmclient.post(BASE, "/v1/chat/completions", {"model": key, "temperature": 0, "max_tokens": 96,
+                              "messages": [{"role": "system", "content": "Convert natural language to regular expression."},
+                                           {"role": "user", "content": q}]})
+            rows.append(f"| {q} | `{r['choices'][0]['message']['content'].strip().replace('|', '&#124;')}` |")
+        lmclient.unload_all(BASE)
+        return mo.md("| you ask | your 9B, IQ4_XS in LM Studio |\n|---|---|\n" + "\n".join(rows))
+
+    _a = lj.attempt(_live9)
+    _a.value if _a.ok else _a.view(mo)
+    return
+
+
+@app.cell
+def _(mo):
+    quiz16 = mo.ui.radio(
+        options={"The task imatrix: it weights the error toward the activations regex prompts produce, which is what this model is for": "a",
+                 "The generic imatrix: its perplexity is lower, so it's the better model": "b",
+                 "Either: an imatrix only matters for i-quants, not for accuracy": "c"},
+        label="**Check yourself:** you must ship this fine-tune at IQ2_XXS. Which imatrix?")
+    quiz16
+    return (quiz16,)
+
+
+@app.cell
+def _(mo, quiz16):
+    _fb = {"a": mo.callout(mo.md("Right: in the reference run, 25 % vs 8 % on the task. Perplexity on prose measures a skill this model "
+                                 "isn't for. (Better still: don't ship IQ2_XXS; IQ3_XXS keeps 41 %.)"), kind="success"),
+           "b": mo.callout(mo.md("Lower perplexity on *prose*, three times worse on the task it was fine-tuned for. "
+                                 "Measure the task."), kind="warn"),
+           "c": mo.callout(mo.md("At 4–5 bits it barely matters, but at 2–3 bits it decides the score: 8 % vs 25 % "
+                                 "in the reference run."), kind="warn")}
+    _fb.get(quiz16.value, mo.md(""))
+    return
+
+
+@app.cell
 def _(mo):
     quiz = mo.ui.radio(
         options={"ΔW is far smaller than W, and rounding W+ΔW to bfloat16 (8 significant bits) adds error that is a sizable fraction of ΔW": "a",
@@ -812,6 +1179,9 @@ def _(mo):
     * Hugging Face docs: [safetensors](https://huggingface.co/docs/safetensors) and
       [chat templates](https://huggingface.co/docs/transformers/chat_templating).
     * Hu et al., [LoRA](https://arxiv.org/abs/2106.09685) §4.2 — merging the adapter for zero-latency inference.
+    * ggml-org, [llama.cpp imatrix README](https://github.com/ggml-org/llama.cpp/blob/master/tools/imatrix/README.md)
+      and the [quantize README](https://github.com/ggml-org/llama.cpp/blob/master/tools/quantize/README.md)
+      (every type, `--tensor-type` overrides).
 
     **Next:** that's the course. The capstone in Module 25 strings it all together — and now you can ship the
     result to LM Studio.
