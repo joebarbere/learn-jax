@@ -14,7 +14,7 @@ Each operation the course introduces, written five ways: the formula (and how pa
 - **Optimization:** [Adam update](#adam-update), [clip by global norm](#clip-by-global-norm), [SGD with momentum](#sgd-with-momentum), [RMSProp](#rmsprop), [AdamW (decoupled weight decay)](#adamw-decoupled-weight-decay), [learning-rate schedules (warmup, cosine, linear)](#learning-rate-schedules-warmup-cosine-linear), [Muon: orthogonalized update (Newton–Schulz)](#muon-orthogonalized-update-newtonschulz), [TIES merging of task vectors](#ties-merging-of-task-vectors), [elastic weight consolidation penalty](#elastic-weight-consolidation-penalty)
 - **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution), [TopK sparse code](#topk-sparse-code)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
-- **Sampling and inference:** [KV cache write](#kv-cache-write), [temperature and top-k filter](#temperature-and-top-k-filter), [top-p (nucleus) filter](#top-p-nucleus-filter), [int8 absmax quantization](#int8-absmax-quantization)
+- **Sampling and inference:** [KV cache write](#kv-cache-write), [temperature and top-k filter](#temperature-and-top-k-filter), [top-p (nucleus) filter](#top-p-nucleus-filter), [int8 absmax quantization](#int8-absmax-quantization), [importance-weighted quantization](#importance-weighted-quantization)
 - **Sequence and state-space models:** [LSTM cell](#lstm-cell), [2-D RNN sweep (MDRNN)](#2-d-rnn-sweep-mdrnn), [linear recurrence as a parallel scan](#linear-recurrence-as-a-parallel-scan), [long convolution via FFT](#long-convolution-via-fft), [decayed linear attention (recurrent form)](#decayed-linear-attention-recurrent-form), [gated delta rule](#gated-delta-rule)
 - **Generative models:** [VAE reparameterization and Gaussian KL](#vae-reparameterization-and-gaussian-kl), [diffusion forward noising](#diffusion-forward-noising), [contrastive (CLIP / InfoNCE) loss](#contrastive-clip--infonce-loss)
 - **Reinforcement learning and preferences:** [GRPO group-relative advantage](#grpo-group-relative-advantage), [DQN target and Huber loss](#dqn-target-and-huber-loss), [PUCT score (AlphaZero search)](#puct-score-alphazero-search), [Bradley–Terry reward-model loss](#bradleyterry-reward-model-loss), [DPO loss](#dpo-loss)
@@ -8013,6 +8013,92 @@ def quantize_int8(w):
 - All four round halves to even (`round(2.5) == 2` in Python, NumPy, JAX and PyTorch), not away from zero.
 - One scale per *output* column for the course's (d_in, d_out) layout; PyTorch's `nn.Linear` weights are (d_out, d_in), so the same per-output scale is per *row* there.
 - The range is symmetric, ±127 (not −128), so 0 stays exactly 0 and the sign is symmetric.
+
+### importance-weighted quantization
+
+*Module 27.*
+
+Round each column to a few levels, but choose its scale to minimise the error that matters: each weight's squared error weighted by how large its input usually is (the importance, mean squared activation). Try a grid of candidate scales below absmax and keep the best.
+
+$$
+\hat W_{:,j} = s_j^* q_{:,j},\quad q_{ij} = \mathrm{clip}\big(\mathrm{round}(W_{ij}/s), -m, m\big),\quad s_j^* = \arg\min_{s \in S_j} \sum_i a_i \big(W_{ij} - s\, q_{ij}\big)^2,\quad S_j = \Big\{ \tfrac{\max_i |W_{ij}|}{m} \cdot f \Big\}_{f \in \{0.5, 0.55, \dots, 1\}}
+$$
+
+**In papers:** llama.cpp's imatrix (2024): $a_i = \mathbb{E}[x_i^2]$ over calibration text; GPTQ (Frantar et al. 2022) uses the full second moment $H = \mathbb{E}[x x^\top]$, not just its diagonal
+
+**Shapes:** `W (d_in, d_out), a (d_in,) -> dequantized (d_in, d_out)`
+
+**Python**
+
+```python
+def quantize_weighted(w, a, m):
+    fs = [0.5 + 0.05 * k for k in range(11)]
+    out = [[0.0] * len(w[0]) for _ in w]
+    for j in range(len(w[0])):
+        col = [row[j] for row in w]
+        amax = max(abs(v) for v in col) or 1.0
+        best = None
+        for f in fs:
+            s = amax / m * f
+            deq = [max(-m, min(m, round(v / s))) * s for v in col]
+            err = sum(ai * (v - d) ** 2 for ai, v, d in zip(a, col, deq))
+            if best is None or err < best[0]:
+                best = (err, deq)
+        for i, d in enumerate(best[1]):
+            out[i][j] = d
+    return out
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def quantize_weighted(w, a, m):
+    fs = np.linspace(0.5, 1.0, 11)
+    amax = np.abs(w).max(axis=0)
+    s = np.where(amax == 0, 1.0, amax)[None, :] / m * fs[:, None]     # (K, d_out) candidates
+    deq = np.clip(np.round(w[None] / s[:, None]), -m, m) * s[:, None]  # (K, d_in, d_out)
+    err = (a[None, :, None] * (w[None] - deq) ** 2).sum(axis=1)        # (K, d_out)
+    k = err.argmin(axis=0)
+    return deq[k, :, np.arange(w.shape[1])].T
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def quantize_weighted(w, a, m):
+    fs = jnp.linspace(0.5, 1.0, 11)
+    amax = jnp.abs(w).max(axis=0)
+    s = jnp.where(amax == 0, 1.0, amax)[None, :] / m * fs[:, None]
+    deq = jnp.clip(jnp.round(w[None] / s[:, None]), -m, m) * s[:, None]
+    err = (a[None, :, None] * (w[None] - deq) ** 2).sum(axis=1)
+    k = err.argmin(axis=0)
+    return jnp.take_along_axis(deq, k[None, None, :], axis=0)[0]
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def quantize_weighted(w, a, m):
+    fs = torch.linspace(0.5, 1.0, 11, dtype=w.dtype)
+    amax = w.abs().amax(dim=0)
+    s = torch.where(amax == 0, 1.0, amax)[None, :] / m * fs[:, None]
+    deq = torch.clamp(torch.round(w[None] / s[:, None]), -m, m) * s[:, None]
+    err = (a[None, :, None] * (w[None] - deq) ** 2).sum(dim=1)
+    k = err.argmin(dim=0)
+    return torch.gather(deq, 0, k[None, None, :].expand(1, *w.shape))[0]
+```
+
+**Where they differ**
+
+- With every a_i equal this is plain round-to-nearest with a searched scale; the importances only change *which* scale wins, so the file format and size are unchanged.
+- A smaller scale than absmax clips the largest weight but rounds the rest more finely; whether that pays depends on which inputs are large, which is what a_i records.
+- llama.cpp searches finer grids and also an offset for asymmetric types; this keeps the idea: the same rounding, a different choice of scale.
 
 ## Sequence and state-space models
 

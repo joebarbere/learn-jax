@@ -19,7 +19,7 @@ def _():
     import matplotlib.pyplot as plt
 
     import learnjax as lj
-    from learnjax import llama
+    from learnjax import llama, rosetta
 
     HERE = mo.notebook_dir()
     ROOT = Path(HERE).parent.parent
@@ -42,7 +42,7 @@ def _():
     ex = lj.load_exercises(HERE)
     BASE = lmclient.find_server()
     return (BASE, ROOT, RUNS, ex, gguf_meta, jax, jnp, json, lj, llama, lmclient, load_mod, mo, np, plt,
-            read_json, time)
+            read_json, rosetta, time)
 
 
 @app.cell
@@ -806,6 +806,63 @@ def _(mo, read_json):
     """)
     _intro
     return (quant15,)
+
+
+@app.cell
+def _(mo):
+    skew15 = mo.ui.slider(1, 30, step=1, value=10, label="how much larger the 4 'loud' input channels are",
+                          show_value=True)
+    mo.vstack([mo.md(r"""
+    **Build it from scratch.** A toy layer: 64 inputs, 32 outputs, Gaussian weights. Four of the 64 input
+    channels are *loud* (their values are larger than the rest), as real activations are: a few channels
+    carry outliers. Quantize the weights to 3 bits (levels −3 … 3, one scale per output column) two ways.
+    Both search the same grid of scales; **plain** picks the one with the smallest weight error, **importance
+    weighted** the one with the smallest error weighted by $a_i = \mathbb{E}[x_i^2]$, measured on 2,048
+    calibration inputs. Then measure the layer's *output* error on 2,048 fresh inputs.
+    """), skew15])
+    return (skew15,)
+
+
+@app.cell
+def _(jax, jnp, mo, skew15):
+    def _quantize(w, a, m=3):
+        fs = jnp.linspace(0.5, 1.0, 11)
+        amax = jnp.abs(w).max(axis=0)
+        s = jnp.where(amax == 0, 1.0, amax)[None, :] / m * fs[:, None]           # (11, d_out) candidate scales
+        deq = jnp.clip(jnp.round(w[None] / s[:, None]), -m, m) * s[:, None]      # (11, d_in, d_out)
+        err = (a[None, :, None] * (w[None] - deq) ** 2).sum(axis=1)              # importance-weighted error
+        k = err.argmin(axis=0)
+        return jnp.take_along_axis(deq, k[None, None, :], axis=0)[0]
+
+    _k = jax.random.split(jax.random.key(0), 3)
+    _w = jax.random.normal(_k[0], (64, 32))
+    _std = jnp.ones(64).at[:4].set(float(skew15.value))
+    _calib = jax.random.normal(_k[1], (2048, 64)) * _std
+    _fresh = jax.random.normal(_k[2], (2048, 64)) * _std
+    _a = (_calib ** 2).mean(0)
+    _rows = []
+    for _name, _imp in (("plain", jnp.ones(64)), ("importance weighted", _a)):
+        _wq = _quantize(_w, _imp)
+        _werr = float(jnp.linalg.norm(_w - _wq) / jnp.linalg.norm(_w))
+        _yerr = float(jnp.linalg.norm(_fresh @ (_w - _wq)) / jnp.linalg.norm(_fresh @ _w))
+        _rows.append(f"| {_name} | {_werr:.3f} | **{_yerr:.3f}** |")
+    mo.md(r"""
+    | 3-bit weights, scale chosen by | weight error (relative) | output error on fresh inputs (relative) |
+    |---|---|---|
+    """ + "\n    ".join(_rows) + r"""
+
+    Importance weighting accepts a *larger* error in the weights overall to make a smaller one where the loud
+    inputs will multiply it, and the output error falls. With equal channels (slider at 1) the two choices
+    coincide. This is the whole of what an imatrix changes: the same levels, the same file size, a different
+    choice of scale. llama.cpp's version searches finer and per block of 16–32 weights, not per column.
+    """)
+    return
+
+
+@app.cell
+def _(mo, rosetta):
+    rosetta.tabs(mo, "importance-weighted quantization")
+    return
 
 
 @app.cell

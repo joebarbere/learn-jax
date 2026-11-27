@@ -729,6 +729,72 @@ ENTRIES: list[E] = [
              "weights are (d_out, d_in), so the same per-output scale is per *row* there."),
              "The range is symmetric, ±127 (not −128), so 0 stays exactly 0 and the sign is symmetric."),
       module="18", also=("19", "27")),
+    E("importance-weighted quantization", "Sampling and inference",
+      "Round each column to a few levels, but choose its scale to minimise the error that matters: each weight's "
+      "squared error weighted by how large its input usually is (the importance, mean squared activation). "
+      "Try a grid of candidate scales below absmax and keep the best.",
+      r"\hat W_{:,j} = s_j^* q_{:,j},\quad q_{ij} = \mathrm{clip}\big(\mathrm{round}(W_{ij}/s), -m, m\big),\quad "
+      r"s_j^* = \arg\min_{s \in S_j} \sum_i a_i \big(W_{ij} - s\, q_{ij}\big)^2,\quad "
+      r"S_j = \Big\{ \tfrac{\max_i |W_{ij}|}{m} \cdot f \Big\}_{f \in \{0.5, 0.55, \dots, 1\}}",
+      r"llama.cpp's imatrix (2024): $a_i = \mathbb{E}[x_i^2]$ over calibration text; GPTQ (Frantar et al. 2022) "
+      r"uses the full second moment $H = \mathbb{E}[x x^\top]$, not just its diagonal",
+      "W (d_in, d_out), a (d_in,) -> dequantized (d_in, d_out)", "quantize_weighted(w, a, m)",
+      lambda r: {"w": r.normal(size=(6, 3)), "a": r.uniform(0.1, 3.0, size=6), "m": 3},
+      python="""
+        def quantize_weighted(w, a, m):
+            fs = [0.5 + 0.05 * k for k in range(11)]
+            out = [[0.0] * len(w[0]) for _ in w]
+            for j in range(len(w[0])):
+                col = [row[j] for row in w]
+                amax = max(abs(v) for v in col) or 1.0
+                best = None
+                for f in fs:
+                    s = amax / m * f
+                    deq = [max(-m, min(m, round(v / s))) * s for v in col]
+                    err = sum(ai * (v - d) ** 2 for ai, v, d in zip(a, col, deq))
+                    if best is None or err < best[0]:
+                        best = (err, deq)
+                for i, d in enumerate(best[1]):
+                    out[i][j] = d
+            return out
+      """,
+      numpy="""
+        def quantize_weighted(w, a, m):
+            fs = np.linspace(0.5, 1.0, 11)
+            amax = np.abs(w).max(axis=0)
+            s = np.where(amax == 0, 1.0, amax)[None, :] / m * fs[:, None]     # (K, d_out) candidates
+            deq = np.clip(np.round(w[None] / s[:, None]), -m, m) * s[:, None]  # (K, d_in, d_out)
+            err = (a[None, :, None] * (w[None] - deq) ** 2).sum(axis=1)        # (K, d_out)
+            k = err.argmin(axis=0)
+            return deq[k, :, np.arange(w.shape[1])].T
+      """,
+      jax="""
+        def quantize_weighted(w, a, m):
+            fs = jnp.linspace(0.5, 1.0, 11)
+            amax = jnp.abs(w).max(axis=0)
+            s = jnp.where(amax == 0, 1.0, amax)[None, :] / m * fs[:, None]
+            deq = jnp.clip(jnp.round(w[None] / s[:, None]), -m, m) * s[:, None]
+            err = (a[None, :, None] * (w[None] - deq) ** 2).sum(axis=1)
+            k = err.argmin(axis=0)
+            return jnp.take_along_axis(deq, k[None, None, :], axis=0)[0]
+      """,
+      torch="""
+        def quantize_weighted(w, a, m):
+            fs = torch.linspace(0.5, 1.0, 11, dtype=w.dtype)
+            amax = w.abs().amax(dim=0)
+            s = torch.where(amax == 0, 1.0, amax)[None, :] / m * fs[:, None]
+            deq = torch.clamp(torch.round(w[None] / s[:, None]), -m, m) * s[:, None]
+            err = (a[None, :, None] * (w[None] - deq) ** 2).sum(dim=1)
+            k = err.argmin(dim=0)
+            return torch.gather(deq, 0, k[None, None, :].expand(1, *w.shape))[0]
+      """,
+      notes=(("With every a_i equal this is plain round-to-nearest with a searched scale; the importances only "
+              "change *which* scale wins, so the file format and size are unchanged."),
+             ("A smaller scale than absmax clips the largest weight but rounds the rest more finely; whether that "
+              "pays depends on which inputs are large, which is what a_i records."),
+             ("llama.cpp searches finer grids and also an offset for asymmetric types; this keeps the idea: "
+              "the same rounding, a different choice of scale.")),
+      module="27"),
     E("LoRA forward", "Neural network layers",
       "Fine-tune a frozen weight by adding a trainable low-rank update: two thin matrices whose product is "
       "the change to W.",
