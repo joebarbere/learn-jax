@@ -4,7 +4,7 @@
 
 Each operation the course introduces, written five ways: the formula (and how papers write it), plain Python loops (the formula read literally), NumPy, JAX and PyTorch. Every version is run on the same inputs and checked to agree (`tests/test_rosetta.py`). In the lessons each entry appears as tabs where the operation is first taught.
 
-- **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add), [difference-in-means direction](#difference-in-means-direction)
+- **Arrays and reductions:** [sum along an axis](#sum-along-an-axis), [broadcasting (outer sum)](#broadcasting-outer-sum), [cumulative sum](#cumulative-sum), [scatter-add (update at indices)](#scatter-add-update-at-indices), [batched matrix multiply (einsum)](#batched-matrix-multiply-einsum), [max and argmax (reductions)](#max-and-argmax-reductions), [mean, standard deviation and median](#mean-standard-deviation-and-median), [boolean masks: where, any and all](#boolean-masks-where-any-and-all), [ranges and grids](#ranges-and-grids), [stack, concatenate and split](#stack-concatenate-and-split), [moving axes: transpose, moveaxis and swapaxes](#moving-axes-transpose-moveaxis-and-swapaxes), [repeat, tile and broadcast_to](#repeat-tile-and-broadcastto), [pad and roll](#pad-and-roll), [flip an axis](#flip-an-axis), [sort and argsort](#sort-and-argsort), [cumulative product](#cumulative-product), [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices), [segment sum (group-by add)](#segment-sum-group-by-add), [difference-in-means direction](#difference-in-means-direction)
 - **Elementwise math:** [exp, log and powers](#exp-log-and-powers), [trig and sign functions](#trig-and-sign-functions), [log1p and expm1 (accurate near zero)](#log1p-and-expm1-accurate-near-zero), [clip, maximum and minimum (elementwise)](#clip-maximum-and-minimum-elementwise), [round to bfloat16](#round-to-bfloat16)
 - **Linear algebra:** [dot product](#dot-product), [linear layer](#linear-layer), [L2 norm](#l2-norm), [cosine similarity](#cosine-similarity), [solve a linear system](#solve-a-linear-system), [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix), [trace of a matrix](#trace-of-a-matrix), [low-rank approximation (SVD)](#low-rank-approximation-svd), [determinant](#determinant), [least squares](#least-squares), [triangular solve (forward substitution)](#triangular-solve-forward-substitution), [bilinear resize of a grid (position-embedding interpolation)](#bilinear-resize-of-a-grid-position-embedding-interpolation), [rank-one edit of a weight matrix (ROME)](#rank-one-edit-of-a-weight-matrix-rome), [directional ablation of a weight matrix](#directional-ablation-of-a-weight-matrix), [total influence in a graph](#total-influence-in-a-graph)
 - **Calculus and autodiff:** [gradient](#gradient), [Jacobian](#jacobian), [value and gradient together](#value-and-gradient-together), [Jacobian-vector product (forward mode)](#jacobian-vector-product-forward-mode), [vector-Jacobian product (reverse mode)](#vector-jacobian-product-reverse-mode), [Hessian](#hessian), [stop-gradient](#stop-gradient), [attribution patching](#attribution-patching)
@@ -15,7 +15,7 @@ Each operation the course introduces, written five ways: the formula (and how pa
 - **Neural network layers:** [ReLU and leaky ReLU](#relu-and-leaky-relu), [GELU](#gelu), [sigmoid, log-sigmoid and softplus](#sigmoid-log-sigmoid-and-softplus), [SiLU (swish)](#silu-swish), [LayerNorm](#layernorm), [RMSNorm](#rmsnorm), [BatchNorm (training mode)](#batchnorm-training-mode), [GroupNorm](#groupnorm), [dropout (inverted)](#dropout-inverted), [2-D convolution](#2-d-convolution), [max pooling](#max-pooling), [transposed convolution](#transposed-convolution), [embedding lookup](#embedding-lookup), [dynamic slice (a window at a traced position)](#dynamic-slice-a-window-at-a-traced-position), [LoRA forward](#lora-forward), [perceptron update](#perceptron-update), [Hopfield network: energy and update](#hopfield-network-energy-and-update), [n-gram hash (multiplicative XOR)](#n-gram-hash-multiplicative-xor), [causal depthwise dilated convolution](#causal-depthwise-dilated-convolution), [TopK sparse code](#topk-sparse-code)
 - **Attention and transformers:** [scaled dot-product attention (causal)](#scaled-dot-product-attention-causal), [grouped-query attention](#grouped-query-attention), [rotary position embedding (RoPE)](#rotary-position-embedding-rope), [SwiGLU feed-forward](#swiglu-feed-forward), [mixture-of-experts routing (top-k with grouped matmul)](#mixture-of-experts-routing-top-k-with-grouped-matmul), [LatentMoE layer](#latentmoe-layer), [Engram context gate](#engram-context-gate)
 - **Sampling and inference:** [KV cache write](#kv-cache-write), [temperature and top-k filter](#temperature-and-top-k-filter), [top-p (nucleus) filter](#top-p-nucleus-filter), [int8 absmax quantization](#int8-absmax-quantization)
-- **Sequence and state-space models:** [LSTM cell](#lstm-cell), [linear recurrence as a parallel scan](#linear-recurrence-as-a-parallel-scan), [long convolution via FFT](#long-convolution-via-fft), [decayed linear attention (recurrent form)](#decayed-linear-attention-recurrent-form), [gated delta rule](#gated-delta-rule)
+- **Sequence and state-space models:** [LSTM cell](#lstm-cell), [2-D RNN sweep (MDRNN)](#2-d-rnn-sweep-mdrnn), [linear recurrence as a parallel scan](#linear-recurrence-as-a-parallel-scan), [long convolution via FFT](#long-convolution-via-fft), [decayed linear attention (recurrent form)](#decayed-linear-attention-recurrent-form), [gated delta rule](#gated-delta-rule)
 - **Generative models:** [VAE reparameterization and Gaussian KL](#vae-reparameterization-and-gaussian-kl), [diffusion forward noising](#diffusion-forward-noising), [contrastive (CLIP / InfoNCE) loss](#contrastive-clip--infonce-loss)
 - **Reinforcement learning and preferences:** [GRPO group-relative advantage](#grpo-group-relative-advantage), [DQN target and Huber loss](#dqn-target-and-huber-loss), [PUCT score (AlphaZero search)](#puct-score-alphazero-search), [Bradley–Terry reward-model loss](#bradleyterry-reward-model-loss), [DPO loss](#dpo-loss)
 - **Retrieval and evaluation:** [BM25 scoring as a sparse matrix product](#bm25-scoring-as-a-sparse-matrix-product), [reciprocal rank fusion](#reciprocal-rank-fusion), [MRR and nDCG@k](#mrr-and-ndcgk), [fraction of variance unexplained](#fraction-of-variance-unexplained), [mutual nearest-neighbour alignment](#mutual-nearest-neighbour-alignment), [logit difference](#logit-difference)
@@ -858,6 +858,60 @@ def border(x):
 
 - Trap: NumPy/JAX `pad` take one (before, after) pair per axis, first axis first; PyTorch's `F.pad` takes a flat tuple starting from the *last* axis: `(left, right, top, bottom, ...)`.
 - Without `axis` / `dims`, `roll` flattens the array, shifts, and reshapes back, in all three.
+
+### flip an axis
+
+*Module 31b.*
+
+Reverse the order along one axis (or several): the last row becomes the first. Flipping an image's rows turns a sweep from the top-left corner into one from the bottom-left.
+
+$$
+\mathrm{flip}_0(X)_{i,j} = X_{R-1-i,\,j},\quad \mathrm{flip}_{0,1}(X)_{i,j} = X_{R-1-i,\,C-1-j}
+$$
+
+**Shapes:** `x (R, C) -> rows flipped (R, C), both axes flipped (R, C)`
+
+**JAX names:** `jax.numpy.flip`
+
+**Python**
+
+```python
+def flips(x):
+    return {"rows": [list(row) for row in reversed(x)],
+            "both": [list(reversed(row)) for row in reversed(x)]}
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def flips(x):
+    return {"rows": np.flip(x, axis=0), "both": np.flip(x, axis=(0, 1))}  # x[::-1], x[::-1, ::-1]
+```
+
+**JAX**
+
+```python
+import jax.numpy as jnp
+
+def flips(x):
+    return {"rows": jnp.flip(x, axis=0), "both": jnp.flip(x, axis=(0, 1))}
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def flips(x):
+    return {"rows": torch.flip(x, dims=(0,)), "both": torch.flip(x, dims=(0, 1))}
+```
+
+**Where they differ**
+
+- NumPy's `flip` (and `x[::-1]`) returns a view in O(1); PyTorch has no negative-step slicing and `torch.flip` copies; under `jit`, JAX's is a cheap index remap XLA usually fuses away.
+- Flipping twice along the same axes is the identity: that's how a flipped sweep is put back in place.
 
 ### sort and argsort
 
@@ -8044,6 +8098,122 @@ def lstm_cell(Wx, Wh, b, h, c, x):
 - PyTorch packs the gates in the same order as the course (i, f, g, o) but stores weights transposed, `weight_ih` (4H, d), and has two biases, `bias_ih` + `bias_hh`; only their sum matters. Porting weights: transpose, and put the bias in one of them.
 - The cell state is updated by multiply-and-add, not squashed through a nonlinearity each step: that additive path is why gradients survive long sequences.
 
+### 2-D RNN sweep (MDRNN)
+
+*Module 31b.*
+
+A recurrent cell on a grid: each cell mixes its input with the hidden states of the cell above and the cell to its left, so information flows down and right from one corner. Four sweeps, one from each corner, let every cell see the whole image.
+
+$$
+h_{i,j} = \tanh\big(x_{i,j} W_x + h_{i-1,j} W_u + h_{i,j-1} W_l + b\big),\quad h_{-1,j} = h_{i,-1} = 0
+$$
+
+**In papers:** Graves, Fernández & Schmidhuber 2007: one recurrent connection per dimension, $2^d$ sweeps for $d$ dimensions; MDLSTM adds one forget gate per dimension
+
+**Shapes:** `x (R, C, F), Wx (F, H), Wu (H, H), Wl (H, H), b (H,) -> (R, C, H)`
+
+**Python**
+
+```python
+import math
+
+def sweep(x, wx, wu, wl, b):
+    R, C, H = len(x), len(x[0]), len(b)
+    def mv(v, w):  # row vector times matrix
+        return [sum(v[k] * w[k][j] for k in range(len(v))) for j in range(len(w[0]))]
+    h = [[[0.0] * H for _ in range(C)] for _ in range(R)]
+    for i in range(R):
+        for j in range(C):
+            up = h[i - 1][j] if i else [0.0] * H
+            left = h[i][j - 1] if j else [0.0] * H
+            a, u, l = mv(x[i][j], wx), mv(up, wu), mv(left, wl)
+            h[i][j] = [math.tanh(a[k] + u[k] + l[k] + b[k]) for k in range(H)]
+    return h
+```
+
+**NumPy**
+
+```python
+import numpy as np
+
+def sweep(x, wx, wu, wl, b):
+    R, C, _ = x.shape
+    H = len(b)
+    h = np.zeros((R, C, H))
+    for i in range(R):
+        for j in range(C):
+            up = h[i - 1, j] if i else np.zeros(H)
+            left = h[i, j - 1] if j else np.zeros(H)
+            h[i, j] = np.tanh(x[i, j] @ wx + up @ wu + left @ wl + b)
+    return h
+```
+
+**JAX**
+
+```python
+import jax
+import jax.numpy as jnp
+
+def sweep(x, wx, wu, wl, b):  # the diagonal wavefront: skew, then scan over R + C - 1 columns
+    R, C, _ = x.shape
+    rows = jnp.arange(R)[:, None]
+    cols = rows + jnp.arange(C)[None, :]                        # row i shifted right by i
+    z = jnp.zeros((R, R + C - 1, len(b))).at[rows, cols].set(x @ wx + b)
+    mask = jnp.zeros((R, R + C - 1)).at[rows, cols].set(1.0)    # which skewed cells are real
+
+    def step(h_prev, col):
+        zc, m = col
+        up = jnp.concatenate([jnp.zeros_like(h_prev[:1]), h_prev[:-1]])
+        h = jnp.tanh(zc + up @ wu + h_prev @ wl) * m[:, None]
+        return h, h
+
+    hs = jax.lax.scan(step, jnp.zeros((R, len(b))), (jnp.swapaxes(z, 0, 1), mask.T))[1]
+    return jnp.swapaxes(hs, 0, 1)[rows, cols]                  # unskew
+```
+
+**JAX, by hand**
+
+```python
+import jax.numpy as jnp
+
+def sweep(x, wx, wu, wl, b):  # cell by cell; JAX arrays are immutable, so build rows in lists
+    R, C, _ = x.shape
+    rows, prev = [], jnp.zeros((C, len(b)))
+    for i in range(R):
+        left, row = jnp.zeros(len(b)), []
+        for j in range(C):
+            left = jnp.tanh(x[i, j] @ wx + prev[j] @ wu + left @ wl + b)
+            row.append(left)
+        prev = jnp.stack(row)
+        rows.append(prev)
+    return jnp.stack(rows)
+```
+
+**PyTorch**
+
+```python
+import torch
+
+def sweep(x, wx, wu, wl, b):
+    R, C, _ = x.shape
+    h = torch.zeros(R, C, len(b), dtype=x.dtype)
+    for i in range(R):
+        for j in range(C):
+            s = x[i, j] @ wx + b
+            if i:
+                s = s + h[i - 1, j] @ wu
+            if j:
+                s = s + h[i, j - 1] @ wl
+            h[i, j] = torch.tanh(s)
+    return h
+```
+
+**Where they differ**
+
+- Cells on one anti-diagonal (i + j constant) don't depend on each other, so the fast version computes them together: R + C - 1 sequential steps instead of R * C. Skewing row i right by i turns anti-diagonals into columns (PixelRNN's Diagonal LSTM uses the same trick).
+- The skew pads with zeros; mask the padded cells after the tanh, or tanh(b) leaks into the next column as a fake neighbour.
+- Other corners are the same function on a flipped grid: flip rows for bottom-left, columns for top-right, both for bottom-right, then flip the result back.
+
 ### linear recurrence as a parallel scan
 
 *Module 36.*
@@ -9423,6 +9593,7 @@ Every JAX, optax and Flax name the lessons use for math, and the entry that expl
 | `jax.numpy.eye` | [identity, diagonal and triangular matrices](#identity-diagonal-and-triangular-matrices) |
 | `jax.numpy.fft.irfft` | [long convolution via FFT](#long-convolution-via-fft) |
 | `jax.numpy.fft.rfft` | [long convolution via FFT](#long-convolution-via-fft) |
+| `jax.numpy.flip` | [flip an axis](#flip-an-axis) |
 | `jax.numpy.linalg.det` | [determinant](#determinant) |
 | `jax.numpy.linalg.eigh` | [eigenvalues of a symmetric matrix](#eigenvalues-of-a-symmetric-matrix) |
 | `jax.numpy.linalg.inv` | [solve a linear system](#solve-a-linear-system) |

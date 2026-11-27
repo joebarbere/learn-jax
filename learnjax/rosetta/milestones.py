@@ -587,6 +587,94 @@ ENTRIES: list[E] = [
              "β plays the KL-penalty role of RLHF: small β lets the policy drift further from the reference."),
       module="35", also=("26",)),
     # ---------------------------------------------------------------- State-space models (Module 36)
+    E("2-D RNN sweep (MDRNN)", "Sequence and state-space models",
+      "A recurrent cell on a grid: each cell mixes its input with the hidden states of the cell above and the "
+      "cell to its left, so information flows down and right from one corner. Four sweeps, one from each "
+      "corner, let every cell see the whole image.",
+      r"h_{i,j} = \tanh\big(x_{i,j} W_x + h_{i-1,j} W_u + h_{i,j-1} W_l + b\big),\quad h_{-1,j} = h_{i,-1} = 0",
+      r"Graves, Fernández & Schmidhuber 2007: one recurrent connection per dimension, $2^d$ sweeps for $d$ "
+      r"dimensions; MDLSTM adds one forget gate per dimension",
+      "x (R, C, F), Wx (F, H), Wu (H, H), Wl (H, H), b (H,) -> (R, C, H)", "sweep(x, wx, wu, wl, b)",
+      lambda r: {"x": r.normal(size=(3, 4, 2)), "wx": r.normal(size=(2, 3)) * 0.7,
+                 "wu": r.normal(size=(3, 3)) * 0.4, "wl": r.normal(size=(3, 3)) * 0.4, "b": r.normal(size=3) * 0.1},
+      python="""
+        def sweep(x, wx, wu, wl, b):
+            R, C, H = len(x), len(x[0]), len(b)
+            def mv(v, w):  # row vector times matrix
+                return [sum(v[k] * w[k][j] for k in range(len(v))) for j in range(len(w[0]))]
+            h = [[[0.0] * H for _ in range(C)] for _ in range(R)]
+            for i in range(R):
+                for j in range(C):
+                    up = h[i - 1][j] if i else [0.0] * H
+                    left = h[i][j - 1] if j else [0.0] * H
+                    a, u, l = mv(x[i][j], wx), mv(up, wu), mv(left, wl)
+                    h[i][j] = [math.tanh(a[k] + u[k] + l[k] + b[k]) for k in range(H)]
+            return h
+      """,
+      numpy="""
+        def sweep(x, wx, wu, wl, b):
+            R, C, _ = x.shape
+            H = len(b)
+            h = np.zeros((R, C, H))
+            for i in range(R):
+                for j in range(C):
+                    up = h[i - 1, j] if i else np.zeros(H)
+                    left = h[i, j - 1] if j else np.zeros(H)
+                    h[i, j] = np.tanh(x[i, j] @ wx + up @ wu + left @ wl + b)
+            return h
+      """,
+      jax="""
+        def sweep(x, wx, wu, wl, b):  # the diagonal wavefront: skew, then scan over R + C - 1 columns
+            R, C, _ = x.shape
+            rows = jnp.arange(R)[:, None]
+            cols = rows + jnp.arange(C)[None, :]                        # row i shifted right by i
+            z = jnp.zeros((R, R + C - 1, len(b))).at[rows, cols].set(x @ wx + b)
+            mask = jnp.zeros((R, R + C - 1)).at[rows, cols].set(1.0)    # which skewed cells are real
+
+            def step(h_prev, col):
+                zc, m = col
+                up = jnp.concatenate([jnp.zeros_like(h_prev[:1]), h_prev[:-1]])
+                h = jnp.tanh(zc + up @ wu + h_prev @ wl) * m[:, None]
+                return h, h
+
+            hs = jax.lax.scan(step, jnp.zeros((R, len(b))), (jnp.swapaxes(z, 0, 1), mask.T))[1]
+            return jnp.swapaxes(hs, 0, 1)[rows, cols]                  # unskew
+      """,
+      torch="""
+        def sweep(x, wx, wu, wl, b):
+            R, C, _ = x.shape
+            h = torch.zeros(R, C, len(b), dtype=x.dtype)
+            for i in range(R):
+                for j in range(C):
+                    s = x[i, j] @ wx + b
+                    if i:
+                        s = s + h[i - 1, j] @ wu
+                    if j:
+                        s = s + h[i, j - 1] @ wl
+                    h[i, j] = torch.tanh(s)
+            return h
+      """,
+      jax_by_hand="""
+        def sweep(x, wx, wu, wl, b):  # cell by cell; JAX arrays are immutable, so build rows in lists
+            R, C, _ = x.shape
+            rows, prev = [], jnp.zeros((C, len(b)))
+            for i in range(R):
+                left, row = jnp.zeros(len(b)), []
+                for j in range(C):
+                    left = jnp.tanh(x[i, j] @ wx + prev[j] @ wu + left @ wl + b)
+                    row.append(left)
+                prev = jnp.stack(row)
+                rows.append(prev)
+            return jnp.stack(rows)
+      """,
+      notes=(("Cells on one anti-diagonal (i + j constant) don't depend on each other, so the fast version computes "
+              "them together: R + C - 1 sequential steps instead of R * C. Skewing row i right by i turns "
+              "anti-diagonals into columns (PixelRNN's Diagonal LSTM uses the same trick)."),
+             ("The skew pads with zeros; mask the padded cells after the tanh, or tanh(b) leaks into the next "
+              "column as a fake neighbour."),
+             ("Other corners are the same function on a flipped grid: flip rows for bottom-left, columns for "
+              "top-right, both for bottom-right, then flip the result back.")),
+      module="31b"),
     E("linear recurrence as a parallel scan", "Sequence and state-space models",
       "The heart of an SSM layer: each state is the previous one scaled plus a new input. It looks sequential, "
       "but pairs of steps compose associatively, so it can run as a tree in log(L) parallel rounds.",

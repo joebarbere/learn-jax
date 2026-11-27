@@ -166,6 +166,7 @@ it's first taught; `make rosetta-browse` opens them all in one notebook, and the
 | 29 | Perceptron to Hopfield networks (1958–1982) | ✅ |
 | 30 | Word embeddings: word2vec (2013) | ✅ |
 | 31 | RNNs, LSTMs and seq2seq with attention (1986–2014) | ✅ |
+| 31b | Multi-dimensional RNNs: one cell, four directions (2007–2024) | 🚧 |
 | 32 | BERT vs GPT: encoders and decoders (2018) | ✅ |
 | 33 | GANs, VAEs, diffusion and CLIP (2014–2022) | ✅ |
 | 34 | Deep RL: DQN to AlphaZero (2013–2019) | ✅ |

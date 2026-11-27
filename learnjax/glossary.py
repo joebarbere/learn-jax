@@ -2292,6 +2292,18 @@ TERMS: list[Term] = [
          "Ramping the learning rate up from near zero over the first steps, so the early, badly scaled "
          "updates (and Adam's noisy statistics) don't blow the model up.",
          "05", ("11", "16"), ""),
+    Term("multi-dimensional RNN", ("MDRNN", "MDLSTM", "multi-dimensional recurrent"),
+         "A recurrent network over a grid: each cell reads the hidden states of its neighbours above and to the "
+         "left, and 2^d sweeps (one from each corner in 2-D) let every cell see the whole input.",
+         "31b", (), "Graves, Fernández & Schmidhuber, 2007"),
+    Term("diagonal wavefront", ("anti-diagonal", "skew trick"),
+         "The order that makes a 2-D recurrence parallel: cells on one anti-diagonal don't depend on each other, "
+         "so they're computed together, R + C - 1 steps instead of R * C. (Not a GPU wavefront.)",
+         "31b", (), "van den Oord et al., 2016 (PixelRNN's Diagonal LSTM)"),
+    Term("cross-scan", ("SS2D", "cross-merge"),
+         "Reading an image as four 1-D sequences (row-major, column-major and both reversed) so a sequence model "
+         "sees it from four sides; the outputs are put back on the grid and summed.",
+         "31b", ("36", "41"), "Liu et al., 2024 (VMamba)"),
     Term("wavefront", ("wavefronts", "wave32", "warp"),
          "A group of threads (32 on RDNA3) that execute in lock-step on one SIMD; AMD's name for a warp.",
          "23", (), ""),
@@ -2306,7 +2318,7 @@ TERMS: list[Term] = [
     Term("weight sharing", ("shared weights",),
          "Using the same parameters at every position (convolution) or every time step (RNN), so the model "
          "generalizes across position with far fewer parameters.",
-         "12", (), ""),
+         "12", ("31b",), ""),
     Term("weight tying", ("tied embeddings", "tying"),
          "Using the same matrix for the input embedding and the output projection to logits, saving V × d "
          "parameters.",

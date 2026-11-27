@@ -49,6 +49,7 @@ MODULES = [
     (29, "29-perceptron-hopfield", "Perceptron to Hopfield networks (1958–1982)", 10),
     (30, "30-word2vec", "Word embeddings: word2vec (2013)", 10),
     (31, "31-rnn-seq2seq", "RNNs, LSTMs and seq2seq with attention (1986–2014)", 10),
+    (51, "31b-mdrnn", "Multi-dimensional RNNs: one cell, four directions (2007–2024)", 10),
     (32, "32-bert-vs-gpt", "BERT vs GPT: encoders and decoders (2018)", 10),
     (33, "33-generative-images", "GANs, VAEs, diffusion and CLIP (2014–2022)", 10),
     (34, "34-deep-rl-alphazero", "Deep RL: DQN to AlphaZero (2013–2019)", 10),

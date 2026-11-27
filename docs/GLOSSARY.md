@@ -1,6 +1,6 @@
 # Glossary
 
-627 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
+630 terms from the course, each with the module that teaches it and the others where it matters; read a term's module section for the full story.
 
 [#](#symbols) · [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x)
 
@@ -143,6 +143,7 @@
 - **cosine similarity** — The dot product of two vectors divided by both their lengths: the cosine of the angle between them, from -1 to 1. The standard way to compare embeddings. *(Module 02.)*
 - **cross-encoder** — A model that reads query and document together and outputs a relevance score. More accurate than a bi-encoder but too slow for the whole corpus, so used to rerank. *(Module 38.)*
 - **cross-entropy** — The average surprise when outcomes come from the true distribution but you predicted with another: −Σ p log q. With one-hot targets it is −log of the probability given to the right answer, the standard classification and language-model loss. *(Module 04; also 08, 09, 11, 14, 16.)* Origin: Shannon, 1948.
+- **cross-scan** — Reading an image as four 1-D sequences (row-major, column-major and both reversed) so a sequence model sees it from four sides; the outputs are put back on the grid and summed. *(Module 31b; also 36, 41.)* Origin: Liu et al., 2024 (VMamba).
 - **CUDA** — NVIDIA's GPU programming platform (2007), which made GPUs general-purpose compute devices. ROCm/HIP is AMD's counterpart. *(Module 00b; also 23, 25.)*
 
 <a id="d"></a>
@@ -168,6 +169,7 @@
 - **derivative** — The slope of a function at a point: how much the output changes per unit change in the input. *(Module 03; also 10.)*
 - **determinant** — How much a matrix scales area (or volume); zero means it squashes space flat and cannot be undone, negative means it flips orientation. *(Module 02.)*
 - **device** — A piece of hardware JAX can place arrays on and run computation on, such as `rocm:0` or the CPU. `jax.device_put` moves data there. *(Module 01; also 00, 08, 22, 24, 25.)*
+- **diagonal wavefront** — The order that makes a 2-D recurrence parallel: cells on one anti-diagonal don't depend on each other, so they're computed together, R + C - 1 steps instead of R * C. (Not a GPU wavefront.) *(Module 31b.)* Origin: van den Oord et al., 2016 (PixelRNN's Diagonal LSTM).
 - **diffusion model** — Learn to reverse a process that gradually adds noise to data: a network predicts the noise at each step, and generation starts from pure noise and denoises step by step. *(Module 33; also 00b, 45.)* Origin: Sohl-Dickstein et al., 2015; Ho et al., 2020.
 - **dilated convolution** — A convolution whose kernel taps are spaced apart, so the receptive field doubles per layer with dilations 1-2-4-8. WaveNet stacks them causally. *(Module 12; also 40.)* Origin: van den Oord et al., 2016 (WaveNet).
 - **directional ablation** — Remove one direction from a model: project it out of the residual stream at every layer, or equivalently out of every matrix that writes to the stream (W − W u uᵀ). *(Module 47; also 46, 50.)* Origin: Arditi et al., 2024.
@@ -425,6 +427,7 @@
 - **Monte Carlo tree search** — Plan by repeatedly simulating from the current position down a search tree, choosing moves that balance promise and uncertainty, and backing up the results. *(Module 34; also 00b.)* Origin: Coulom, 2006; Kocsis & Szepesvári, 2006.
 - **MRR** — Mean reciprocal rank: average of 1/(rank of the first relevant result) over queries. *(Module 38.)*
 - **multi-agent system** — Several agents cooperating: a manager calling specialists as tools, or agents handing off to one another. Worth it only when one agent's prompt or toolset gets unwieldy. *(Module 39.)* Origin: OpenAI, 2025 (A practical guide to building agents).
+- **multi-dimensional RNN** — A recurrent network over a grid: each cell reads the hidden states of its neighbours above and to the left, and 2^d sweeps (one from each corner in 2-D) let every cell see the whole input. *(Module 31b.)* Origin: Graves, Fernández & Schmidhuber, 2007.
 - **multi-head attention** — Running several attention operations in parallel on smaller slices of the vector, each free to look for a different relation, then concatenating the results. *(Module 15; also 17, 18.)* Origin: Vaswani et al., 2017.
 - **multi-head latent attention** — DeepSeek's attention: compress keys and values into a small shared latent vector and cache only that, with a separate small RoPE part. Much smaller KV cache than GQA at similar quality. *(Module 17; also 15, 16, 18.)* Origin: DeepSeek-AI, 2024 (V2).
 - **multi-host** — Running one JAX program across several machines, each with its own devices, coordinated by `jax.distributed`. *(Module 24; also 25.)*
@@ -735,7 +738,7 @@
 - **wavefront** — A group of threads (32 on RDNA3) that execute in lock-step on one SIMD; AMD's name for a warp. *(Module 23.)*
 - **WaveNet** — DeepMind's 2016 audio model built from dilated causal convolutions; an early autoregressive sequence model without recurrence. *(Module 12.)* Origin: van den Oord et al., 2016.
 - **weight decay** — Shrinking every weight slightly toward zero each step, which discourages large weights and reduces overfitting. Decoupled from the gradient in AdamW. *(Module 05; also 11.)*
-- **weight sharing** — Using the same parameters at every position (convolution) or every time step (RNN), so the model generalizes across position with far fewer parameters. *(Module 12.)*
+- **weight sharing** — Using the same parameters at every position (convolution) or every time step (RNN), so the model generalizes across position with far fewer parameters. *(Module 12; also 31b.)*
 - **weight tying** — Using the same matrix for the input embedding and the output projection to logits, saving V × d parameters. *(Module 16.)* Origin: Press & Wolf, 2016.
 - **weight-space programming** — An LLM reading and editing another network's raw weights by reasoning, with a few forward passes and no gradients (Takehi et al., 2026); later work had models edit their own weights. *(Module 46.)* Origin: Takehi et al., 2026.
 - **win rate** — The fraction of comparisons in which one model's answer is preferred over another's (by people, a judge or a reward model). *(Module 35.)*

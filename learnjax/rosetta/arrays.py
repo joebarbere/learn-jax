@@ -416,6 +416,35 @@ ENTRIES: list[E] = [
              "Without `axis` / `dims`, `roll` flattens the array, shifts, and reshapes back, in all three."),
       apis=("jax.numpy.pad", "jax.numpy.roll"),
       module="06", also=("12", "36")),
+    E("flip an axis", "Arrays and reductions",
+      "Reverse the order along one axis (or several): the last row becomes the first. Flipping an image's rows "
+      "turns a sweep from the top-left corner into one from the bottom-left.",
+      r"\mathrm{flip}_0(X)_{i,j} = X_{R-1-i,\,j},\quad \mathrm{flip}_{0,1}(X)_{i,j} = X_{R-1-i,\,C-1-j}",
+      "",
+      "x (R, C) -> rows flipped (R, C), both axes flipped (R, C)", "flips(x)",
+      lambda r: {"x": r.normal(size=(3, 4))},
+      python="""
+        def flips(x):
+            return {"rows": [list(row) for row in reversed(x)],
+                    "both": [list(reversed(row)) for row in reversed(x)]}
+      """,
+      numpy="""
+        def flips(x):
+            return {"rows": np.flip(x, axis=0), "both": np.flip(x, axis=(0, 1))}  # x[::-1], x[::-1, ::-1]
+      """,
+      jax="""
+        def flips(x):
+            return {"rows": jnp.flip(x, axis=0), "both": jnp.flip(x, axis=(0, 1))}
+      """,
+      torch="""
+        def flips(x):
+            return {"rows": torch.flip(x, dims=(0,)), "both": torch.flip(x, dims=(0, 1))}
+      """,
+      notes=(("NumPy's `flip` (and `x[::-1]`) returns a view in O(1); PyTorch has no negative-step slicing and "
+              "`torch.flip` copies; under `jit`, JAX's is a cheap index remap XLA usually fuses away."),
+             "Flipping twice along the same axes is the identity: that's how a flipped sweep is put back in place."),
+      apis=("jax.numpy.flip",),
+      module="31b"),
     E("sort and argsort", "Arrays and reductions",
       "Sort the values, or get the order that would sort them (argsort) so you can reorder something else the "
       "same way. Top-p sampling sorts token probabilities.",

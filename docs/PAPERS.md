@@ -318,6 +318,14 @@ The papers behind each module's ideas, with a line on why each matters. Read a m
 - **[Sequence to Sequence Learning with Neural Networks](https://arxiv.org/abs/1409.3215)** — Sutskever, Vinyals, Le, 2014. seq2seq with LSTMs.
 - **[Neural Machine Translation by Jointly Learning to Align and Translate](https://arxiv.org/abs/1409.0473)** — Bahdanau, Cho, Bengio, 2014. Attention is born here.
 
+### 31b · Multi-dimensional RNNs: one cell, four directions (2007–2024)
+
+- **[Multi-Dimensional Recurrent Neural Networks](https://arxiv.org/abs/0705.2011)** — Graves, Fernández, Schmidhuber, 2007. The 2-D recurrence, swept from all 2^d corners: the model this module rebuilds.
+- **[Offline Handwriting Recognition with Multidimensional Recurrent Neural Networks](https://papers.nips.cc/paper/3449-offline-handwriting-recognition-with-multidimensional-recurrent-neural-networks)** — Graves, Schmidhuber, 2008. MDLSTM from raw pixels beat every entry of the ICDAR 2007 Arabic competition.
+- **[Grid Long Short-Term Memory](https://arxiv.org/abs/1507.01526)** — Kalchbrenner, Danihelka, Graves, 2015. Depth as one more dimension, and weights tied across dimensions: the closest test of one set of weights.
+- **[Are Multidimensional Recurrent Layers Really Necessary for Handwritten Text Recognition?](http://www.jpuigcerver.net/pubs/jpuigcerver_icdar2017.pdf)** — Puigcerver, 2017. CNN + 1-D LSTM matched 2-D LSTM at 6–7x less time per epoch: why the line faded.
+- **[VMamba: Visual State Space Model](https://arxiv.org/abs/2401.10166)** — Liu et al., 2024. The four-direction cross-scan, revived with a linear recurrence and a parallel scan.
+
 ### 32 · BERT vs GPT: encoders and decoders (2018)
 
 - **[Deep contextualized word representations](https://arxiv.org/abs/1802.05365)** — Peters et al., 2018. ELMo: context-dependent embeddings.
