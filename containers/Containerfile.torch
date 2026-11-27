@@ -10,6 +10,26 @@ COPY requirements-torch.lock /tmp/requirements.lock
 RUN uv pip install --system --no-cache --no-deps -r /tmp/requirements.lock \
  && ln -sf "$(command -v python3)" /usr/local/bin/python
 
+# bitsandbytes (QLoRA, module 27 §16) ships no ROCm 7.16 build: the wheel loads its 7.15 library, which works but
+# trains Qwen3.5-9B about 1.5x slower here (8.7-9.1 vs 5.75-6.1 s/step). Build the library from the same release's
+# source for this card against the image's own ROCm SDK, and put it beside the wheel's: bitsandbytes then loads
+# libbitsandbytes_rocm716.so. CMake is only needed for the build and is removed again.
+ARG BNB_VERSION=0.50.2
+ARG BNB_SHA256=baecd40b01500b4f7f60a926544bbb315a2123eedbff5f72c38ba01611203385
+RUN set -e; R="$(rocm-sdk path --root)"; export ROCM_PATH="$R" HIP_PATH="$R" PATH="$R/bin:$R/lib/llvm/bin:$PATH"; \
+    curl -fsSL -o /tmp/bnb.tar.gz "https://github.com/bitsandbytes-foundation/bitsandbytes/archive/refs/tags/$BNB_VERSION.tar.gz"; \
+    echo "$BNB_SHA256  /tmp/bnb.tar.gz" | sha256sum -c -; \
+    tar xzf /tmp/bnb.tar.gz -C /tmp; cd "/tmp/bitsandbytes-$BNB_VERSION"; \
+    uv pip install --system --no-cache cmake==4.4.5; \
+    cmake -G Ninja -DCOMPUTE_BACKEND=hip -DBNB_ROCM_ARCH=gfx1102 -DCMAKE_PREFIX_PATH="$R" \
+          -DCMAKE_HIP_COMPILER="$R/lib/llvm/bin/clang++" -S . -B build; \
+    cmake --build build -j"$(nproc)"; \
+    D="$(cd / && python -c 'import importlib.util, os; print(os.path.dirname(importlib.util.find_spec("bitsandbytes").origin))')"; \
+    cp bitsandbytes/libbitsandbytes_rocm716.so "$D/"; \
+    uv pip uninstall --system cmake; cd /; rm -rf /tmp/bnb.tar.gz "/tmp/bitsandbytes-$BNB_VERSION"; \
+    test -f "$D/libbitsandbytes_rocm716.so"
+# (No GPU during the build, so it can't check which library loads; with the GPU it's libbitsandbytes_rocm716.so.)
+
 # No HSA_OVERRIDE_GFX_VERSION here: PyTorch's ROCm build runs natively on gfx1102 (verified: reports
 # gcnArchName gfx1102). Only the JAX plugin needs the override — a useful contrast in the course.
 # Opt-in (experimental on RDNA3): TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1 enables flash/mem-efficient SDPA.
