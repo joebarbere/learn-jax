@@ -18,10 +18,10 @@ podman image exists localhost/learn-jax-torch || { echo "needs the PyTorch image
 avail=$(df --output=avail -BG "$out" | tail -1 | tr -dc 0-9)
 [ -s "$out/m-Q8_0-none.gguf" ] || [ "$avail" -ge 90 ] || { echo "needs ~90 GB free here, have ${avail} GB"; exit 1; }
 
-# QLoRA needs bitsandbytes, which the PyTorch image doesn't ship: install the pinned wheel into each throwaway
-# container. (0.50.2 has no ROCm 7.16 build and loads its 7.15 one with a warning; that works.)
-torch() { flock "$LOCK" env IMAGE=localhost/learn-jax-torch "$repo/containers/run.sh" \
-            sh -c "uv pip install --system -q bitsandbytes==0.50.2 && $*"; }
+# QLoRA's bitsandbytes is in the PyTorch image (0.50.2: no ROCm 7.16 build, it loads its 7.15 one with a warning).
+torch() { flock "$LOCK" env IMAGE=localhost/learn-jax-torch "$repo/containers/run.sh" "$@"; }
+podman run --rm localhost/learn-jax-torch python -c "import bitsandbytes" 2>/dev/null \
+  || { echo "the PyTorch image predates bitsandbytes: make build-torch"; exit 1; }
 
 IMAGE=localhost/learn-jax-torch "$repo/containers/run.sh" python $Q/prep.py nlrx $R
 

@@ -1,6 +1,6 @@
 """QLoRA fine-tune of Qwen3.5-9B on NL-RX (English → regex), and exact-match evaluation. §16's model.
 
-Runs in the PyTorch image with bitsandbytes added (lab9b.sh does both); ~50 min to train one epoch on the
+Runs in the PyTorch image (it includes bitsandbytes); ~50 min to train one epoch on the
 RX 7600 XT (500 steps × 16 examples, 8.8 GiB peak), ~4 min to evaluate 500 test examples.
 
     python qlora_nlrx.py train --out DIR        # writes a peft adapter to DIR

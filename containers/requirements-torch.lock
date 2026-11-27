@@ -9,6 +9,7 @@ annotated-doc==0.0.6
 annotated-types==0.8.0
 anyio==4.16.0
 attrs==26.1.0
+bitsandbytes==0.50.2
 click==8.5.1
 datasets==5.2.0
 dill==0.4.1
