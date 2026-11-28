@@ -84,7 +84,8 @@ if a.mode == "eval":
             out.append({"nl": m[1]["content"], "gt": m[2]["content"], "gen": gen})
     res = {"exact_match": hits / len(rows), "n": len(rows), "shots": a.shots, "adapter": bool(a.adapter),
            "seconds": round(time.time() - t0), "outputs": out}
-    json.dump(res, open(a.out, "w"), indent=1)
+    with open(a.out, "w") as f:
+        json.dump(res, f, indent=1)
     print(f"RESULT exact match {hits}/{len(rows)} = {hits / len(rows):.1%}  ({res['seconds']}s)")
     sys.exit()
 
@@ -145,5 +146,6 @@ for s in range(steps):
 model.save_pretrained(a.out)
 summary = {"steps": steps, "skipped": skipped, "minutes": round((time.time() - t0) / 60, 1),
            "peak_gib": round(torch.cuda.max_memory_allocated() / 2**30, 1), "log": log}
-json.dump(summary, open(os.path.join(a.out, "train_log.json"), "w"))
+with open(os.path.join(a.out, "train_log.json"), "w") as f:
+    json.dump(summary, f)
 print(f"TRAIN DONE: {steps} steps ({skipped} skipped) in {summary['minutes']} min, peak VRAM {summary['peak_gib']} GiB")

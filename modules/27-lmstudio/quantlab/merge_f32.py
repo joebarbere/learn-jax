@@ -14,11 +14,11 @@ from safetensors.torch import save_file
 
 snap, adir, out = map(Path, sys.argv[1:4])
 out.mkdir(parents=True, exist_ok=True)
-cfg = json.load(open(adir / "adapter_config.json"))
+cfg = json.loads((adir / "adapter_config.json").read_text())
 scale = cfg["lora_alpha"] / cfg["r"]
 ad = safe_open(adir / "adapter_model.safetensors", "pt")
 deltas = {}
-for k in ad.keys():
+for k in ad.keys():  # noqa: SIM118 (safe_open handles have keys(), not __iter__)
     if ".lora_A." not in k:
         continue
     mod = k.split(".lora_A.")[0].removeprefix("base_model.model.model.")
@@ -30,12 +30,12 @@ print(f"{len(deltas)} LoRA deltas, scale {scale}")
 for f in snap.iterdir():   # configs, tokenizer, templates: copy (resolving HF cache symlinks)
     if not f.name.endswith(".safetensors"):
         shutil.copyfile(f.resolve(), out / f.name)
-index = json.load(open(snap / "model.safetensors.index.json"))
+index = json.loads((snap / "model.safetensors.index.json").read_text())
 merged, rel = 0, []
 for shard in sorted(set(index["weight_map"].values())):
     t = {}
     with safe_open(snap / shard, "pt") as s:
-        for k in s.keys():
+        for k in s.keys():  # noqa: SIM118 (safe_open handles have keys(), not __iter__)
             w = s.get_tensor(k)
             if k in deltas:
                 d = deltas.pop(k)

@@ -17,12 +17,13 @@ import sys
 import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 DIR = sys.argv[1]
 URL = "http://127.0.0.1:8099"
-rows = [json.loads(line) for line in open(f"{DIR}/tests.jsonl")]
+rows = [json.loads(line) for line in Path(f"{DIR}/tests.jsonl").read_text().splitlines()]
 path = f"{DIR}/results.json"
-res = json.load(open(path)) if os.path.exists(path) else {}
+res = json.loads(Path(path).read_text()) if os.path.exists(path) else {}
 
 
 def post(body):
@@ -33,7 +34,7 @@ def post(body):
 def bpw(log_path):
     """Real bits per weight from llama-quantize's log ("quant size = 5129.21 MiB (4.68 BPW)")."""
     if os.path.exists(log_path):
-        m = re.search(r"quant size\s*=\s*[\d.]+ MiB \(([\d.]+) BPW\)", open(log_path).read())
+        m = re.search(r"quant size\s*=\s*[\d.]+ MiB \(([\d.]+) BPW\)", Path(log_path).read_text())
         return float(m.group(1)) if m else None
     return None
 
@@ -50,7 +51,7 @@ for m in models:
         try:
             urllib.request.urlopen(URL + "/health", timeout=1)
             break
-        except Exception:
+        except OSError:     # server not up yet (connection refused/reset, URLError)
             time.sleep(0.5)
     t0 = time.time()
     with ThreadPoolExecutor(4) as pool:     # 4 server slots
@@ -60,7 +61,7 @@ for m in models:
     srv.wait()
     seconds = time.time() - t0
     ppl = subprocess.run(["/app/llama-perplexity", "-m", m, "-f", f"{DIR}/ppl_text.txt", "-c", "512", "-ngl", "99"],
-                         capture_output=True, text=True)
+                         capture_output=True, text=True, check=False)   # a failure leaves ppl None
     pm = re.search(r"Final estimate: PPL = ([\d.]+)", ppl.stdout + ppl.stderr)
     ok = sum(o == r["answer"] for o, r in zip(outs, rows))
     res[name] = {"exact_match": ok / len(rows), "n": len(rows), "ppl": float(pm.group(1)) if pm else None,
@@ -68,10 +69,10 @@ for m in models:
                  "seconds": round(seconds), "outputs": outs}
     print(f"{name:18s} {res[name]['size_gb']:6.2f} GB  exact {ok}/{len(rows)} = {ok / len(rows):5.1%}  "
           f"ppl {res[name]['ppl']}  ({seconds:.0f}s)", flush=True)
-    json.dump(res, open(path, "w"), indent=1)
+    Path(path).write_text(json.dumps(res, indent=1))
 
 ref = max(res, key=lambda k: res[k]["size_gb"])        # the highest-precision model scored
-for k, v in res.items():
+for v in res.values():
     v["agree_with_ref"] = sum(a == b for a, b in zip(v["outputs"], res[ref]["outputs"])) / len(rows)
     v["ref"] = ref
-json.dump(res, open(path, "w"), indent=1)
+Path(path).write_text(json.dumps(res, indent=1))

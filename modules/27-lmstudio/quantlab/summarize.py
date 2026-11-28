@@ -10,29 +10,30 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 
 d = sys.argv[1]
 out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(d, "summary.json")
-res = json.load(open(os.path.join(d, "results.json")))
+res = json.loads(Path(d, "results.json").read_text())
 s = {"quants": {k: {f: v[f] for f in ("exact_match", "n", "ppl", "size_gb", "bpw", "agree_with_ref", "ref")}
                 for k, v in res.items()}}
 tl = os.path.join(d, "adapter", "train_log.json")
 if os.path.exists(tl):
-    t = json.load(open(tl))
+    t = json.loads(Path(tl).read_text())
     s["train"] = {k: t[k] for k in ("steps", "skipped", "minutes", "peak_gib")}
     s["train"]["loss"] = [[r["step"], r["loss"]] for r in t["log"]][::5]       # every 5th step is plenty to plot
 for name in ("base-5shot", "ft"):
     p = os.path.join(d, f"eval-{name}.json")
     if os.path.exists(p):
-        e = json.load(open(p))
+        e = json.loads(Path(p).read_text())
         s[f"eval_{name.replace('-', '_')}"] = {k: e[k] for k in ("exact_match", "n", "shots", "seconds")}
         if name == "ft":
             s["examples"] = [o for o in e["outputs"] if o["gen"] != o["gt"]][:6] + \
                             [o for o in e["outputs"] if o["gen"] == o["gt"]][:3]
 ml = os.path.join(d, "merge.log")
 if os.path.exists(ml):
-    m = re.search(r"median ([\d.e+-]+), max ([\d.e+-]+)", open(ml).read())
+    m = re.search(r"median ([\d.e+-]+), max ([\d.e+-]+)", Path(ml).read_text())
     if m:
         s["update_rel"] = {"median": float(m.group(1)), "max": float(m.group(2))}
-json.dump(s, open(out, "w"), indent=1)
+Path(out).write_text(json.dumps(s, indent=1))
 print(f"wrote {out}: {len(s['quants'])} quants" + (f", train {s['train']['steps']} steps" if "train" in s else ""))
